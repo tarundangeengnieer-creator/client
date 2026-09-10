@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useInvestigator, investigatorStore } from '../../../stores/investigator-store.ts';
+import { useAuth } from '../../../stores/auth-store.ts';
 import {
   X,
   Mail,
@@ -256,6 +257,172 @@ export const EmailEntityModal: React.FC = () => {
             className="px-4 py-1.5 text-xs font-semibold rounded bg-sky-600 hover:bg-sky-500 text-white shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 transition-colors cursor-pointer"
           >
             Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const ActiveEntityHud: React.FC = () => {
+  const {
+    selectedEntity,
+    timelineEvents,
+    geographicHops,
+    graphEdges,
+    isExpandingNode,
+  } = useInvestigator();
+  const auth = useAuth();
+  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+
+  const [copied, setCopied] = useState(false);
+
+  if (!selectedEntity) return null;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(selectedEntity.value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Timeline events matching selected entity
+  const matchingTimelineEvents = timelineEvents.filter(
+    (e) =>
+      e.associated_entity_id === selectedEntity.id ||
+      (selectedEntity.value && e.summary.toLowerCase().includes(selectedEntity.value.toLowerCase()))
+  );
+
+  // Geographic hop matching selected entity if IP/Domain
+  const matchingHop = geographicHops.find(
+    (h) =>
+      h.ip.toLowerCase() === selectedEntity.value.toLowerCase() ||
+      (h.hostname && h.hostname.toLowerCase().includes(selectedEntity.value.toLowerCase()))
+  );
+
+  // Connected 1-hop neighbor count
+  const connectedEdges = graphEdges.filter(
+    (e) => e.source === selectedEntity.id || e.target === selectedEntity.id
+  );
+
+  return (
+    <div className="bg-white dark:bg-[#0c1322] border-2 border-[#08B4ED]/70 rounded-xl p-3 shadow-[0_0_18px_rgba(8,180,237,0.14)] animate-fadeIn select-none transition-all">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        {/* Left: Entity Identification & Reputation */}
+        <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-[#08B4ED]/10 border border-[#08B4ED]/40 text-[#08B4ED] flex items-center justify-center font-mono font-bold shrink-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#08B4ED] animate-pulse" />
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono font-extrabold uppercase px-1.5 py-0.2 rounded bg-cyan-50 dark:bg-[#070b14] text-[#08B4ED] border border-[#08B4ED]/40">
+                {selectedEntity.type}
+              </span>
+              <span className="text-xs font-mono font-bold text-slate-900 dark:text-slate-100 max-w-[280px] sm:max-w-md truncate">
+                {selectedEntity.value}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors p-0.5 rounded cursor-pointer"
+                title="Copy Entity Indicator"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {/* Subordinate metadata summary */}
+            <div className="flex items-center gap-3 mt-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              <span>Hop Depth: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{selectedEntity.depth || 1}</strong></span>
+              <span>•</span>
+              <span>Confidence: <strong className="text-[#08B4ED] font-semibold">{selectedEntity.confidence || 90}%</strong></span>
+              <span>•</span>
+              <span>Connected: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{connectedEdges.length} nodes</strong></span>
+              {matchingHop && (
+                <>
+                  <span>•</span>
+                  <span className="text-slate-700 dark:text-slate-300">
+                    Geo: <strong>{matchingHop.city ? `${matchingHop.city}, ` : ''}{matchingHop.country}</strong>
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="hidden sm:block ml-2">
+            {selectedEntity.reputation?.toLowerCase() === 'malicious' ? (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-rose-50 dark:bg-[#070b14] text-rose-600 dark:text-rose-400 border border-rose-500/40">
+                <ShieldAlert className="w-3 h-3" />
+                <span>Malicious Verdict</span>
+              </span>
+            ) : selectedEntity.reputation?.toLowerCase() === 'suspicious' ? (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-50 dark:bg-[#070b14] text-amber-600 dark:text-amber-400 border border-amber-500/40">
+                <span>Suspicious</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-50 dark:bg-[#070b14] text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
+                <ShieldCheck className="w-3 h-3" />
+                <span>Internal / Clean</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Right: 1-Click Forensic Pivots */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Inspect Full Dossier */}
+          <button
+            type="button"
+            onClick={() => investigatorStore.selectEntity(selectedEntity)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#08B4ED]/40 bg-cyan-50/50 dark:bg-[#070b14] hover:bg-cyan-100/60 dark:hover:bg-[#0f172a] text-[#08B4ED] font-mono text-xs font-bold transition-colors cursor-pointer shadow-xs"
+            title="Inspect Comprehensive Forensic Dossier"
+          >
+            <span>Inspect Dossier</span>
+          </button>
+
+          {/* Pivot to Origin Map if IP or Host */}
+          {matchingHop && (
+            <button
+              type="button"
+              onClick={() => investigatorStore.selectGeoHop(matchingHop)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#070b14] hover:bg-slate-50 dark:hover:bg-[#0f172a] text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+              title="Locate Hop on Origin Map"
+            >
+              <span>Locate on Map</span>
+            </button>
+          )}
+
+          {/* Highlight in Timeline */}
+          {matchingTimelineEvents.length > 0 && (
+            <button
+              type="button"
+              onClick={() => investigatorStore.selectTimelineEvent(matchingTimelineEvents[0])}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#070b14] hover:bg-slate-50 dark:hover:bg-[#0f172a] text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+              title={`Focus ${matchingTimelineEvents.length} events in timeline`}
+            >
+              <span>Timeline ({matchingTimelineEvents.length})</span>
+            </button>
+          )}
+
+          {/* Expand 1-Hop Graph Neighbors */}
+          <button
+            type="button"
+            disabled={isExpandingNode}
+            onClick={() => investigatorStore.expandNode(selectedEntity.id, tenantId)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#070b14] hover:bg-slate-50 dark:hover:bg-[#0f172a] text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+            title="Expand 1-Hop Neighbor Infrastructure"
+          >
+            <span>{isExpandingNode ? 'Expanding...' : '+1 Hop'}</span>
+          </button>
+
+          {/* Clear Active Entity Focus */}
+          <button
+            type="button"
+            onClick={() => investigatorStore.selectEntity(null)}
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer ml-1"
+            title="Clear Active Entity Selection"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>

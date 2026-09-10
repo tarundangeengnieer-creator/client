@@ -24,6 +24,7 @@ export const OriginIntelligenceWorkspace: React.FC = () => {
     currentCase, 
     geographicHops, 
     selectedGeoHop, 
+    selectedEntity,
     focusedMapCoords,
     isLoadingCaseDetail 
   } = useInvestigator();
@@ -172,11 +173,45 @@ export const OriginIntelligenceWorkspace: React.FC = () => {
         </div>
       </div>
 
+      {/* Active Entity Corroboration Banner */}
+      {selectedEntity && (
+        <div className="px-4 py-2 bg-cyan-50/80 dark:bg-[#0c1322] border-b border-[#08B4ED]/40 flex flex-wrap items-center justify-between gap-2 text-xs font-mono select-none animate-fadeIn">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-[#08B4ED] animate-pulse shrink-0" />
+            <span className="text-slate-500 dark:text-slate-400">Target Entity Corroboration:</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[220px]">
+              {selectedEntity.value}
+            </span>
+            {geographicHops.some(h => h.ip.toLowerCase() === selectedEntity.value.toLowerCase() || (h.hostname && h.hostname.toLowerCase().includes(selectedEntity.value.toLowerCase()))) ? (
+              <span className="px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">
+                ✓ IP Matches Mail Relay Hop
+              </span>
+            ) : (
+              <span className="text-[10.5px] text-slate-400">
+                (Transiting infrastructure context)
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const matchedHop = geographicHops.find(h => h.ip.toLowerCase() === selectedEntity.value.toLowerCase() || (h.hostname && h.hostname.toLowerCase().includes(selectedEntity.value.toLowerCase())));
+              if (matchedHop) {
+                investigatorStore.selectGeoHop(matchedHop);
+              }
+            }}
+            className="text-[11px] font-bold text-[#08B4ED] hover:underline cursor-pointer"
+          >
+            Zoom to Origin Specimen →
+          </button>
+        </div>
+      )}
+
       {/* 2. MAIN WORKSPACE: MAP (LEFT) + SOURCE DETAILS (RIGHT) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 border-b border-slate-200/80 dark:border-slate-800">
         
         {/* LEFT 7 COLS: EXISTING MAP COMPONENT */}
-        <div className="lg:col-span-7 relative min-h-[420px] lg:min-h-[480px] bg-[#0c1322] border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800">
+        <div className="lg:col-span-7 relative min-h-[380px] lg:min-h-[420px] bg-[#0c1322] border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800">
           
           {isLoadingCaseDetail ? (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-xs text-white">

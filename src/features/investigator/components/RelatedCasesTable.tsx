@@ -21,13 +21,26 @@ import {
 } from 'lucide-react';
 
 export const RelatedCasesTable: React.FC = () => {
-  const { relatedCases, currentCaseId, isLoadingRelated, errorRelated } = useInvestigator();
+  const { relatedCases, currentCaseId, selectedEntity, isLoadingRelated, errorRelated } = useInvestigator();
   const auth = useAuth();
   const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
 
   // Compare drawer modal state
   const [comparingCase, setComparingCase] = useState<RelatedCaseMatch | null>(null);
   const [copiedIOC, setCopiedIOC] = useState<string | null>(null);
+
+  // Prioritize cases that match the currently selected entity indicator
+  const sortedCases = React.useMemo(() => {
+    if (!selectedEntity?.value) return relatedCases;
+    const val = selectedEntity.value.toLowerCase();
+    return [...relatedCases].sort((a, b) => {
+      const aMatches = a.shared_iocs.some(ioc => ioc.toLowerCase() === val || a.similarity_basis.toLowerCase().includes(val));
+      const bMatches = b.shared_iocs.some(ioc => ioc.toLowerCase() === val || b.similarity_basis.toLowerCase().includes(val));
+      if (aMatches && !bMatches) return -1;
+      if (!aMatches && bMatches) return 1;
+      return b.similarity_score - a.similarity_score;
+    });
+  }, [relatedCases, selectedEntity]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -114,22 +127,40 @@ export const RelatedCasesTable: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800/80">
-              {relatedCases.map((match) => (
+              {sortedCases.map((match) => {
+                const isMatchingSelected = Boolean(
+                  selectedEntity?.value &&
+                  (match.shared_iocs.some(ioc => ioc.toLowerCase() === selectedEntity.value.toLowerCase()) ||
+                   match.similarity_basis.toLowerCase().includes(selectedEntity.value.toLowerCase()))
+                );
+
+                return (
                 <tr
                   key={match.case_id}
-                  className="hover:bg-slate-50 dark:hover:bg-[#0f172a] transition-colors"
+                  className={`transition-colors ${
+                    isMatchingSelected
+                      ? 'bg-cyan-50/60 dark:bg-[#070f20] hover:bg-cyan-100/50 dark:hover:bg-[#0a152d]'
+                      : 'hover:bg-slate-50 dark:hover:bg-[#0f172a]'
+                  }`}
                 >
                   {/* Case ID */}
                   <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => investigatorStore.selectCase(match.case_id, tenantId)}
-                      className="text-[#08B4ED] hover:underline flex items-center gap-1 cursor-pointer font-mono font-bold"
-                      title="Switch active workspace to this case"
-                    >
-                      <span>#{match.case_id}</span>
-                      <ArrowUpRight className="w-3 h-3 text-[#08B4ED]" />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => investigatorStore.selectCase(match.case_id, tenantId)}
+                        className="text-[#08B4ED] hover:underline flex items-center gap-1 cursor-pointer font-mono font-bold"
+                        title="Switch active workspace to this case"
+                      >
+                        <span>#{match.case_id}</span>
+                        <ArrowUpRight className="w-3 h-3 text-[#08B4ED]" />
+                      </button>
+                      {isMatchingSelected && (
+                        <span className="px-1.5 py-0.2 rounded bg-[#08B4ED]/15 text-[#08B4ED] border border-[#08B4ED]/40 text-[9px] font-mono font-bold">
+                          Matching Entity
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[10px] font-sans font-normal text-slate-500 dark:text-slate-400 truncate max-w-[190px] mt-0.5">
                       {match.subject}
                     </p>
@@ -230,7 +261,7 @@ export const RelatedCasesTable: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              ); })}
             </tbody>
           </table>
         )}

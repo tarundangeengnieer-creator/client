@@ -39,6 +39,8 @@ export interface InvestigatorState {
 
   // Selected item contexts
   selectedEntity: GraphNode | null;
+  selectedEdge: GraphEdge | null;
+  isolatedNodeId: string | null;
   selectedTimelineEvent: TimelineEvent | null;
   selectedEvidence: InvestigatorEvidence | null;
   selectedGeoHop: GeographicActivityHop | null;
@@ -92,6 +94,8 @@ const initialState: InvestigatorState = {
   isThreatIntelOffline: false,
 
   selectedEntity: null,
+  selectedEdge: null,
+  isolatedNodeId: null,
   selectedTimelineEvent: null,
   selectedEvidence: null,
   selectedGeoHop: null,
@@ -538,6 +542,50 @@ export const investigatorStore = {
       graphFilterType: type,
     };
     notify();
+  },
+
+  selectEdge(edge: GraphEdge | null): void {
+    currentState = {
+      ...currentState,
+      selectedEdge: edge,
+    };
+    notify();
+  },
+
+  setIsolatedNode(nodeId: string | null): void {
+    currentState = {
+      ...currentState,
+      isolatedNodeId: nodeId,
+    };
+    notify();
+  },
+
+  async setGraphDepth(depth: number, tenantId: string): Promise<void> {
+    if (!currentState.currentCaseId || currentState.graphDepth === depth) return;
+    currentState = {
+      ...currentState,
+      graphDepth: depth,
+      isLoadingGraph: true,
+    };
+    notify();
+
+    try {
+      const graph = await investigatorRepo.getGraph(currentState.currentCaseId, tenantId, depth);
+      currentState = {
+        ...currentState,
+        graphNodes: graph.nodes,
+        graphEdges: graph.edges,
+        isLoadingGraph: false,
+      };
+      notify();
+    } catch (err: unknown) {
+      currentState = {
+        ...currentState,
+        isLoadingGraph: false,
+        errorGraph: err instanceof Error ? err.message : 'Failed to update graph depth.',
+      };
+      notify();
+    }
   },
 
   toggleThreatIntelOffline(): void {

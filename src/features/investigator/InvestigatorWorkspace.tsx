@@ -7,7 +7,7 @@ import { InvestigationTimeline } from './components/InvestigationTimeline.tsx';
 import { RelatedCasesTable } from './components/RelatedCasesTable.tsx';
 import { EvidencePanel } from './components/EvidencePanel.tsx';
 import { EntityProfileDrawer } from './components/EntityProfileDrawer.tsx';
-import { EmailEntityModal } from './components/EmailEntityModal.tsx';
+import { EmailEntityModal, ActiveEntityHud } from './components/EmailEntityModal.tsx';
 import { ThreatIntelPanel } from './components/ThreatIntelPanel.tsx';
 import { CaseActionBar } from './components/CaseActionBar.tsx';
 import { LinkCaseModal } from './components/LinkCaseModal.tsx';
@@ -122,17 +122,20 @@ export const InvestigatorWorkspace: React.FC = () => {
           </div>
         </div>
 
+        {/* Active Entity Investigation HUD Banner */}
+        <ActiveEntityHud />
+
         {/* LEVEL 2 — Core Forensic Workspace: Entity Graph + Timeline */}
         {workspaceMode === 'split' && (
-          <div className="space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch min-h-[540px]">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch lg:h-[560px]">
               {/* Left 7 cols: Entity Relationship Graph */}
-              <div className="lg:col-span-7 flex flex-col min-h-[500px]">
+              <div className="lg:col-span-7 flex flex-col h-[480px] lg:h-full">
                 <EntityRelationshipGraph />
               </div>
 
               {/* Right 5 cols: Chronological Investigation Timeline */}
-              <div className="lg:col-span-5 flex flex-col min-h-[500px]">
+              <div className="lg:col-span-5 flex flex-col h-[480px] lg:h-full">
                 <InvestigationTimeline />
               </div>
             </div>

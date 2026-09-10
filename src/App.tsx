@@ -16,6 +16,7 @@ import { HealthPlaceholder } from './features/admin/HealthPlaceholder.tsx';
 import { SettingsPlaceholder } from './features/settings/SettingsPlaceholder.tsx';
 import { ForensicReportPage } from './features/reports/ForensicReportPage.tsx';
 import { InvestigatorWorkspace } from './features/investigator/InvestigatorWorkspace.tsx';
+import { GraphInvestigationPage } from './features/investigator/components/ThreatIntelPanel.tsx';
 import { SOCWorkspace } from './features/soc/SOCWorkspace.tsx';
 import { Role } from './features/auth/authConfig.ts';
 
@@ -119,6 +120,10 @@ export default function App() {
 
     // Dedicated Investigator Role Route Handling
     if (auth.currentRole === Role.INVESTIGATOR) {
+      if (ui.currentPath.startsWith('/investigator/graph')) {
+        return <GraphInvestigationPage />;
+      }
+
       if (
         ui.currentPath === '/' ||
         ui.currentPath === '/overview' ||
@@ -152,6 +157,11 @@ export default function App() {
     if (ui.currentPath.startsWith('/soc')) {
       if (!checkAccess('/soc')) return <ForbiddenPage />;
       return <SOCWorkspace />;
+    }
+
+    if (ui.currentPath.startsWith('/investigator/graph')) {
+      if (!checkAccess('/investigator')) return <ForbiddenPage />;
+      return <GraphInvestigationPage />;
     }
 
     if (ui.currentPath.startsWith('/investigator')) {

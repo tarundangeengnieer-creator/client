@@ -37,6 +37,7 @@ export const EntityRelationshipGraph: React.FC = () => {
     graphNodes,
     graphEdges,
     selectedEntity,
+    selectedEdge,
     isLoadingGraph,
     isExpandingNode,
     errorGraph,
@@ -588,15 +589,25 @@ export const EntityRelationshipGraph: React.FC = () => {
                   const midX = (sourcePos.x + targetPos.x) / 2;
                   const midY = (sourcePos.y + targetPos.y) / 2 - 12;
 
+                  const isSelectedEdge = selectedEdge?.id === edge.id;
+
                   return (
-                    <g key={edge.id} className="transition-opacity duration-200" style={{ opacity: isDimmed ? 0.18 : 1 }}>
+                    <g
+                      key={edge.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        investigatorStore.selectEdge(edge);
+                      }}
+                      className="transition-opacity duration-200 cursor-pointer group"
+                      style={{ opacity: isDimmed && !isSelectedEdge ? 0.18 : 1 }}
+                    >
                       <path
                         d={`M ${sourcePos.x} ${sourcePos.y} Q ${midX} ${midY} ${targetPos.x} ${targetPos.y}`}
                         fill="none"
-                        stroke={isHighlighted ? '#08B4ED' : '#94a3b8'}
-                        strokeWidth={isHighlighted ? 2.2 : 1.25}
+                        stroke={isSelectedEdge ? '#08B4ED' : isHighlighted ? '#08B4ED' : '#94a3b8'}
+                        strokeWidth={isSelectedEdge ? 3.5 : isHighlighted ? 2.5 : 1.3}
                         strokeDasharray={edge.relationship_type.includes('threat') ? '4 3' : undefined}
-                        markerEnd={isHighlighted ? 'url(#forensic-arrow-active)' : 'url(#forensic-arrow)'}
+                        markerEnd={isSelectedEdge || isHighlighted ? 'url(#forensic-arrow-active)' : 'url(#forensic-arrow)'}
                       />
                       {/* Edge Label Pill */}
                       <g transform={`translate(${midX}, ${midY})`}>
@@ -606,14 +617,22 @@ export const EntityRelationshipGraph: React.FC = () => {
                           width={edge.label.length * 6 + 12}
                           height={16}
                           rx={4}
-                          className="fill-white dark:fill-[#0a0f1d] stroke-slate-200 dark:stroke-slate-800"
-                          strokeWidth="1"
+                          className={`${
+                            isSelectedEdge
+                              ? 'fill-[#08B4ED]/20 stroke-[#08B4ED]'
+                              : 'fill-white dark:fill-[#0a0f1d] stroke-slate-200 dark:stroke-slate-800'
+                          } transition-colors`}
+                          strokeWidth={isSelectedEdge ? 1.5 : 1}
                         />
                         <text
                           textAnchor="middle"
                           y={2.5}
                           className={`text-[9px] font-mono select-none pointer-events-none ${
-                            isHighlighted ? 'fill-[#08B4ED] font-bold' : 'fill-slate-500 dark:fill-slate-400'
+                            isSelectedEdge
+                              ? 'fill-[#08B4ED] font-extrabold'
+                              : isHighlighted
+                              ? 'fill-[#08B4ED] font-bold'
+                              : 'fill-slate-500 dark:fill-slate-400'
                           }`}
                         >
                           {edge.label}
@@ -694,29 +713,32 @@ export const EntityRelationshipGraph: React.FC = () => {
                         {getNodeIcon(node.type)}
                       </g>
 
-                      {/* Node Label & Value Pill */}
+                      {/* Node Label & Value Pill (Identity & Value Prominent) */}
                       <g transform="translate(30, 0)">
                         <rect
                           x={-4}
-                          y={-14}
-                          width={145}
-                          height={28}
+                          y={-15}
+                          width={155}
+                          height={30}
                           rx={4}
-                          className="fill-white/95 dark:fill-[#070b14]/90 stroke-slate-200 dark:stroke-slate-800/80 shadow-xs"
+                          className="fill-white/95 dark:fill-[#070b14]/95 stroke-slate-200 dark:stroke-slate-800/80 shadow-xs"
                         />
+                        {/* 1. Entity Name / Value Prominent */}
                         <text
                           textAnchor="start"
                           y={-2}
-                          className="text-[10px] font-mono font-bold fill-slate-800 dark:fill-slate-200 select-none"
+                          className="text-[11px] font-mono font-bold fill-slate-900 dark:fill-slate-100 select-none"
                         >
-                          {node.type}
+                          {node.value.length > 21 ? `${node.value.substring(0, 19)}...` : node.value}
                         </text>
+                        {/* 2. Entity Type & Confidence Subordinate */}
                         <text
                           textAnchor="start"
                           y={10}
-                          className="text-[9px] font-mono fill-slate-500 dark:fill-slate-400 select-none"
+                          className="text-[9px] font-mono font-semibold fill-slate-500 dark:fill-slate-400 select-none"
                         >
-                          {node.value.length > 20 ? `${node.value.substring(0, 18)}...` : node.value}
+                          {node.type}
+                          {node.confidence ? ` • ${node.confidence}%` : ''}
                         </text>
                       </g>
 

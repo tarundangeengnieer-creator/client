@@ -121,6 +121,11 @@ export interface GraphEdge {
   relationship_type: string;
   label: string;
   confidence?: number;
+  provenance?: 'OBSERVED' | 'ENRICHED' | 'INFERRED';
+  evidence_source?: string;
+  observed_at?: string;
+  source_record?: string;
+  evidence_id?: string;
 }
 
 export interface EntityRelationship {
