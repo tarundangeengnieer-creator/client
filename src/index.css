@@ -1,0 +1,241 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-serif: "IBM Plex Serif", Georgia, Cambria, "Times New Roman", Times, serif;
+  --color-primary-cyber: #08b4ed;
+  --color-surface-cyber: #0c1322;
+  --color-surface-cyber-elevated: #0f172a;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-elevated: #f1f5f9;
+  --border: #e2e8f0;
+  --border-primary: rgba(8, 180, 237, 0.6);
+  --primary: #08b4ed;
+  --primary-glow: rgba(8, 180, 237, 0.15);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --danger: #e11d48;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --info: #08b4ed;
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #060a14;
+  --surface: #0c1322;
+  --surface-elevated: #0f172a;
+  --border: #1e293b;
+  --border-primary: rgba(8, 180, 237, 0.6);
+  --primary: #08b4ed;
+  --primary-glow: rgba(8, 180, 237, 0.18);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --danger: #f43f5e;
+  --warning: #fbbf24;
+  --success: #34d399;
+  --info: #08b4ed;
+}
+
+/* ==========================================================================
+   AShieldER Cybersecurity Design System Utilities
+   - Approved MITRE Tag & Primary Cyber Cards
+   - Restrained subtle primary glow and dark surfaces
+   ========================================================================== */
+.card-cyber-primary {
+  background-color: #0c1322;
+  border: 1px solid rgba(8, 180, 237, 0.55);
+  box-shadow: 0 0 15px rgba(8, 180, 237, 0.12);
+}
+
+.glow-primary-subtle {
+  box-shadow: 0 0 12px rgba(8, 180, 237, 0.15);
+}
+
+.border-primary-cyber {
+  border-color: rgba(8, 180, 237, 0.6);
+}
+
+/* Smooth transition for theme switches on backgrounds, borders, and text colors */
+body,
+header,
+nav,
+aside,
+main,
+.theme-transition {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Global SVG Icon Styling:
+   - Transparent borders across all icon containers & SVGs
+   - Seamless blending with the current system in light mode
+   - In dark mode, icons shift to crisp white (#ffffff) to ensure complete viability and blending
+   ========================================================================== */
+
+/* Base SVG icon transition & transparent borders */
+svg.lucide,
+svg[class*="lucide"],
+.lucide,
+svg[data-lucide] {
+  border-color: transparent !important;
+  transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), stroke 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light mode: Icons blend seamlessly with current light system surfaces (#071A2B / dark navy) */
+html:not(.dark) svg.lucide,
+html:not(.dark) svg[class*="lucide"],
+html:not(.dark) .lucide,
+html:not(.dark) svg[data-lucide] {
+  color: #071A2B;
+  stroke: #071A2B;
+}
+
+html:not(.dark) svg.lucide *,
+html:not(.dark) svg[class*="lucide"] *,
+html:not(.dark) .lucide * {
+  stroke: #071A2B;
+}
+
+/* Maintain crisp white icon on dark buttons in light mode */
+html:not(.dark) .text-white svg.lucide,
+html:not(.dark) [class*="text-white"] svg.lucide,
+html:not(.dark) [class*="bg-slate-900"] svg.lucide,
+html:not(.dark) [class*="bg-[#0b1329]"] svg.lucide {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Dark mode: All SVG icons shift to solid white to be completely viable and blend with dark system */
+html.dark svg.lucide,
+html.dark svg[class*="lucide"],
+html.dark .lucide,
+html.dark svg[data-lucide],
+.dark svg.lucide,
+.dark svg[class*="lucide"],
+.dark .lucide,
+.dark svg[data-lucide] {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  border-color: transparent !important;
+}
+
+html.dark svg.lucide *,
+html.dark svg[class*="lucide"] *,
+html.dark .lucide *,
+.dark svg.lucide *,
+.dark svg[class*="lucide"] *,
+.dark .lucide * {
+  stroke: #ffffff !important;
+}
+
+html.dark svg.lucide[fill]:not([fill="none"]),
+html.dark svg[class*="lucide"][fill]:not([fill="none"]),
+html.dark .lucide[fill]:not([fill="none"]),
+.dark svg.lucide[fill]:not([fill="none"]),
+.dark svg[class*="lucide"][fill]:not([fill="none"]),
+.dark .lucide[fill]:not([fill="none"]) {
+  fill: #ffffff !important;
+}
+
+/* Icon container wrappers: background-color #ffffff in light mode, equal to dark mode surface in dark mode */
+div:has(> svg.lucide:only-child),
+div:has(> svg[class*="lucide"]:only-child),
+div:has(> .lucide:only-child),
+span:has(> svg.lucide:only-child),
+span:has(> svg[class*="lucide"]:only-child),
+span:has(> .lucide:only-child) {
+  border-color: transparent !important;
+  background-color: #ffffff;
+}
+
+html.dark div:has(> svg.lucide:only-child),
+html.dark div:has(> svg[class*="lucide"]:only-child),
+html.dark div:has(> .lucide:only-child),
+html.dark span:has(> svg.lucide:only-child),
+html.dark span:has(> svg[class*="lucide"]:only-child),
+html.dark span:has(> .lucide:only-child),
+.dark div:has(> svg.lucide:only-child),
+.dark div:has(> svg[class*="lucide"]:only-child),
+.dark div:has(> .lucide:only-child),
+.dark span:has(> svg.lucide:only-child),
+.dark span:has(> svg[class*="lucide"]:only-child),
+.dark span:has(> .lucide:only-child) {
+  background-color: #0c1322 !important;
+}
+
+button div:has(> svg.lucide:only-child),
+button span:has(> svg.lucide:only-child) {
+  background-color: transparent !important;
+}
+
+
+/* Custom scrollbar matching dark/light themes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.7);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.9);
+}
+
+/* ==========================================================================
+   Print & PDF Export Optimization for ASHIELDER Forensic Reports
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Avoid awkward page break splits across cards, table rows, and headers */
+  section,
+  .p-3\.5,
+  .p-4,
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  h1, h2, h3 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+}
