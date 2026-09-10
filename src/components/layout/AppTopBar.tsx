@@ -242,9 +242,6 @@ export const AppTopBar: React.FC = () => {
           <div className="min-w-0">
             <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 truncate">
               <span>Investigator Workspace</span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-transparent text-[#08B4ED] border border-[#08B4ED]/40">
-                FORENSIC L2
-              </span>
             </h1>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">
               Multi-hop entity relationship graph & chronological timeline
