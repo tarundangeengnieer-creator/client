@@ -237,14 +237,14 @@ export const EntityRelationshipGraph: React.FC = () => {
         return {
           bg: 'fill-white dark:fill-[#0c1322]',
           stroke: 'stroke-rose-400',
-          badge: 'bg-rose-50/50 dark:bg-[#0c1322] text-rose-600 dark:text-rose-400 border border-rose-500/40',
+          badge: 'bg-white dark:bg-[#0c1322] text-rose-600 dark:text-rose-400 border border-rose-500/40',
           icon: 'text-rose-600 dark:text-rose-400',
         };
       case 'Threat Intelligence Indicator':
         return {
           bg: 'fill-white dark:fill-[#0c1322]',
           stroke: 'stroke-rose-500',
-          badge: 'bg-rose-50/50 dark:bg-[#0c1322] text-rose-600 dark:text-rose-400 border border-rose-500/40',
+          badge: 'bg-white dark:bg-[#0c1322] text-rose-600 dark:text-rose-400 border border-rose-500/40',
           icon: 'text-rose-600 dark:text-rose-400',
         };
       case 'Related Case':
@@ -619,20 +619,20 @@ export const EntityRelationshipGraph: React.FC = () => {
                           rx={4}
                           className={`${
                             isSelectedEdge
-                              ? 'fill-[#08B4ED]/20 stroke-[#08B4ED]'
-                              : 'fill-white dark:fill-[#0a0f1d] stroke-slate-200 dark:stroke-slate-800'
+                              ? 'fill-[#0c1322] stroke-[#08B4ED]'
+                              : 'fill-[#0c1322] stroke-slate-700/80'
                           } transition-colors`}
                           strokeWidth={isSelectedEdge ? 1.5 : 1}
                         />
                         <text
                           textAnchor="middle"
-                          y={2.5}
-                          className={`text-[9px] font-mono select-none pointer-events-none ${
+                          y={3.5}
+                          className={`text-[10px] font-mono select-none pointer-events-none ${
                             isSelectedEdge
                               ? 'fill-[#08B4ED] font-extrabold'
                               : isHighlighted
                               ? 'fill-[#08B4ED] font-bold'
-                              : 'fill-slate-500 dark:fill-slate-400'
+                              : 'fill-slate-400'
                           }`}
                         >
                           {edge.label}
@@ -686,7 +686,7 @@ export const EntityRelationshipGraph: React.FC = () => {
                       {isSelected && (
                         <circle
                           r={32}
-                          className="fill-[#08B4ED]/15 stroke-[#08B4ED] animate-pulse"
+                          className="fill-[#08B4ED]/15 stroke-[#08B4ED]"
                           strokeWidth="2"
                         />
                       )}
@@ -701,11 +701,20 @@ export const EntityRelationshipGraph: React.FC = () => {
                         />
                       )}
 
+                      {/* Root Node Anchoring (SIH Demo Golden Path) */}
+                      {node.type === 'Email' && (
+                        <g transform="translate(0, -32)">
+                          <rect x={-20} y={-10} width={40} height={14} rx={4} className="fill-[#08B4ED] stroke-white dark:stroke-[#070b14]" strokeWidth={1} />
+                          <text x={0} y={0} textAnchor="middle" className="text-[9px] font-mono font-bold fill-white dark:fill-[#0c1322]">ROOT</text>
+                        </g>
+                      )}
+
                       {/* Main Node Circle */}
                       <circle
                         r={24}
                         className={`${style.bg} ${style.stroke} transition-all duration-150 group-hover:scale-105`}
-                        strokeWidth={isSelected ? 2.5 : 1.5}
+                        strokeWidth={isSelected ? 2.5 : node.type === 'Email' ? 2.5 : 1.5}
+                        strokeDasharray={node.type === 'Email' && !isSelected ? '4 2' : undefined}
                       />
 
                       {/* Icon Centered */}
@@ -735,7 +744,7 @@ export const EntityRelationshipGraph: React.FC = () => {
                         <text
                           textAnchor="start"
                           y={10}
-                          className="text-[9px] font-mono font-semibold fill-slate-500 dark:fill-slate-400 select-none"
+                          className="text-[10px] font-mono font-semibold fill-slate-500 dark:fill-slate-400 select-none"
                         >
                           {node.type}
                           {node.confidence ? ` • ${node.confidence}%` : ''}
@@ -756,7 +765,7 @@ export const EntityRelationshipGraph: React.FC = () => {
                             x={15}
                             y={10}
                             textAnchor="middle"
-                            className="text-[8px] font-mono font-bold fill-[#08B4ED]"
+                            className="text-[10px] font-mono font-bold fill-[#08B4ED]"
                           >
                             {node.confidence}%
                           </text>

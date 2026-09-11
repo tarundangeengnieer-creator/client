@@ -108,11 +108,64 @@ export const authStore = {
     return () => listeners.delete(listener);
   },
 
-  // Mock login replacing actual backend integration
+  // Real login integration + mock fallback
   async login(email: string, password: string): Promise<boolean> {
     if (!email.trim() || !password.trim()) return false;
     
-    // Dev mock logic: we determine role from email domain or alias
+    if (import.meta.env.VITE_API_BASE_URL) {
+      try {
+        const response = await apiClient.post<{
+          access_token: string;
+          token_type: string;
+          expires_in: number;
+          user_id: string;
+          email: string;
+          role: string;
+          tenant_id: string;
+        }>(ENDPOINTS.LOGIN, { email, password });
+
+        apiClient.setToken(response.access_token);
+        
+        const mappedRole = (function mapBackendRole(backendRole: string): Role {
+          switch (backendRole) {
+            case 'admin': return Role.ADMIN;
+            case 'analyst': return Role.INVESTIGATOR;
+            case 'viewer': return Role.SOC_ANALYST;
+            default: return Role.SOC_ANALYST;
+          }
+        })(response.role);
+
+        const session: AuthSession = {
+          user: { id: response.user_id, name: response.email, email: response.email },
+          tenant: { id: response.tenant_id, name: response.tenant_id },
+          role: mappedRole
+        };
+
+        try {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ session, token: response.access_token }));
+        } catch (e) {
+          console.error('SessionStorage failed', e);
+        }
+
+        currentState = {
+          ...currentState,
+          isAuthenticated: true,
+          currentUser: session.user,
+          currentTenant: session.tenant,
+          currentRole: session.role,
+          token: response.access_token,
+        };
+        notify();
+
+        await authStore.checkHealth();
+        return true;
+      } catch (err) {
+        console.error('Login failed', err);
+        return false;
+      }
+    }
+
+    // Dev mock logic fallback
     let assignedRole = Role.SOC_ANALYST;
     if (email.includes('investigator')) assignedRole = Role.INVESTIGATOR;
     if (email.includes('itadmin')) assignedRole = Role.IT_ADMIN;
@@ -129,6 +182,7 @@ export const authStore = {
     }
 
     apiClient.setApiKey(token);
+    apiClient.setToken(token);
 
     currentState = {
       ...currentState,
@@ -172,6 +226,7 @@ export const authStore = {
     }
 
     apiClient.clearApiKey();
+    apiClient.clearToken();
 
     currentState = {
       ...currentState,

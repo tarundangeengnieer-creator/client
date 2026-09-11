@@ -23,8 +23,8 @@ export const Breadcrumbs: React.FC = () => {
           items.push({ label: ui.activeTab.toUpperCase(), path: `/case/${segments[1]}` });
         }
       }
-    } else if (segments[0] === 'hunting') {
-      items.push({ label: 'THREAT HUNTING', path: '/hunting' });
+    } else if (segments[0] === 'hunting' || segments[0] === 'threat-intel') {
+      items.push({ label: 'THREAT INTELLIGENCE', path: '/hunting' });
     } else if (segments[0] === 'admin') {
       items.push({ label: 'ADMINISTRATION', path: '/admin/health' });
       if (segments[1]) {

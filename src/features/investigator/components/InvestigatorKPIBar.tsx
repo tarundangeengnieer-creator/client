@@ -47,29 +47,29 @@ export const InvestigatorKPIBar: React.FC = () => {
   const getSeverityStyle = (sev?: string) => {
     switch (sev?.toUpperCase()) {
       case 'CRITICAL':
-        return 'text-rose-600 dark:text-rose-500 border-rose-500/40 bg-rose-50 dark:bg-[#0c1322]';
+        return 'text-rose-600 dark:text-rose-500 border-rose-500/40 bg-white dark:bg-[#0c1322]';
       case 'HIGH':
-        return 'text-orange-600 dark:text-orange-400 border-orange-500/40 bg-orange-50 dark:bg-[#0c1322]';
+        return 'text-orange-600 dark:text-orange-400 border-orange-500/40 bg-white dark:bg-[#0c1322]';
       case 'MEDIUM':
-        return 'text-amber-600 dark:text-amber-400 border-amber-500/40 bg-amber-50 dark:bg-[#0c1322]';
+        return 'text-amber-600 dark:text-amber-400 border-amber-500/40 bg-white dark:bg-[#0c1322]';
       case 'LOW':
       case 'INFO':
-        return 'text-[#08B4ED] border-[#08B4ED]/40 bg-cyan-50/50 dark:bg-[#0c1322]';
+        return 'text-[#08B4ED] border-[#08B4ED]/40 bg-white dark:bg-[#0c1322]';
       default:
-        return 'text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700/60 bg-slate-100 dark:bg-[#0c1322]';
+        return 'text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700/60 bg-white dark:bg-[#0c1322]';
     }
   };
 
   const getVerdictStyle = (verdict?: string) => {
     switch (verdict?.toUpperCase()) {
       case 'MALICIOUS':
-        return 'text-rose-600 dark:text-rose-400 border-rose-500/40 bg-rose-50/60 dark:bg-transparent';
+        return 'text-rose-600 dark:text-rose-400 border-rose-500/40 bg-white dark:bg-[#0c1322]';
       case 'SUSPICIOUS':
-        return 'text-amber-600 dark:text-amber-400 border-amber-500/40 bg-amber-50/60 dark:bg-transparent';
+        return 'text-amber-600 dark:text-amber-400 border-amber-500/40 bg-white dark:bg-[#0c1322]';
       case 'BENIGN':
-        return 'text-emerald-600 dark:text-emerald-400 border-emerald-500/40 bg-emerald-50/60 dark:bg-transparent';
+        return 'text-emerald-600 dark:text-emerald-400 border-emerald-500/40 bg-white dark:bg-[#0c1322]';
       default:
-        return 'text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700/60 bg-slate-100 dark:bg-transparent';
+        return 'text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700/60 bg-white dark:bg-[#0c1322]';
     }
   };
 
@@ -125,70 +125,60 @@ export const InvestigatorKPIBar: React.FC = () => {
             ))}
           </div>
 
-          {/* Persistent Selected Entity HUD Badge */}
-          {selectedEntity && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white dark:bg-[#0c1322] border border-[#08B4ED]/70 shadow-[0_0_10px_rgba(8,180,237,0.18)] animate-fadeIn">
-              <Target className="w-3.5 h-3.5 text-[#08B4ED] animate-pulse" />
-              <span className="text-[10px] uppercase font-mono font-bold text-[#08B4ED]">
-                {selectedEntity.type}:
-              </span>
-              <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 max-w-[160px] truncate" title={selectedEntity.value}>
-                {selectedEntity.value}
-              </span>
-              <button
-                type="button"
-                onClick={() => investigatorStore.selectEntity(null)}
-                className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors ml-1 cursor-pointer"
-                title="Deselect Entity"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Right: Separate Risk vs. Confidence vs. Severity vs. Evidence */}
         <div className="flex flex-wrap items-center gap-2 text-xs shrink-0">
           {/* Risk Metric */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800">
-            <span className="text-[10px] uppercase font-mono text-slate-500 dark:text-slate-400 font-medium">Risk:</span>
-            <span className={`text-[11px] font-mono font-bold px-1.5 py-0.2 rounded border ${getVerdictStyle(riskVerdict)}`}>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800">
+            <span className="text-[11px] uppercase font-mono text-slate-500 dark:text-slate-400 font-medium">Risk:</span>
+            <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border ${getVerdictStyle(riskVerdict)}`}>
               {riskVerdict} ({riskScore}/100)
             </span>
           </div>
 
           {/* Detection Confidence (Separate from Risk!) */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800" title="Statistical detection model confidence">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800" title="Statistical detection model confidence">
             <Activity className="w-3.5 h-3.5 text-[#08B4ED]" />
-            <span className="text-[10px] uppercase font-mono text-slate-500 dark:text-slate-400 font-medium">Confidence:</span>
+            <span className="text-[11px] uppercase font-mono text-slate-500 dark:text-slate-400 font-medium">Confidence:</span>
             <span className="text-[11px] font-mono font-bold text-[#08B4ED]">
               {detectionConfidence}%
             </span>
           </div>
 
           {/* Severity (Separate from Confidence & Risk!) */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800">
-            <span className="text-[10px] uppercase font-mono text-slate-500 dark:text-slate-400 font-medium">Severity:</span>
-            <span className={`text-[11px] font-mono font-bold px-1.5 py-0.2 rounded border ${getSeverityStyle(currentSeverity)}`}>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800">
+            <span className="text-[11px] uppercase font-mono text-slate-500 dark:text-slate-400 font-medium">Severity:</span>
+            <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border ${getSeverityStyle(currentSeverity)}`}>
               {currentSeverity}
             </span>
           </div>
-
-          {/* Evidence Ledger State */}
-          <button
-            type="button"
-            onClick={() => investigatorStore.openEvidenceInspector(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 transition-colors cursor-pointer"
-            title="Inspect Tamper-Evident Evidence Ledger"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-[10px] uppercase font-mono text-slate-500 dark:text-slate-400 font-medium">Evidence:</span>
-            <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
-              {verifiedEvidenceCount}/{caseEvidence.length} Verified
-            </span>
-          </button>
         </div>
       </div>
+
+      {/* LEVEL 1.5 — Selected Entity Context (Visually Separated) */}
+      {selectedEntity && (
+        <div className="max-w-[1850px] mx-auto mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-2 animate-fadeIn">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Focus:</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 dark:bg-[#0c1322] border border-[#08B4ED]/40">
+            <Target className="w-3.5 h-3.5 text-[#08B4ED]" />
+            <span className="text-[11px] uppercase font-mono font-bold text-[#08B4ED]">
+              {selectedEntity.type}:
+            </span>
+            <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 max-w-[300px] truncate" title={selectedEntity.value}>
+              {selectedEntity.value}
+            </span>
+            <button
+              type="button"
+              onClick={() => investigatorStore.selectEntity(null)}
+              className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors ml-1 cursor-pointer"
+              title="Deselect Entity"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

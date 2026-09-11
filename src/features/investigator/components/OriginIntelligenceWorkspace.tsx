@@ -132,9 +132,6 @@ export const OriginIntelligenceWorkspace: React.FC = () => {
               <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
                 Origin Intelligence & Geolocation
               </h3>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-transparent text-sky-600 dark:text-sky-400 font-bold border border-sky-500/30">
-                P0 Telemetry
-              </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               AI-assisted probable-origin assessment & mail-routing hop reconstruction

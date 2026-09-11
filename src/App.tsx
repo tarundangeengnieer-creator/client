@@ -17,6 +17,8 @@ import { SettingsPlaceholder } from './features/settings/SettingsPlaceholder.tsx
 import { ForensicReportPage } from './features/reports/ForensicReportPage.tsx';
 import { InvestigatorWorkspace } from './features/investigator/InvestigatorWorkspace.tsx';
 import { GraphInvestigationPage } from './features/investigator/components/ThreatIntelPanel.tsx';
+import { EvidencePage } from './features/investigation/components/evidence/EvidencePage.tsx';
+import { TimelinePage } from './features/investigation/components/timeline/TimelinePage.tsx';
 import { SOCWorkspace } from './features/soc/SOCWorkspace.tsx';
 import { Role } from './features/auth/authConfig.ts';
 
@@ -35,7 +37,8 @@ const ROUTE_ACCESS: Record<string, Role[]> = {
   '/investigation': [Role.SOC_ANALYST, Role.INVESTIGATOR, Role.FRAUD_IR],
   '/evidence': [Role.INVESTIGATOR, Role.FRAUD_IR],
   '/reports': [Role.INVESTIGATOR, Role.FRAUD_IR],
-  '/hunting': [Role.SOC_ANALYST, Role.INVESTIGATOR],
+  '/hunting': [Role.SOC_ANALYST, Role.INVESTIGATOR, Role.ADMIN],
+  '/threat-intel': [Role.SOC_ANALYST, Role.INVESTIGATOR, Role.ADMIN],
   '/admin/health': [Role.IT_ADMIN, Role.ADMIN],
   '/admin/users': [Role.IT_ADMIN, Role.ADMIN],
   '/admin/integrations': [Role.IT_ADMIN, Role.ADMIN],
@@ -123,6 +126,18 @@ export default function App() {
       if (ui.currentPath.startsWith('/investigator/graph')) {
         return <GraphInvestigationPage />;
       }
+      
+      if (ui.currentPath.startsWith('/investigator/timeline')) {
+        return <TimelinePage />;
+      }
+      
+      if (ui.currentPath.startsWith('/evidence')) {
+        return <EvidencePage />;
+      }
+
+      if (ui.currentPath.startsWith('/hunting') || ui.currentPath.startsWith('/threat-intel')) {
+        return <HuntingPlaceholder />;
+      }
 
       if (
         ui.currentPath === '/' ||
@@ -130,8 +145,7 @@ export default function App() {
         ui.currentPath.startsWith('/investigator') ||
         ui.currentPath.startsWith('/cases') ||
         ui.currentPath === '/inbox' ||
-        ui.currentPath.startsWith('/investigation') ||
-        ui.currentPath.startsWith('/evidence')
+        ui.currentPath.startsWith('/investigation')
       ) {
         return <InvestigatorWorkspace />;
       }
@@ -189,7 +203,7 @@ export default function App() {
       return <InvestigationPage />;
     }
 
-    if (ui.currentPath.startsWith('/hunting')) {
+    if (ui.currentPath.startsWith('/hunting') || ui.currentPath.startsWith('/threat-intel')) {
       if (!checkAccess('/hunting')) return <ForbiddenPage />;
       return <HuntingPlaceholder />;
     }

@@ -271,6 +271,22 @@ export const EntityProfileDrawer: React.FC = () => {
             </button>
           )}
 
+          {/* Pivot to Threat Intelligence */}
+          <button
+            type="button"
+            onClick={() => {
+              investigatorStore.closeEntityProfile();
+              uiStore.navigate(`/hunting?q=${encodeURIComponent(selectedEntity.value)}`);
+            }}
+            className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#070b14] hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:border-purple-500/50 transition-colors cursor-pointer text-left font-mono shadow-2xs"
+          >
+            <div className="flex items-center gap-2">
+              <Globe className="w-3.5 h-3.5 text-purple-500" />
+              <span className="text-slate-800 dark:text-slate-200 font-semibold">Query Threat Intelligence Dossier</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-purple-500" />
+          </button>
+
           {/* View Associated Evidence */}
           <button
             type="button"

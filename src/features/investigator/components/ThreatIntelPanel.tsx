@@ -64,15 +64,15 @@ export const ThreatIntelPanel: React.FC = () => {
 
           {/* Graceful Fallback when Threat Intelligence is Offline */}
           {(isThreatIntelOffline || errorTI) && (
-            <div className="p-3.5 rounded-lg bg-amber-50 dark:bg-[#070b14] border border-amber-500/30 text-xs flex items-start gap-3">
-              <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 text-xs flex items-start gap-3">
+              <AlertTriangle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-slate-800 dark:text-slate-200">
+                <p className="font-bold text-slate-700 dark:text-slate-300">
                   External Threat Intelligence Telemetry Offline
                 </p>
-                <p className="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5 leading-relaxed font-sans">
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5 leading-relaxed font-sans">
                   Third-party IOC reputation service is currently unavailable.
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 ml-1">
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 ml-1">
                     Timeline, Graph, Forensic Evidence Ledger, and Case Actions remain fully operational.
                   </span>
                 </p>
@@ -134,6 +134,60 @@ export const ThreatIntelPanel: React.FC = () => {
                       </span>
                     )
                   ))}
+                </div>
+
+                {/* SIH DEMO 26106: Threat Intelligence Pivots */}
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const snap = investigatorStore.getSnapshot();
+                      const node = snap.graphNodes.find(n => n.value.toLowerCase() === threatIntel.indicator.toLowerCase());
+                      if (node) {
+                        investigatorStore.selectEntity(node);
+                        uiStore.navigate('/investigator');
+                      }
+                    }}
+                    className="px-3 py-1.5 text-[10px] font-bold rounded bg-slate-50 dark:bg-[#0a0f1d] text-slate-700 dark:text-slate-300 hover:border-[#08B4ED]/50 border border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    Open in Graph
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                       const snap = investigatorStore.getSnapshot();
+                       const ev = snap.timelineEvents.find(e => e.summary.toLowerCase().includes(threatIntel.indicator.toLowerCase()));
+                       if (ev) {
+                          investigatorStore.selectTimelineEvent(ev);
+                          uiStore.navigate('/investigator');
+                       }
+                    }}
+                    className="px-3 py-1.5 text-[10px] font-bold rounded bg-slate-50 dark:bg-[#0a0f1d] text-slate-700 dark:text-slate-300 hover:border-purple-500/50 border border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    Open Timeline
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                       const snap = investigatorStore.getSnapshot();
+                       const ev = snap.caseEvidence.find(e => e.title.toLowerCase().includes(threatIntel.indicator.toLowerCase()) || e.description.toLowerCase().includes(threatIntel.indicator.toLowerCase()));
+                       if (ev) {
+                         investigatorStore.selectEvidence(ev);
+                       } else {
+                         investigatorStore.openEvidenceInspector(true);
+                       }
+                    }}
+                    className="px-3 py-1.5 text-[10px] font-bold rounded bg-slate-50 dark:bg-[#0a0f1d] text-slate-700 dark:text-slate-300 hover:border-emerald-500/50 border border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    View Evidence
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => uiStore.navigate('/reports')}
+                    className="px-3 py-1.5 text-[10px] font-bold rounded bg-slate-50 dark:bg-[#0a0f1d] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    Add to Report
+                  </button>
                 </div>
               </div>
 

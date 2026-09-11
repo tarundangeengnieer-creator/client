@@ -27,6 +27,12 @@ export type Permission =
   | 'reports.view'
   | 'reports.create'
   | 'threat_intel.view'
+  | 'threat_intel.pivot'
+  | 'ai.query'
+  | 'ai.operational_metrics'
+  | 'ml.detection.view'
+  | 'ml.admin.manage'
+  | 'ml.tenant.analytics'
   | 'users.view'
   | 'users.manage'
   | 'tenant.manage'
@@ -35,11 +41,82 @@ export type Permission =
   | 'system.manage';
 
 export const RolePermissions: Record<Role, Permission[]> = {
-  [Role.SOC_ANALYST]: ['dashboard.view', 'soc.view', 'investigation.view', 'investigation.create', 'cases.view', 'threat_intel.view'],
-  [Role.INVESTIGATOR]: ['dashboard.view', 'soc.view', 'investigation.view', 'investigation.create', 'evidence.view', 'evidence.manage', 'cases.view', 'cases.manage', 'reports.view', 'reports.create', 'threat_intel.view'],
-  [Role.IT_ADMIN]: ['dashboard.view', 'users.view', 'users.manage', 'integrations.manage', 'system.manage', 'audit.view'],
-  [Role.FRAUD_IR]: ['dashboard.view', 'cases.view', 'cases.manage', 'investigation.view', 'evidence.view', 'reports.view', 'reports.create'],
-  [Role.ADMIN]: ['dashboard.view', 'soc.view', 'users.view', 'users.manage', 'tenant.manage', 'integrations.manage', 'audit.view', 'system.manage']
+  [Role.SOC_ANALYST]: [
+    'dashboard.view',
+    'soc.view',
+    'investigation.view',
+    'investigation.create',
+    'cases.view',
+    'threat_intel.view',
+    'threat_intel.pivot',
+    'ai.query',
+    'ai.operational_metrics',
+    'ml.detection.view',
+  ],
+  [Role.INVESTIGATOR]: [
+    'dashboard.view',
+    'soc.view',
+    'investigation.view',
+    'investigation.create',
+    'evidence.view',
+    'evidence.manage',
+    'cases.view',
+    'cases.manage',
+    'reports.view',
+    'reports.create',
+    'threat_intel.view',
+    'threat_intel.pivot',
+    'ai.query',
+    'ml.detection.view',
+  ],
+  [Role.IT_ADMIN]: [
+    'dashboard.view',
+    'users.view',
+    'users.manage',
+    'integrations.manage',
+    'system.manage',
+    'audit.view',
+    'ml.tenant.analytics',
+  ],
+  [Role.FRAUD_IR]: [
+    'dashboard.view',
+    'cases.view',
+    'cases.manage',
+    'investigation.view',
+    'evidence.view',
+    'reports.view',
+    'reports.create',
+    'threat_intel.view',
+    'threat_intel.pivot',
+    'ai.query',
+    'ml.detection.view',
+  ],
+  [Role.ADMIN]: [
+    'dashboard.view',
+    'soc.view',
+    'investigation.view',
+    'investigation.create',
+    'investigation.manage',
+    'evidence.view',
+    'evidence.manage',
+    'cases.view',
+    'cases.manage',
+    'reports.view',
+    'reports.create',
+    'threat_intel.view',
+    'threat_intel.pivot',
+    'ai.query',
+    'ai.operational_metrics',
+    'ml.detection.view',
+    'ml.admin.manage',
+    'ml.tenant.analytics',
+    'users.view',
+    'users.manage',
+    'tenant.manage',
+    'integrations.manage',
+    'audit.view',
+    'system.manage',
+  ],
 };
 
 export interface Tenant {

@@ -5,6 +5,7 @@ import { GlobalSearchModal } from './GlobalSearchModal.tsx';
 import { ToastContainer } from './ToastContainer.tsx';
 import { Modal } from '../ui/Modal.tsx';
 import { useUI, uiStore } from '../../stores/ui-store.ts';
+import { AIAssistantButton, AIAssistantDrawer } from '../../features/ai-assistant/index.ts';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -55,6 +56,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <div className="print:hidden">
         <GlobalSearchModal />
         <ToastContainer />
+        <AIAssistantButton />
+        <AIAssistantDrawer />
       </div>
 
       {/* Keyboard Shortcuts Help Modal */}

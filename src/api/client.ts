@@ -50,6 +50,28 @@ export class ApiClient {
     }
   }
 
+  public setToken(token: string): void {
+    try {
+      sessionStorage.setItem('ashielder_bearer_token', token);
+    } catch (e) {
+      console.error('Failed to write token to sessionStorage', e);
+    }
+  }
+
+  public getToken(): string | null {
+    try {
+      return sessionStorage.getItem('ashielder_bearer_token');
+    } catch {
+      return null;
+    }
+  }
+
+  public clearToken(): void {
+    try {
+      sessionStorage.removeItem('ashielder_bearer_token');
+    } catch {}
+  }
+
   public async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { timeoutMs = 30000, skipAuth = false, headers = {}, ...rest } = options;
 
@@ -62,9 +84,14 @@ export class ApiClient {
     };
 
     if (!skipAuth) {
-      const apiKey = this.getApiKey();
-      if (apiKey) {
-        requestHeaders['X-API-Key'] = apiKey;
+      const token = this.getToken();
+      if (token) {
+        requestHeaders['Authorization'] = `Bearer ${token}`;
+      } else {
+        const apiKey = this.getApiKey();
+        if (apiKey) {
+          requestHeaders['X-API-Key'] = apiKey;
+        }
       }
     }
 

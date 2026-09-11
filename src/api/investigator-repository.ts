@@ -1247,5 +1247,12 @@ class MockInvestigatorRepository implements InvestigatorRepository {
   }
 }
 
-// Export singleton instance ready for DI or replacement with HTTP client
-export const investigatorRepo: InvestigatorRepository = new MockInvestigatorRepository();
+import { RestInvestigatorRepository } from './rest-investigator-repository.ts';
+
+const _isLiveMode = Boolean(import.meta.env.VITE_API_BASE_URL?.trim());
+export const investigatorRepo: InvestigatorRepository = _isLiveMode
+  ? new RestInvestigatorRepository()
+  : new MockInvestigatorRepository();
+
+// Expose mode for debugging
+export const IS_LIVE_MODE = _isLiveMode;

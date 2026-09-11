@@ -103,16 +103,16 @@ export const InvestigationTimeline: React.FC = () => {
   const getSeverityBadgeStyle = (relevance: string) => {
     switch (relevance.toUpperCase()) {
       case 'CRITICAL':
-        return 'text-rose-600 dark:text-rose-400 border-rose-500/40 bg-rose-50 dark:bg-[#0c1322]';
+        return 'text-rose-600 dark:text-rose-400 border-rose-500/40 bg-white dark:bg-[#0c1322]';
       case 'HIGH':
-        return 'text-orange-600 dark:text-orange-400 border-orange-500/40 bg-orange-50 dark:bg-[#0c1322]';
+        return 'text-orange-600 dark:text-orange-400 border-orange-500/40 bg-white dark:bg-[#0c1322]';
       case 'MEDIUM':
-        return 'text-amber-600 dark:text-amber-400 border-amber-500/40 bg-amber-50 dark:bg-[#0c1322]';
+        return 'text-amber-600 dark:text-amber-400 border-amber-500/40 bg-white dark:bg-[#0c1322]';
       case 'LOW':
-        return 'text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700/60 bg-slate-100 dark:bg-[#0c1322]';
+        return 'text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700/60 bg-white dark:bg-[#0c1322]';
       case 'INFO':
       default:
-        return 'text-[#08B4ED] border-[#08B4ED]/40 bg-cyan-50/50 dark:bg-[#0c1322]';
+        return 'text-[#08B4ED] border-[#08B4ED]/40 bg-white dark:bg-[#0c1322]';
     }
   };
 
@@ -230,8 +230,8 @@ export const InvestigationTimeline: React.FC = () => {
         {/* Isolated Error State */}
         {errorTimeline && (
           <div className="p-6 text-center text-slate-500 dark:text-slate-400">
-            <AlertTriangle className="w-8 h-8 mx-auto text-amber-500 mb-2" />
-            <p className="font-bold text-xs text-slate-800 dark:text-slate-200">
+            <AlertTriangle className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+            <p className="font-bold text-xs text-slate-700 dark:text-slate-300">
               Investigation Timeline Unavailable
             </p>
             <p className="text-[11px] mt-1 text-slate-500 dark:text-slate-400">{errorTimeline}</p>
@@ -275,10 +275,10 @@ export const InvestigationTimeline: React.FC = () => {
                   onClick={() => investigatorStore.selectTimelineEvent(evt)}
                   className={`relative group cursor-pointer rounded-lg p-3 transition-all border ${
                     isSelected
-                      ? 'bg-cyan-50/70 dark:bg-[#0f172a] border-[#08B4ED] shadow-[0_0_12px_rgba(8,180,237,0.18)]'
+                      ? 'bg-white dark:bg-[#0f172a] border-[#08B4ED]'
                       : isRelatedToSelectedEntity
-                      ? 'bg-white dark:bg-[#0c1322] border-[#08B4ED]/70 border-l-4 border-l-[#08B4ED] shadow-xs'
-                      : 'bg-white dark:bg-[#0c1322] border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+                      ? 'bg-white dark:bg-[#0c1322] border-[#08B4ED]/70 border-l-4 border-l-[#08B4ED]'
+                      : 'bg-white dark:bg-[#0c1322] border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                   } ${isDimmed ? 'opacity-40 hover:opacity-100' : 'opacity-100'}`}
                 >
                   {/* Timeline Bullet Node */}
@@ -294,49 +294,46 @@ export const InvestigationTimeline: React.FC = () => {
                     <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-black' : isRelatedToSelectedEntity ? 'bg-[#08B4ED]' : 'bg-slate-400'}`} />
                   </span>
 
-                  {/* 1. Header: Title, Severity, UTC Timestamp */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+                  {/* 1. Header: Title (Primary), Timestamp (Secondary), Severity */}
+                  <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
                     <div className="flex items-center gap-1.5">
                       {getEventIcon(evt.event_type)}
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-100 font-mono">
+                      <span className="text-sm font-bold text-slate-800 dark:text-slate-100 font-sans">
                         {evt.event_type}
                       </span>
                       {isRelatedToSelectedEntity && (
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-50 dark:bg-[#070b14] border border-[#08B4ED]/50 text-[#08B4ED]">
+                        <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border border-[#08B4ED]/50 text-[#08B4ED] bg-white dark:bg-[#0c1322]">
                           Related Entity
                         </span>
                       )}
                     </div>
+                    
+                    <span className="text-xs font-mono font-medium text-slate-500 dark:text-slate-400 text-right">
+                      {new Date(evt.timestamp).toUTCString().replace('GMT', 'UTC')}
+                    </span>
+                  </div>
 
-                    <div className="flex items-center gap-1.5">
+                  {/* 2. Concise Evidence Summary */}
+                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans mb-2">
+                    {evt.summary}
+                  </p>
+
+                  {/* 3. Metadata strip: Severity, MITRE ATT&CK, Source, SHA-256 Hash */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span
-                        className={`text-[9.5px] font-mono font-bold px-1.5 py-0.2 rounded border uppercase ${getSeverityBadgeStyle(
+                        className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border uppercase ${getSeverityBadgeStyle(
                           evt.relevance
                         )}`}
                       >
                         {evt.relevance}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                        {new Date(evt.timestamp).toUTCString().replace('GMT', 'UTC')}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 2. Concise Evidence Summary */}
-                  <p className="text-[11.5px] text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
-                    {evt.summary}
-                  </p>
-
-                  {/* 3. Metadata strip: MITRE ATT&CK, Source, SHA-256 Hash */}
-                  <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/90 flex flex-wrap items-center justify-between gap-2 text-[10px]">
-                    <div className="flex flex-wrap items-center gap-1.5">
                       {/* Approved MITRE Tag */}
                       {evt.mitre_technique && (
                         <MitreBadge technique={evt.mitre_technique} size="sm" />
                       )}
-
                       {/* Source Reference Tag */}
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-mono">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-mono bg-white dark:bg-[#0c1322]">
                         <span className="text-slate-400 dark:text-slate-500">source:</span>
                         <span className="text-slate-700 dark:text-slate-300 font-semibold">{evt.source_ref}</span>
                       </span>
@@ -350,15 +347,15 @@ export const InvestigationTimeline: React.FC = () => {
                           e.stopPropagation();
                           handleCopyHash(evt.evidence_hash, evt.event_id);
                         }}
-                        className="flex items-center gap-1 font-mono text-[9.5px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-1 py-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        className="flex items-center gap-1 font-mono text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                         title={`Copy Evidence Hash: ${evt.evidence_hash}`}
                       >
-                        <Hash className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                        <Hash className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span>{evt.evidence_hash.substring(0, 8)}...</span>
                         {copiedHashId === evt.event_id ? (
-                          <Check className="w-2.5 h-2.5 text-emerald-500 dark:text-emerald-400" />
+                          <Check className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
                         ) : (
-                          <Copy className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
+                          <Copy className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                         )}
                       </button>
                     </div>

@@ -212,3 +212,104 @@ export interface ThreatIntelEnrichment {
   last_resolved?: string;
   tags: string[];
 }
+
+export type ProvenanceType =
+  | 'OBSERVED EVIDENCE'
+  | 'THREAT INTELLIGENCE'
+  | 'ML DETECTION'
+  | 'AI ANALYSIS'
+  | 'ANALYST DECISION';
+
+export interface MLDetectionSignal {
+  model_id: string;
+  model_name: string;
+  model_version: string;
+  prediction: 'PHISHING' | 'MALICIOUS' | 'SUSPICIOUS' | 'BENIGN' | 'CLEAN';
+  confidence: number; // 0 - 100 specimen confidence percentage
+  inference_latency_ms: number;
+  inference_status: 'Completed (Deterministic)' | 'Completed (Heuristic)' | 'Degraded' | 'Offline';
+  timestamp: string;
+  supporting_evidence_ids: string[];
+  key_features_triggered: string[];
+  // Separate model evaluation metrics (only for admin context, never confused with confidence)
+  evaluation_metrics?: {
+    precision: number;
+    recall: number;
+    f1: number;
+    evaluation_dataset: string;
+  };
+}
+
+export interface AIInvestigationQuery {
+  query_id: string;
+  case_id: string;
+  tenant_id: string;
+  performed_by: string;
+  role: string;
+  timestamp: string;
+  model_version: string;
+  prompt: string;
+  response: string;
+  evidence_count: number;
+  supporting_evidence_ids: string[];
+  sources_used: string[];
+  audit_hash: string;
+}
+
+export interface ThreatIntelProvenanceSource {
+  source_name: string;
+  category: 'Commercial Feed' | 'GeoIP Database' | 'Passive DNS' | 'Detonation Sandbox' | 'Internal Correlation' | 'Advisory';
+  observation_time: string;
+  last_updated: string;
+  confidence: number;
+  reputation: 'MALICIOUS' | 'SUSPICIOUS' | 'NEUTRAL' | 'CLEAN';
+  source_record_ref: string;
+}
+
+export interface ThreatIntelDetail {
+  indicator: string;
+  type: 'ip' | 'domain' | 'url' | 'hash' | 'email';
+  reputation: 'MALICIOUS' | 'SUSPICIOUS' | 'NEUTRAL' | 'CLEAN';
+  risk_level: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  confidence: number;
+  first_seen: string;
+  last_seen: string;
+  country?: string;
+  country_code?: string;
+  city?: string;
+  asn?: string;
+  isp?: string;
+  infrastructure_type?: string; // e.g. "Tor Exit Node", "Bulletproof VPS", "AiTM Proxy"
+  associated_activity: string; // e.g. "Credential Phishing / Wire Fraud Lure"
+  known_campaigns: string[];
+  related_domains: string[];
+  related_urls: string[];
+  provenance_sources: ThreatIntelProvenanceSource[];
+  observed_in_email?: {
+    case_id: string;
+    field: string;
+    hop_number?: number;
+    header_snippet: string;
+  };
+  analyst_notes: string[];
+  ai_summary?: {
+    summary_text: string;
+    evidence_count: number;
+    evidence_sources: string[];
+    generated_at: string;
+  };
+}
+
+export interface SignalCorrelation {
+  correlation_score: number; // 0 - 100
+  overall_risk_verdict: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  signals: {
+    name: string;
+    category: ProvenanceType;
+    verdict: string;
+    confidence: number;
+    weight: number;
+    description: string;
+  }[];
+}
+

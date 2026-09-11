@@ -406,6 +406,14 @@ export const investigatorStore = {
     notify();
   },
 
+  openEntityProfile(open = true): void {
+    currentState = {
+      ...currentState,
+      isEntityProfileOpen: open,
+    };
+    notify();
+  },
+
   closeEntityProfile(): void {
     currentState = {
       ...currentState,

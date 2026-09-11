@@ -223,6 +223,42 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
+          {/* SIH 26106 DEMO MODE BUTTON (GOLDEN PATH) */}
+          <button
+            type="button"
+            onClick={async () => {
+              setIsSubmitting(true);
+              try {
+                // Log in as Investigator
+                await authStore.login('demo.investigator@ashielder.local', 'sih_demo_2026');
+                // Force SIH Demo Case Context
+                uiStore.addToast('success', 'SIH 26106 Demo initialized. Loading golden path case...');
+                uiStore.navigate('/investigator');
+              } catch {
+                setErrorMsg('Demo initialization failed.');
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
+            disabled={isSubmitting}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-[#08B4ED] bg-cyan-50/10 hover:bg-[#08B4ED]/10 text-[#08B4ED] font-bold text-sm transition-all shadow-[0_0_15px_rgba(8,180,237,0.15)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mb-2 group"
+          >
+            <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
+            <span>Launch SIH 26106 Demo (Golden Path)</span>
+          </button>
+
+          {/* Divider */}
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+            </div>
+            <div className="relative flex justify-center text-[11px]">
+              <span className="bg-white dark:bg-[#0c1322] px-3 text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">
+                or sign in
+              </span>
+            </div>
+          </div>
+
           {/* Google SSO Button */}
           <button
             type="button"
