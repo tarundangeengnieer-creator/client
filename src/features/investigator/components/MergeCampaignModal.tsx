@@ -6,7 +6,7 @@ import { GitMerge, AlertTriangle } from 'lucide-react';
 export const MergeCampaignModal: React.FC = () => {
   const { isMergeModalOpen, currentCaseId, relatedCases, isActionInProgress } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   const [targetCaseId, setTargetCaseId] = useState(relatedCases[0]?.case_id || '');
   const [campaignName, setCampaignName] = useState('Operation PayPal Phish Cluster (Q3-2026)');

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSOC, socStore } from '../../stores/soc-store.ts';
+import { uiStore } from '../../stores/ui-store.ts';
 import { AlertQueue } from './components/AlertQueue.tsx';
 import { SOCTriagePanel } from './components/SOCTriagePanel.tsx';
 import { SOCCharts } from './components/SOCCharts.tsx';
@@ -21,7 +22,12 @@ export const SOCWorkspace: React.FC = () => {
       <div className="flex flex-wrap items-center gap-3 mb-3 select-none">
         {/* KPI 1: Open Alerts Assigned to Me */}
         <div 
-          onClick={() => socStore.setFilters({ status: 'INVESTIGATING' })}
+          onClick={() => {
+            import('../../stores/cases-store.ts').then(m => {
+              m.casesStore.setFilters({ status: 'INVESTIGATING' });
+              uiStore.navigate('/inbox');
+            });
+          }}
           className="flex-1 min-w-[170px] flex items-center gap-3 px-3.5 py-2 bg-white dark:bg-[#0a0f1d] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs cursor-pointer hover:border-blue-400 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
@@ -37,7 +43,14 @@ export const SOCWorkspace: React.FC = () => {
 
         {/* KPI 2: Alerts Breaching SLA */}
         <div 
-          onClick={() => socStore.setFilters({ agingBucket: 'SLA Breaching' })}
+          onClick={() => {
+            import('../../stores/cases-store.ts').then(m => {
+              // casesStore.setSlaFilter('BREACHED') - assuming we handle SLA via custom filter or assume age bucket.
+              // For now, let's reset others just to show queue:
+              m.casesStore.setFilters({ status: 'ALL', severity: 'ALL' }); 
+              uiStore.navigate('/inbox');
+            });
+          }}
           className="flex-1 min-w-[170px] flex items-center gap-3 px-3.5 py-2 bg-white dark:bg-[#0a0f1d] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs cursor-pointer hover:border-rose-400 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
@@ -53,7 +66,12 @@ export const SOCWorkspace: React.FC = () => {
 
         {/* KPI 3: Critical / High Unresolved */}
         <div 
-          onClick={() => socStore.setFilters({ severity: 'CRITICAL' })}
+          onClick={() => {
+            import('../../stores/cases-store.ts').then(m => {
+              m.casesStore.setFilters({ severity: 'CRITICAL', status: 'ALL' });
+              uiStore.navigate('/inbox');
+            });
+          }}
           className="flex-1 min-w-[170px] flex items-center gap-3 px-3.5 py-2 bg-white dark:bg-[#0a0f1d] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs cursor-pointer hover:border-orange-400 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-orange-600 dark:text-orange-400 flex items-center justify-center flex-shrink-0">
@@ -69,7 +87,12 @@ export const SOCWorkspace: React.FC = () => {
 
         {/* KPI 4: New Alerts in Last 15 Minutes */}
         <div 
-          onClick={() => socStore.setFilters({ agingBucket: '0-15m' })}
+          onClick={() => {
+            import('../../stores/cases-store.ts').then(m => {
+              m.casesStore.setFilters({ status: 'ALL', severity: 'ALL' }); // New could mean timestamp sort
+              uiStore.navigate('/inbox');
+            });
+          }}
           className="flex-1 min-w-[170px] flex items-center gap-3 px-3.5 py-2 bg-white dark:bg-[#0a0f1d] border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs cursor-pointer hover:border-emerald-400 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
@@ -83,92 +106,23 @@ export const SOCWorkspace: React.FC = () => {
           </div>
         </div>
 
-        {/* High-value Filter Controls & Refresh */}
+        {/* Refresh button */}
         <div className="flex items-center gap-2 ml-auto">
-          {/* Severity filter */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-[#0e1627] border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xs">
-            <Filter className="w-3 h-3 text-slate-400" />
-            <select
-              value={filterSeverity}
-              onChange={(e) => socStore.setFilters({ severity: e.target.value })}
-              className="text-[11px] font-bold bg-transparent text-slate-700 dark:text-slate-300 outline-none cursor-pointer"
-            >
-              <option value="ALL">All Severities</option>
-              <option value="CRITICAL">Critical</option>
-              <option value="HIGH">High</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
-            </select>
-          </div>
-
-          {/* Status filter */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-[#0e1627] border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xs">
-            <select
-              value={filterStatus}
-              onChange={(e) => socStore.setFilters({ status: e.target.value })}
-              className="text-[11px] font-bold bg-transparent text-slate-700 dark:text-slate-300 outline-none cursor-pointer"
-            >
-              <option value="ALL">All Status</option>
-              <option value="NEW">New (Unassigned)</option>
-              <option value="INVESTIGATING">Investigating</option>
-              <option value="ESCALATED">Escalated</option>
-              <option value="CLOSED_TRUE_POSITIVE">Closed (TP)</option>
-              <option value="CLOSED_FALSE_POSITIVE">Closed (FP)</option>
-            </select>
-          </div>
-
-          {/* Category filter */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-[#0e1627] border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xs">
-            <select
-              value={filterCategory}
-              onChange={(e) => socStore.setFilters({ category: e.target.value })}
-              className="text-[11px] font-bold bg-transparent text-slate-700 dark:text-slate-300 outline-none cursor-pointer"
-            >
-              <option value="ALL">All Categories</option>
-              <option value="Business Email Compromise">BEC</option>
-              <option value="Phishing">Phishing</option>
-              <option value="Malware">Malware</option>
-              <option value="Account Takeover">Account Takeover</option>
-              <option value="Suspicious Login">Suspicious Login</option>
-              <option value="Spam">Spam</option>
-            </select>
-          </div>
-
-          {/* Refresh button */}
           <button
             onClick={() => {
-              socStore.fetchQueue();
               socStore.fetchDashboardData();
             }}
-            disabled={isLoadingQueue}
+            disabled={isLoadingKPIs}
             className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1627] text-slate-600 dark:text-slate-300 hover:text-blue-600 transition-colors cursor-pointer shadow-2xs"
-            title="Refresh Alert Telemetry"
+            title="Refresh Telemetry"
           >
-            <RotateCw className={`w-3.5 h-3.5 ${isLoadingQueue ? 'animate-spin' : ''}`} />
+            <RotateCw className={`w-3.5 h-3.5 ${isLoadingKPIs ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* Secondary Context: Actionable Rollup Trends */}
       <SOCCharts />
-
-      {/* Primary Work Surface: Alert Triage Queue + Contextual Detail Drawer */}
-      <div className="flex-1 flex gap-3 min-h-[400px] overflow-hidden">
-        <div className="flex-1 flex flex-col h-full min-w-0">
-          <AlertQueue />
-        </div>
-
-        {/* Contextual Side Panel */}
-        {isTriagePanelOpen && (
-          <div className="w-[380px] flex-shrink-0 h-full hidden lg:flex flex-col">
-            <SOCTriagePanel />
-          </div>
-        )}
-      </div>
-
-      {/* Deep-dive Email Entity Modal */}
-      <SOCEmailEntityModal />
-
     </div>
   );
 };

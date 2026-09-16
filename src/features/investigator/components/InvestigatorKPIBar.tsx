@@ -27,7 +27,7 @@ export const InvestigatorKPIBar: React.FC = () => {
     graphNodes,
   } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   const verifiedEvidenceCount = caseEvidence.filter(
     (e) => e.verification_state === 'VERIFIED'

@@ -36,7 +36,7 @@ interface PredefinedQuery {
 export const AIAnalysisPanel: React.FC = () => {
   const { currentCase, currentCaseId, selectedEntity, caseEvidence } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
   const tenantName = auth.currentTenant?.name || 'Acme Security Operations';
   const investigatorName = auth.currentUser?.name || 'Ankit Sharma (Investigator)';
 

@@ -266,7 +266,7 @@ export const ThreatIntelWorkspace: React.FC = () => {
   const auth = useAuth();
   const ui = useUI();
   const { currentCaseId, caseEvidence, geographicHops } = useInvestigator();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   // Read URL query parameter if available (e.g. /hunting?q=185.220.101.5)
   const initialQuery = useMemo(() => {

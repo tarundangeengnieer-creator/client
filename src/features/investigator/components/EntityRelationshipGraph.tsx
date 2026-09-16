@@ -46,7 +46,7 @@ export const EntityRelationshipGraph: React.FC = () => {
   } = useInvestigator();
 
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   // Canvas Pan & Zoom State
   const [zoom, setZoom] = useState(1);

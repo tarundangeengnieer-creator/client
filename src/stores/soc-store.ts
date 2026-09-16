@@ -117,7 +117,7 @@ class SOCStore {
     const alert = this.state.alerts.find(a => a.id === alertId);
     if (!alert) return;
 
-    const tenantId = authStore.getState().tenant?.id || 'tnt_acme_soc';
+    const tenantId = authStore.getState().tenant?.id ;
     this.patch({ isEmailEntityOpen: true, isLoadingEmailEntity: true });
     try {
       const emailEntity = await socRepo.getEmailEntity(alert.email_entity_id, tenantId);
@@ -133,7 +133,7 @@ class SOCStore {
   };
 
   fetchQueue = async () => {
-    const tenantId = authStore.getState().tenant?.id || 'tnt_acme_soc';
+    const tenantId = authStore.getState().tenant?.id ;
 
     this.patch({ isLoadingQueue: true, errorQueue: null });
     try {
@@ -152,7 +152,7 @@ class SOCStore {
 
   fetchDashboardData = async () => {
     const state = authStore.getState();
-    const tenantId = state.tenant?.id || 'tnt_acme_soc';
+    const tenantId = state.tenant?.id ;
     const analyst = state.user?.name || 'Alice SOC';
 
     this.patch({ isLoadingKPIs: true, isLoadingCharts: true });
@@ -178,7 +178,7 @@ class SOCStore {
 
   acknowledgeAlert = async (alertId: string) => {
     const state = authStore.getState();
-    const tenantId = state.tenant?.id || 'tnt_acme_soc';
+    const tenantId = state.tenant?.id ;
     const userName = state.user?.name || 'Alice SOC';
     try {
       await socRepo.acknowledgeAlert(alertId, userName, tenantId);
@@ -192,7 +192,7 @@ class SOCStore {
 
   updateAlertStatus = async (alertId: string, status: AlertStatus, justification?: string) => {
     const state = authStore.getState();
-    const tenantId = state.tenant?.id || 'tnt_acme_soc';
+    const tenantId = state.tenant?.id ;
     try {
       await socRepo.updateAlertStatus(alertId, status, tenantId, justification);
       uiStore.addToast('success', `Alert ${alertId} marked as ${status.replace(/_/g, ' ')}.`);
@@ -206,7 +206,7 @@ class SOCStore {
 
   escalateToInvestigator = async (alertId: string) => {
     const state = authStore.getState();
-    const tenantId = state.tenant?.id || 'tnt_acme_soc';
+    const tenantId = state.tenant?.id ;
     try {
       await socRepo.updateAlertStatus(alertId, 'ESCALATED', tenantId, 'Escalated to Forensic Investigator');
       uiStore.addToast('success', `Alert ${alertId} escalated to Investigator. Case generated.`);
@@ -220,7 +220,7 @@ class SOCStore {
 
   escalateToFraudIR = async (alertId: string, rationale: string, urgency = 'HIGH') => {
     const state = authStore.getState();
-    const tenantId = state.tenant?.id || 'tnt_acme_soc';
+    const tenantId = state.tenant?.id ;
     try {
       const res = await socRepo.escalateToFraudIR(alertId, rationale, urgency, tenantId);
       uiStore.addToast('success', `Alert ${alertId} escalated to Fraud / IR (${res.escalationId}).`);
@@ -234,7 +234,7 @@ class SOCStore {
 
   quarantineSenderOrDomain = async (target: string, type: 'DOMAIN' | 'SENDER') => {
     const state = authStore.getState();
-    const tenantId = state.tenant?.id || 'tnt_acme_soc';
+    const tenantId = state.tenant?.id ;
     try {
       await socRepo.quarantine(target, type, tenantId);
       uiStore.addToast('success', `Quarantined ${type}: ${target} across email gateway.`);
@@ -245,7 +245,7 @@ class SOCStore {
 
   addNote = async (alertId: string, note: string) => {
     const state = authStore.getState();
-    const tenantId = state.tenant?.id || 'tnt_acme_soc';
+    const tenantId = state.tenant?.id ;
     const author = state.user?.name || 'Alice SOC';
     try {
       await socRepo.addNote(alertId, note, author, tenantId);

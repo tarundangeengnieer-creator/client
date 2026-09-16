@@ -16,7 +16,7 @@ import {
 export const CaseActionBar: React.FC = () => {
   const { currentCaseId, caseEvidence } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
   const author = auth.currentUser?.name || 'Ankit Sharma (Investigator)';
 
   const [isExporting, setIsExporting] = useState(false);

@@ -6,7 +6,7 @@ import { X, Link2, AlertCircle } from 'lucide-react';
 export const LinkCaseModal: React.FC = () => {
   const { isLinkModalOpen, currentCaseId, relatedCases, isActionInProgress } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   const [targetCaseId, setTargetCaseId] = useState(relatedCases[0]?.case_id || '');
   const [justification, setJustification] = useState('');

@@ -3,6 +3,7 @@ import { useCases, casesStore, RiskFilter, ConfidenceFilter, SortField } from '.
 import { useUI, uiStore } from '../../stores/ui-store.ts';
 import { CaseViewModel, TableDensityMode } from '../../domain/case.ts';
 import { Verdict } from '../../contracts/backend.ts';
+import { useCapabilities } from '../auth/capabilities.ts';
 import { CaseTableRow } from './CaseTableRow.tsx';
 import { QuickPeekDrawer } from './QuickPeekDrawer.tsx';
 import {
@@ -36,6 +37,7 @@ export const CaseInboxPage: React.FC = () => {
   const filteredCases = casesStore.getFilteredCases();
   const metrics = casesStore.getMetrics();
   const selectedCount = casesState.selectedCaseIds.size;
+  const capabilities = useCapabilities();
   const isAllSelected =
     filteredCases.length > 0 &&
     filteredCases.every((c) => casesState.selectedCaseIds.has(c.id));
@@ -154,113 +156,80 @@ export const CaseInboxPage: React.FC = () => {
 
   return (
     <div className="w-full min-w-0 p-4 sm:p-5 lg:p-6 space-y-5 lg:space-y-6">
-      {/* 1. TOP CATEGORY TABS (Gmail Style) */}
-      <div className="bg-white dark:bg-[#0c1322] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden transition-colors">
-        <div className="flex items-stretch overflow-x-auto no-scrollbar divide-x divide-slate-100 dark:divide-slate-800/80">
-          {[
-            {
-              id: 'ALL',
-              filter: 'ALL' as const,
-              label: 'Primary',
-              subtitle: 'All Ingested Cases',
-              count: metrics.total,
-              badgeClass: 'bg-transparent text-blue-600 dark:text-sky-400 border border-blue-500/30',
-              icon: Inbox,
-            },
-            {
-              id: Verdict.MALICIOUS,
-              filter: Verdict.MALICIOUS,
-              label: 'Malicious',
-              subtitle: 'Quarantine Ready',
-              count: metrics.malicious,
-              badgeClass: 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold',
-              icon: ShieldAlert,
-            },
-            {
-              id: Verdict.SUSPICIOUS,
-              filter: Verdict.SUSPICIOUS,
-              label: 'Suspicious',
-              subtitle: 'Analyst Review',
-              count: metrics.suspicious,
-              badgeClass: 'bg-transparent text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold',
-              icon: AlertTriangle,
-            },
-            {
-              id: Verdict.BENIGN,
-              filter: Verdict.BENIGN,
-              label: 'Benign',
-              subtitle: 'Auto-Verified Clean',
-              count: metrics.benign,
-              badgeClass: 'bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold',
-              icon: ShieldCheck,
-            },
-            {
-              id: Verdict.INCONCLUSIVE,
-              filter: Verdict.INCONCLUSIVE,
-              label: 'Inconclusive',
-              subtitle: 'Evidence Exhausted',
-              count: metrics.inconclusive,
-              badgeClass: 'bg-transparent text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700',
-              icon: HelpCircle,
-            },
-          ].map((tab) => {
-            const isActive = casesState.verdictFilter === tab.filter;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => casesStore.setVerdictFilter(tab.filter)}
-                className={`flex-1 min-w-[190px] py-3.5 px-4 sm:px-5 flex items-start gap-3.5 text-left transition-all relative cursor-pointer group ${
-                  isActive
-                    ? 'bg-slate-50 dark:bg-slate-800/60 text-blue-600 dark:text-sky-400'
-                    : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400'
-                }`}
-              >
-                {/* Icon */}
-                <div
-                  className={`mt-0.5 shrink-0 transition-colors ${
-                    isActive
-                      ? 'text-blue-600 dark:text-sky-400'
-                      : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
-                  }`}
-                >
-                  <tab.icon className="w-5 h-5" />
-                </div>
-
-                {/* Text Content */}
-                <div className="min-w-0 flex-1">
-                  {/* Title & Badge */}
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-sm font-semibold truncate ${
-                        isActive
-                          ? 'text-blue-600 dark:text-sky-400'
-                          : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'
-                      }`}
-                    >
-                      {tab.label}
+      {/* 1. FILTER TABS (GMAIL STYLE) */}
+      <div className="flex items-center border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] overflow-x-auto no-scrollbar pt-2 px-2">
+        {[
+          { 
+            id: 'ALL', filter: 'ALL' as const, label: 'All Cases', count: metrics.total, 
+            icon: <Inbox className="w-4 h-4" />, 
+            subtext: 'Complete investigation queue',
+            badgeColor: 'bg-blue-600 text-white',
+            activeColor: 'text-blue-600 dark:text-blue-500 border-blue-600'
+          },
+          { 
+            id: Verdict.MALICIOUS, filter: Verdict.MALICIOUS, label: 'Malicious', count: metrics.malicious, 
+            icon: <AlertTriangle className="w-4 h-4" />,
+            subtext: 'Confirmed threats requiring action',
+            badgeColor: 'bg-rose-600 text-white',
+            activeColor: 'text-rose-600 dark:text-rose-500 border-rose-600'
+          },
+          { 
+            id: Verdict.SUSPICIOUS, filter: Verdict.SUSPICIOUS, label: 'Suspicious', count: metrics.suspicious, 
+            icon: <ShieldAlert className="w-4 h-4" />,
+            subtext: 'Anomalies under investigation',
+            badgeColor: 'bg-amber-600 text-white',
+            activeColor: 'text-amber-600 dark:text-amber-500 border-amber-600'
+          },
+          { 
+            id: Verdict.BENIGN, filter: Verdict.BENIGN, label: 'Benign', count: metrics.benign, 
+            icon: <CheckCircle2 className="w-4 h-4" />,
+            subtext: 'Verified safe communications',
+            badgeColor: 'bg-emerald-600 text-white',
+            activeColor: 'text-emerald-600 dark:text-emerald-500 border-emerald-600'
+          },
+          { 
+            id: Verdict.INCONCLUSIVE, filter: Verdict.INCONCLUSIVE, label: 'Inconclusive', count: metrics.inconclusive, 
+            icon: <Search className="w-4 h-4" />,
+            subtext: 'Awaiting further signals',
+            badgeColor: 'bg-slate-500 text-white',
+            activeColor: 'text-slate-700 dark:text-slate-300 border-slate-700 dark:border-slate-300'
+          },
+        ].map((tab) => {
+          const isActive = casesState.verdictFilter === tab.filter;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => casesStore.setVerdictFilter(tab.filter)}
+              className={`group flex items-start gap-3 px-4 py-3 min-w-[200px] max-w-[280px] border-b-2 transition-all cursor-pointer ${
+                isActive
+                  ? tab.activeColor
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+              }`}
+            >
+              <div className={`mt-0.5 ${isActive ? tab.activeColor : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`}>
+                {tab.icon}
+              </div>
+              <div className="flex flex-col items-start flex-1 min-w-0">
+                <div className="flex items-center gap-2 w-full">
+                  <span className={`text-sm font-semibold truncate ${isActive ? tab.activeColor : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100'}`}>
+                    {tab.label}
+                  </span>
+                  {tab.count > 0 && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                      isActive ? tab.badgeColor : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    }`}>
+                      {tab.count} {tab.count === 1 ? 'case' : 'cases'}
                     </span>
-                    <span
-                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full leading-tight shrink-0 shadow-2xs ${tab.badgeClass}`}
-                    >
-                      {tab.count} new
-                    </span>
-                  </div>
-
-                  {/* Subtitle */}
-                  <div className="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5 font-normal">
-                    {tab.subtitle}
-                  </div>
+                  )}
                 </div>
-
-                {/* Bottom Active Indicator Bar (matching Gmail) */}
-                {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 dark:bg-sky-400 rounded-t-sm" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+                <span className="text-xs text-slate-500 dark:text-slate-500 truncate w-full text-left mt-0.5 font-normal">
+                  {tab.subtext}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* 2. TOOLBAR & CONTROLS CARD */}
@@ -289,6 +258,24 @@ export const CaseInboxPage: React.FC = () => {
 
         {/* Right: Filters & Action Buttons */}
         <div className="flex items-center gap-2.5 flex-wrap text-xs">
+          {/* Severity Filter */}
+          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5">
+            <span className="text-slate-500 dark:text-slate-400 text-xs">Severity:</span>
+            <select
+              value={casesState.severityFilter}
+              onChange={(e) =>
+                casesStore.setFilters({ severity: e.target.value })
+              }
+              className="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer"
+            >
+              <option value="ALL" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">ALL</option>
+              <option value="CRITICAL" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">Critical</option>
+              <option value="HIGH" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">High</option>
+              <option value="MEDIUM" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">Medium</option>
+              <option value="LOW" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">Low</option>
+            </select>
+          </div>
+
           {/* Verdict Filter */}
           <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5">
             <span className="text-slate-500 dark:text-slate-400 text-xs">Verdict:</span>
@@ -356,14 +343,16 @@ export const CaseInboxPage: React.FC = () => {
           </button>
 
           {/* Ingest EML */}
-          <button
-            type="button"
-            onClick={() => uiStore.navigate('/ingest')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Ingest .eml</span>
-          </button>
+          {capabilities.canCreateInvestigation && (
+            <button
+              type="button"
+              onClick={() => uiStore.navigate('/ingest')}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Ingest .eml</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -376,6 +365,7 @@ export const CaseInboxPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {capabilities.canManageCases && <>
             <button
               type="button"
               onClick={() => {
@@ -407,6 +397,7 @@ export const CaseInboxPage: React.FC = () => {
             >
               Clear
             </button>
+            </>}
           </div>
         </div>
       )}
@@ -428,11 +419,11 @@ export const CaseInboxPage: React.FC = () => {
                     className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0 cursor-pointer"
                   />
                 </th>
-                <th className="w-28 px-3 py-3">#</th>
-                <th className="px-3 py-3">Subject</th>
+                <th className="w-24 px-3 py-3">Severity / Age</th>
+                <th className="px-3 py-3">Subject / Sender</th>
+                <th className="w-40 px-3 py-3">Category / Auth</th>
                 <th className="w-32 px-3 py-3">Risk</th>
-                <th className="w-28 px-3 py-3">Status</th>
-                <th className="w-36 px-3 py-3">Received</th>
+                <th className="w-32 px-3 py-3">Assignee / Status</th>
                 <th className="w-16 px-3 py-3 text-right"></th>
               </tr>
             </thead>

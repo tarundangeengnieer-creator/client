@@ -46,6 +46,9 @@ export interface CasesState {
   confidenceFilter: ConfidenceFilter;
   sortField: SortField;
   sortDirection: SortDirection;
+  severityFilter: string;
+  statusFilter: string;
+  categoryFilter: string;
 }
 
 const STORAGE_KEY = 'ashielder_cases_v3';
@@ -183,6 +186,7 @@ function createDefaultDemonstrationCases(): {
       {
         hypothesis_id: 'HYP-01',
         case_id: 'ASH-2026-9012',
+      
         hypothesis_type: AttackHypothesisType.CREDENTIAL_PHISHING,
         score: 0.92,
         confidence: 0.88,
@@ -195,6 +199,7 @@ function createDefaultDemonstrationCases(): {
       {
         hypothesis_id: 'HYP-02',
         case_id: 'ASH-2026-9012',
+      
         hypothesis_type: AttackHypothesisType.SPOOFING,
         score: 0.90,
         confidence: 0.92,
@@ -254,6 +259,7 @@ function createDefaultDemonstrationCases(): {
       {
         hypothesis_id: 'HYP-03',
         case_id: 'ASH-2026-9015',
+      
         hypothesis_type: AttackHypothesisType.INVOICE_FRAUD,
         score: 0.74,
         confidence: 0.72,
@@ -456,6 +462,7 @@ function createDefaultDemonstrationCases(): {
       {
         hypothesis_id: 'HYP-07',
         case_id: 'ASH-2026-9031',
+      
         hypothesis_type: AttackHypothesisType.CREDENTIAL_PHISHING,
         score: 0.85,
         confidence: 0.68,
@@ -736,6 +743,11 @@ function createDefaultDemonstrationCases(): {
     },
     {
       id: 'ASH-2026-9012',
+      severity: 'CRITICAL',
+      isSlaBreached: true,
+      threatCategory: 'Credential Phishing',
+      authSignals: { spf: 'FAIL', dkim: 'FAIL', dmarc: 'FAIL' },
+      assignee: 'unassigned',
       status: InvestigationStatus.COMPLETED,
       verdict: Verdict.MALICIOUS,
       riskScore: 92.5,
@@ -760,6 +772,11 @@ function createDefaultDemonstrationCases(): {
     },
     {
       id: 'ASH-2026-9015',
+      severity: 'HIGH',
+      isSlaBreached: false,
+      threatCategory: 'Business Email Compromise',
+      authSignals: { spf: 'PASS', dkim: 'NONE', dmarc: 'NONE' },
+      assignee: 'Alex Chen',
       status: InvestigationStatus.COMPLETED,
       verdict: Verdict.SUSPICIOUS,
       riskScore: 58.4,
@@ -856,6 +873,11 @@ function createDefaultDemonstrationCases(): {
     },
     {
       id: 'ASH-2026-9031',
+      severity: 'MEDIUM',
+      isSlaBreached: false,
+      threatCategory: 'Spam',
+      authSignals: { spf: 'PASS', dkim: 'PASS', dmarc: 'PASS' },
+      assignee: 'unassigned',
       status: InvestigationStatus.COMPLETED,
       verdict: Verdict.SUSPICIOUS,
       riskScore: 64.1,
@@ -927,7 +949,10 @@ let currentCasesState: CasesState = {
   verdictFilter: 'ALL',
   riskFilter: 'ALL',
   confidenceFilter: 'ALL',
-  sortField: 'timestamp',
+      severityFilter: 'ALL',
+      statusFilter: 'ALL',
+      categoryFilter: 'ALL',
+      sortField: 'timestamp',
   sortDirection: 'desc',
 };
 
@@ -1260,6 +1285,17 @@ export const casesStore = {
     notifyCases();
   },
 
+  setFilters(filters: Partial<{ severity: string; status: string; category: string }>): void {
+    currentCasesState = {
+      ...currentCasesState,
+      severityFilter: filters.severity ?? currentCasesState.severityFilter,
+      statusFilter: filters.status ?? currentCasesState.statusFilter,
+      categoryFilter: filters.category ?? currentCasesState.categoryFilter,
+    };
+    persistState(currentCasesState.cases, currentCasesState.investigations);
+    notifyCases();
+  },
+
   setVerdictFilter(verdict: 'ALL' | Verdict): void {
     currentCasesState = { ...currentCasesState, verdictFilter: verdict, focusedIndex: 0 };
     notifyCases();
@@ -1298,6 +1334,9 @@ export const casesStore = {
       verdictFilter: 'ALL',
       riskFilter: 'ALL',
       confidenceFilter: 'ALL',
+      severityFilter: 'ALL',
+      statusFilter: 'ALL',
+      categoryFilter: 'ALL',
       sortField: 'timestamp',
       sortDirection: 'desc',
       focusedIndex: 0,

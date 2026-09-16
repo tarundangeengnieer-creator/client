@@ -23,7 +23,7 @@ import {
 export const RelatedCasesTable: React.FC = () => {
   const { relatedCases, currentCaseId, selectedEntity, isLoadingRelated, errorRelated } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   // Compare drawer modal state
   const [comparingCase, setComparingCase] = useState<RelatedCaseMatch | null>(null);

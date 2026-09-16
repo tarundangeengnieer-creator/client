@@ -34,6 +34,13 @@ export interface CaseViewModel {
   originCountry?: string;
   isTorExit?: boolean;
   hasAttachmentMismatch?: boolean;
+  
+  // Universal Queue / SOC Attributes
+  severity?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  assignee?: string;
+  isSlaBreached?: boolean;
+  threatCategory?: string;
+  authSignals?: { spf: string; dkim: string; dmarc: string };
 }
 
 export type TableDensityMode = 'compact' | 'standard' | 'preview';

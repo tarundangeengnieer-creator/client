@@ -268,7 +268,7 @@ export const GraphToolbar: React.FC<{
     selectedEntity,
   } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   const [showSearchResults, setShowSearchResults] = useState(false);
 
@@ -599,7 +599,7 @@ export const EntityInspectorPanel: React.FC = () => {
     isExpandingNode,
   } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   const [copiedValue, setCopiedValue] = useState(false);
 
@@ -854,7 +854,7 @@ export const EntityInspectorPanel: React.FC = () => {
  */
 export const GraphInvestigationPage: React.FC = () => {
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
   const { currentCaseId, selectedEdge } = useInvestigator();
 
   const [searchQuery, setSearchQuery] = useState('');

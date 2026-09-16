@@ -6,7 +6,7 @@ import { ShieldAlert, AlertCircle } from 'lucide-react';
 export const EscalateModal: React.FC = () => {
   const { isEscalateModalOpen, currentCaseId, isActionInProgress } = useInvestigator();
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   const [urgency, setUrgency] = useState<'CRITICAL' | 'HIGH' | 'MEDIUM'>('CRITICAL');
   const [rationale, setRationale] = useState(

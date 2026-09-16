@@ -9,7 +9,7 @@ import { Archive } from 'lucide-react';
 
 export const EvidencePage: React.FC = () => {
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   useEffect(() => {
     investigatorStore.initWorkspace(tenantId);

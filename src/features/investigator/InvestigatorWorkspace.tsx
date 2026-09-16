@@ -32,7 +32,7 @@ import { OriginIntelligenceWorkspace } from './components/OriginIntelligenceWork
 export const InvestigatorWorkspace: React.FC = () => {
   const auth = useAuth();
   const ui = useUI();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
   const { currentCaseId } = useInvestigator();
 
   // Desktop view layout modes

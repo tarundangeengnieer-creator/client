@@ -238,7 +238,7 @@ export const AppTopBar: React.FC = () => {
           <Menu className="w-5 h-5" />
         </button>
 
-        {ui.currentPath.startsWith('/investigator') || (auth.currentRole === Role.INVESTIGATOR && (ui.currentPath === '/' || ui.currentPath === '/investigation' || ui.currentPath === '/cases' || ui.currentPath === '/overview')) ? (
+        {ui.currentPath.startsWith('/investigator') ? (
           <div className="min-w-0">
             <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 truncate">
               <span>Investigator Workspace</span>

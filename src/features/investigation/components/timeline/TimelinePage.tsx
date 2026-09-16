@@ -9,7 +9,7 @@ import { Clock } from 'lucide-react';
 
 export const TimelinePage: React.FC = () => {
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   useEffect(() => {
     investigatorStore.initWorkspace(tenantId);

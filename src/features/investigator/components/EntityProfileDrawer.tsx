@@ -44,7 +44,7 @@ export const EntityProfileDrawer: React.FC = () => {
   } = useInvestigator();
 
   const auth = useAuth();
-  const tenantId = auth.currentTenant?.id || 'tnt_acme_soc';
+  const tenantId = auth.currentTenant?.id ;
 
   const [copied, setCopied] = useState(false);
 

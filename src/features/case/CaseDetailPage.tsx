@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useUI, uiStore } from '../../stores/ui-store.ts';
+import { investigatorStore } from '../../stores/investigator-store.ts';
+import { useAuth } from '../../stores/auth-store.ts';
 import { casesStore, CaseViewModel } from '../../stores/cases-store.ts';
 import { ForensicReportPage } from '../reports/ForensicReportPage.tsx';
 import { downloadPdfReport } from '../reports/exporters.ts';
@@ -37,10 +39,27 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { GeospatialMap, MapNode, MapRoute } from '../../components/ui/GeospatialMap.tsx';
+import { EntityRelationshipGraph } from '../investigator/components/EntityRelationshipGraph.tsx';
+import { InvestigationTimeline } from '../investigator/components/InvestigationTimeline.tsx';
+import { ThreatIntelPanel } from '../investigator/components/ThreatIntelPanel.tsx';
+import { OriginIntelligenceWorkspace } from '../investigator/components/OriginIntelligenceWorkspace.tsx';
+import { EntityProfileDrawer } from '../investigator/components/EntityProfileDrawer.tsx';
+import { EmailEntityModal } from '../investigator/components/EmailEntityModal.tsx';
+import { LinkCaseModal } from '../investigator/components/LinkCaseModal.tsx';
+import { MergeCampaignModal } from '../investigator/components/MergeCampaignModal.tsx';
+import { EscalateModal } from '../investigator/components/EscalateModal.tsx';
 
 export const CaseDetailPage: React.FC = () => {
   const ui = useUI();
+  const auth = useAuth();
+  const tenantId = auth.currentTenant?.id;
   const caseId = ui.activeCaseId || 'A2291';
+
+  useEffect(() => {
+    if (tenantId && caseId) {
+      investigatorStore.selectCase(caseId, tenantId);
+    }
+  }, [caseId, tenantId]);
   const caseData = casesStore.getCase(caseId) || {
     id: 'A2291',
     subject: 'Invoice Payment Update - Action Required',
@@ -58,19 +77,17 @@ export const CaseDetailPage: React.FC = () => {
   const investigation = casesStore.getInvestigation(caseId);
 
   type DetailTab =
-    | 'summary'
-    | 'findings'
-    | 'journey'
+    | 'overview'
+    | 'split'
     | 'evidence'
-    | 'headers'
-    | 'body'
-    | 'urls'
-    | 'attachments'
-    | 'geolocation'
-    | 'history'
-    | 'report';
+    | 'timeline'
+    | 'graph'
+    | 'threat-intel'
+    | 'report'
+    | 'findings'
+    | 'geolocation';
 
-  const [activeTab, setActiveTab] = useState<DetailTab>('summary');
+  const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [threatPreviewMode, setThreatPreviewMode] = useState<'rendered' | 'text' | 'raw'>('rendered');
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isReinvestigating, setIsReinvestigating] = useState(false);
@@ -194,7 +211,10 @@ export const CaseDetailPage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Case #{caseData.id}</h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[11px] font-semibold">
-                  Malicious
+                  {caseData.verdict}
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-full bg-transparent border text-[11px] font-semibold ${caseData.riskScore >= 80 ? 'border-rose-500/30 text-rose-600 dark:text-rose-400' : 'border-amber-500/30 text-amber-600 dark:text-amber-400'}`}>
+                  Risk: {caseData.riskScore}
                 </span>
               </div>
 
@@ -213,15 +233,11 @@ export const CaseDetailPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-slate-400 dark:text-slate-500">Received: </span>
-                  <span className="text-slate-700 dark:text-slate-300">12 Aug 2025, 10:24 AM</span>
+                  <span className="text-slate-700 dark:text-slate-300">{new Date(caseData.timestamp).toLocaleString()}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 dark:text-slate-500">Source: </span>
-                  <span className="text-slate-700 dark:text-slate-300">Uploaded (.eml)</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-500">Investigation ID: </span>
-                  <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">INV-7823</span>
+                  <span className="text-slate-400 dark:text-slate-500">Status: </span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">Investigating</span>
                 </div>
               </div>
             </div>
@@ -254,19 +270,40 @@ export const CaseDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. TAB NAVIGATION BAR matching screenshot */}
-      <div className="border-b border-slate-200 dark:border-slate-800 flex items-center gap-6 sm:gap-7 text-xs font-medium select-none overflow-x-auto no-scrollbar pt-1 print:hidden">
+      {/* NEW: Investigation Context Bar */}
+      <div className="flex items-center gap-2 pb-2 select-none print:hidden border-b border-slate-200 dark:border-slate-800/80">
         {[
-          { id: 'summary', label: 'Summary' },
-          { id: 'findings', label: 'Findings' },
-          { id: 'journey', label: 'Investigation Journey' },
-          { id: 'evidence', label: 'Evidence (6)' },
-          { id: 'headers', label: 'Headers' },
-          { id: 'body', label: 'Body & Content' },
-          { id: 'urls', label: 'URLs (3)' },
-          { id: 'attachments', label: 'Attachments (1)' },
-          { id: 'geolocation', label: 'Geolocation' },
-          { id: 'history', label: 'Historical Context (3)' },
+          { label: 'Threat detected', state: 'done' },
+          { label: 'Evidence collected', state: 'done' },
+          { label: 'Indicators correlated', state: 'done' },
+          { label: 'Investigation in progress', state: 'active' },
+          { label: 'Report pending', state: 'pending' }
+        ].map((phase, i, arr) => (
+          <React.Fragment key={phase.label}>
+            <div className={`text-xs font-semibold flex items-center gap-1.5 ${
+              phase.state === 'done' ? 'text-emerald-600 dark:text-emerald-400' :
+              phase.state === 'active' ? 'text-blue-600 dark:text-sky-400' :
+              'text-slate-400 dark:text-slate-500'
+            }`}>
+              {phase.state === 'done' ? <CheckCircle2 className="w-3.5 h-3.5" /> : 
+               phase.state === 'active' ? <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-sky-400 shadow-[0_0_8px_rgba(8,180,237,0.6)] ml-1 mr-0.5" /> :
+               <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 ml-1 mr-0.5" />}
+              {phase.label}
+            </div>
+            {i < arr.length - 1 && <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-700 mx-1" />}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* 2. TAB NAVIGATION BAR matching screenshot */}
+      <div className="flex items-center gap-6 sm:gap-7 text-xs font-medium select-none overflow-x-auto no-scrollbar pt-1 print:hidden">
+        {[
+          { id: 'overview', label: 'Overview' },
+          { id: 'split', label: 'Forensic Split' },
+          { id: 'evidence', label: 'Evidence (Raw Email)' },
+          { id: 'timeline', label: 'Timeline' },
+          { id: 'graph', label: 'Graph' },
+          { id: 'threat-intel', label: 'Threat Intelligence' },
           { id: 'report', label: 'Report' },
         ].map((tab) => (
           <button
@@ -276,7 +313,7 @@ export const CaseDetailPage: React.FC = () => {
             className={`pb-3 whitespace-nowrap transition-colors relative cursor-pointer font-semibold ${
               activeTab === tab.id
                 ? 'text-blue-600 dark:text-sky-400 border-b-2 border-blue-600 dark:border-sky-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border-b-2 border-transparent'
             }`}
           >
             {tab.label}
@@ -285,7 +322,7 @@ export const CaseDetailPage: React.FC = () => {
       </div>
 
       {/* 3. ACTIVE TAB CONTENT */}
-      {activeTab === 'summary' && (
+      {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* ROW 1: 3 COLUMNS */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -817,600 +854,86 @@ Authentication-Results: mx.company.com;
         </div>
       )}
 
-      {/* 4. FINDINGS TAB */}
-      {activeTab === 'findings' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-6 transition-colors">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">Comprehensive Forensic Findings</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Autonomous evaluation results across RFC 822 headers, domains, and network indicators</p>
+      {/* SPLIT TAB */}
+      {activeTab === 'split' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch min-h-[500px]">
+            {/* Left 7 cols: Entity Relationship Graph */}
+            <div className="lg:col-span-7 flex flex-col min-h-[500px] bg-white dark:bg-[#070b14] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden">
+              <EntityRelationshipGraph />
             </div>
-            <span className="px-3 py-1 rounded-full bg-transparent border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold">
-              Verdict: MALICIOUS (Risk 87/100)
-            </span>
+
+            {/* Right 5 cols: Chronological Investigation Timeline */}
+            <div className="lg:col-span-5 flex flex-col min-h-[500px] bg-white dark:bg-[#070b14] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden">
+              <InvestigationTimeline />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Finding 1 */}
-            <div className="p-4 rounded-xl border border-rose-500/30 bg-slate-50 dark:bg-[#090e1c] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                  Domain Typosquatting & Impersonation
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-transparent border border-rose-500/30 text-rose-600 dark:text-rose-400 font-mono">CRITICAL</span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                The sender domain <code className="text-rose-600 dark:text-rose-400 bg-white dark:bg-[#090e1a] px-1 rounded border border-rose-500/20">paypal1-secure.com</code> uses deceptive string concatenation mimicking PayPal Inc. Registered only 4 hours prior via an anonymous registrar in Panama.
-              </p>
-            </div>
-
-            {/* Finding 2 */}
-            <div className="p-4 rounded-xl border border-rose-500/30 bg-slate-50 dark:bg-[#090e1c] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                  Credential Harvesting Hyperlink
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-transparent border border-rose-500/30 text-rose-600 dark:text-rose-400 font-mono">CRITICAL</span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                Extracted URL <code className="text-rose-600 dark:text-rose-400 bg-white dark:bg-[#090e1a] px-1 rounded border border-rose-500/20">https://paypal1-secure.com/invoice</code> loads an unauthenticated fake login form requesting payment card details and SSN.
-              </p>
-            </div>
-
-            {/* Finding 3 */}
-            <div className="p-4 rounded-xl border border-amber-500/30 bg-slate-50 dark:bg-[#090e1c] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  Cryptographic Authentication Discrepancy
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-transparent border border-amber-500/30 text-amber-600 dark:text-amber-400 font-mono">WARNING</span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                DKIM signature is absent. While SPF passed against the malicious disposable host, DMARC alignment failed against official PayPal authentication policy (p=reject).
-              </p>
-            </div>
-
-            {/* Finding 4 */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#090e1a] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-                  <Globe className="w-4 h-4 text-blue-600 dark:text-sky-400" />
-                  Anonymized Routing Relay
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">EVIDENCE</span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                Origin relay IP <code className="text-slate-800 dark:text-slate-200 bg-white dark:bg-[#0c1322] px-1 rounded">185.220.101.5</code> is a known active Tor Exit Node in Frankfurt, Germany (AS205100).
-              </p>
-            </div>
+          {/* Forensic Origin Intelligence & Geolocation Workspace */}
+          <div className="w-full">
+            <OriginIntelligenceWorkspace />
           </div>
         </div>
       )}
 
-      {/* 5. INVESTIGATION JOURNEY TAB */}
-      {activeTab === 'journey' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-6 transition-colors">
-          <div className="border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">Autonomous Investigation Journey</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Node-by-node execution trace of the multi-stage adaptive forensic loop</p>
-          </div>
-
-          <div className="relative pl-6 space-y-6 before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-[2px] before:bg-blue-200 dark:before:bg-blue-900/60">
-            {/* Step 1 */}
-            <div className="relative flex items-start gap-4">
-              <div className="w-6 h-6 rounded-full bg-blue-600 dark:bg-sky-500 text-white flex items-center justify-center text-xs font-bold ring-4 ring-blue-50 dark:ring-blue-950/60 shrink-0">
-                1
-              </div>
-              <div className="bg-slate-50 dark:bg-[#090e1a] p-4 rounded-xl border border-slate-200 dark:border-slate-800 w-full">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">Ingestion & RFC 822 Header Parsing</span>
-                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">18ms</span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                  Extracted MIME structures, decoded base64 payload, and hashed full email payload with SHA-256.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="relative flex items-start gap-4">
-              <div className="w-6 h-6 rounded-full bg-blue-600 dark:bg-sky-500 text-white flex items-center justify-center text-xs font-bold ring-4 ring-blue-50 dark:ring-blue-950/60 shrink-0">
-                2
-              </div>
-              <div className="bg-slate-50 dark:bg-[#090e1a] p-4 rounded-xl border border-slate-200 dark:border-slate-800 w-full">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">Authentication Protocol Verification</span>
-                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">142ms</span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                  Resolved DNS TXT records for SPF, checked DKIM public keys, and evaluated DMARC policy. Detected alignment failure.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative flex items-start gap-4">
-              <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center justify-center text-xs font-bold shrink-0">
-                3
-              </div>
-              <div className="bg-slate-50 dark:bg-[#090e1c] p-4 rounded-xl border border-rose-500/30 w-full">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">URL Canonicalization & Threat Feed Cross-Match</span>
-                  <span className="text-[11px] font-mono text-rose-600 dark:text-rose-400">310ms</span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                  Discovered lookalike token in host part. Target flagged in antiphishing feeds as credential harvester.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div className="relative flex items-start gap-4">
-              <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs font-bold shrink-0">
-                4
-              </div>
-              <div className="bg-slate-50 dark:bg-[#090e1a] p-4 rounded-xl border border-slate-200 dark:border-slate-800 w-full">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">Final Verdict & Confidence Threshold Reached</span>
-                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">Total: 1840ms</span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                  Confidence score achieved 0.87 (target: 0.80). Investigation halted with final recommendation: <strong className="text-rose-600 dark:text-rose-400">QUARANTINE</strong>.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 6. EVIDENCE TAB */}
+      {/* EVIDENCE TAB */}
       {activeTab === 'evidence' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-4 transition-colors">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">Court-Admissible Evidence Atoms (6)</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Cryptographically verifiable hashes and forensic chain of custody</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => uiStore.addToast('success', 'Evidence bundle verified against tamper registry.')}
-              className="text-xs font-semibold text-blue-600 dark:text-sky-400 hover:underline cursor-pointer"
-            >
-              Verify Hashes
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              {
-                id: 'EVD-DOM-01',
-                type: 'Domain Lookalike',
-                val: 'paypal1-secure.com',
-                sha: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-              },
-              {
-                id: 'EVD-URL-01',
-                type: 'Malicious URL',
-                val: 'https://paypal1-secure.com/invoice',
-                sha: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
-              },
-              {
-                id: 'EVD-IP-01',
-                type: 'Tor Exit Origin',
-                val: '185.220.101.5:443',
-                sha: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
-              },
-              {
-                id: 'EVD-SPF-01',
-                type: 'DNS SPF Record',
-                val: 'v=spf1 ip4:185.220.101.0/24 -all',
-                sha: '18ac3e7343f016890c510e93f935261169d9e3f565436429830faf093400e1a2',
-              },
-              {
-                id: 'EVD-HDR-01',
-                type: 'Raw RFC 822 Header Block',
-                val: 'Message-ID: <202508121024.PAYPAL-ALERT@paypal1-secure.com>',
-                sha: '4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a',
-              },
-              {
-                id: 'EVD-TXT-01',
-                type: 'NLP Threat Intent Vector',
-                val: 'Urgent Action Required (0.912 Score)',
-                sha: 'ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d',
-              },
-            ].map((evd) => (
-              <div key={evd.id} className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#090e1a] flex items-center justify-between text-xs transition-colors">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{evd.id}</span>
-                    <span className="px-2 py-0.5 rounded bg-transparent border border-sky-500/30 text-sky-600 dark:text-sky-400 font-semibold text-[10px]">
-                      {evd.type}
-                    </span>
-                  </div>
-                  <p className="font-mono text-slate-700 dark:text-slate-300 font-medium">{evd.val}</p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">SHA-256: {evd.sha}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(evd.sha);
-                    uiStore.addToast('info', `Copied hash for ${evd.id}`);
-                  }}
-                  className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
-                  title="Copy SHA-256"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 7. HEADERS TAB */}
-      {activeTab === 'headers' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-4 transition-colors">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">Full RFC 822 Email Headers</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Complete raw network transport metadata</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                navigator.clipboard.writeText(`Received: from mail.paypal1-secure.com (185.220.101.5) by mx.company.com; Tue, 12 Aug 2025 10:24:00 +0000\nFrom: "PayPal Support" <support@paypal1-secure.com>\nTo: <user@company.com>\nSubject: Invoice Payment Update - Action Required\nDate: Tue, 12 Aug 2025 10:24:00 +0000\nMessage-ID: <202508121024.PAYPAL-ALERT@paypal1-secure.com>\nReturn-Path: <bounce@paypal1-secure.com>\nAuthentication-Results: mx.company.com; spf=pass (ip 185.220.101.5); dkim=none; dmarc=fail (p=reject)\nX-Priority: 1 (Highest)\nX-Mailer: Python-smtplib/3.10`);
-                uiStore.addToast('success', 'Copied raw RFC 822 headers to clipboard');
-              }}
-              className="text-xs font-semibold text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy Headers</span>
-            </button>
-          </div>
-
-          <div className="space-y-2 text-xs font-mono">
-            {[
-              { key: 'Delivered-To', value: 'user@company.com' },
-              { key: 'Received', value: 'from mail.paypal1-secure.com (185.220.101.5) by mx.company.com with ESMTP id 9X29A78 for <user@company.com>; Tue, 12 Aug 2025 10:24:00 +0000' },
-              { key: 'Return-Path', value: '<bounce@paypal1-secure.com>' },
-              { key: 'From', value: '"PayPal Support" <support@paypal1-secure.com>' },
-              { key: 'To', value: '<user@company.com>' },
-              { key: 'Subject', value: 'Invoice Payment Update - Action Required' },
-              { key: 'Date', value: 'Tue, 12 Aug 2025 10:24:00 +0000' },
-              { key: 'Message-ID', value: '<202508121024.PAYPAL-ALERT@paypal1-secure.com>' },
-              { key: 'Authentication-Results', value: 'mx.company.com; spf=pass smtp.mailfrom=paypal1-secure.com; dkim=none; dmarc=fail (p=reject)' },
-              { key: 'X-Mailer', value: 'Python-smtplib/3.10' },
-              { key: 'X-Spam-Score', value: '8.7 (HIGH)' },
-            ].map((hdr, idx) => (
-              <div key={idx} className="p-3 rounded-lg bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-start gap-2">
-                <span className="font-bold text-slate-800 dark:text-slate-200 min-w-[160px] shrink-0">{hdr.key}:</span>
-                <span className="text-slate-600 dark:text-slate-300 break-all">{hdr.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 8. BODY & CONTENT TAB */}
-      {activeTab === 'body' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-4 transition-colors">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">Decoded Body & Content</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Extracted plaintext and sanitized HTML representations</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Plaintext Output</span>
-              <pre className="text-xs font-mono text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-{`Dear customer,
-
-We detected an unusual transaction of $349.00 USD on your account. If you did not authorize this charge, please review and cancel the invoice immediately:
-
-View Invoice: https://paypal1-secure.com/invoice
-
-PayPal Fraud Dept.`}
-              </pre>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">NLP Linguistics Analysis</span>
-              <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800">
-                  <span>Urgency Score:</span>
-                  <span className="font-bold text-rose-600 dark:text-rose-400">92 / 100 (Extremely High)</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800">
-                  <span>Sentiment:</span>
-                  <span className="font-semibold text-amber-600 dark:text-amber-400">Coercive / Threatening</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800">
-                  <span>Grammar Discrepancies:</span>
-                  <span>Missing comma, generic greeting</span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span>Target Currency:</span>
-                  <span className="font-mono">USD ($349.00)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 9. URLS TAB */}
-      {activeTab === 'urls' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-4 transition-colors">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">Extracted URLs (3)</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">All hyperlinks discovered inside HTML and plaintext parts</p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              {
-                url: 'https://paypal1-secure.com/invoice',
-                status: 'Malicious',
-                category: 'Credential Phishing',
-                ip: '185.220.101.5',
-                registrar: 'Panama Privacy Protect',
-                risk: '98/100',
-              },
-              {
-                url: 'https://www.paypal.com/legal/privacy',
-                status: 'Benign',
-                category: 'Legitimate Domain (Lure Decorator)',
-                ip: '151.101.65.140',
-                registrar: 'PayPal Inc.',
-                risk: '2/100',
-              },
-              {
-                url: 'https://fonts.googleapis.com/css2?family=PayPal+Sans',
-                status: 'Benign',
-                category: 'Google Font CDN',
-                ip: '142.250.190.42',
-                registrar: 'Google LLC',
-                risk: '0/100',
-              },
-            ].map((u, i) => (
-              <div key={i} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#090e1a] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-colors">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100 truncate">{u.url}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      u.status === 'Malicious' ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30' : 'bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
-                    }`}>
-                      {u.status}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Category: {u.category} • IP: {u.ip} • Registrar: {u.registrar}</p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Risk: {u.risk}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(u.url);
-                      uiStore.addToast('info', 'URL copied');
-                    }}
-                    className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 10. ATTACHMENTS TAB */}
-      {activeTab === 'attachments' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-4 transition-colors">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">File Attachments (1)</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Extracted binary attachments and malware static inspection</p>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-[#090e1a] flex items-center justify-between text-xs transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white dark:bg-[#0c1322] border border-transparent flex items-center justify-center text-slate-800 dark:text-white">
-                <Paperclip className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-bold text-slate-900 dark:text-slate-100">invoice.pdf</span>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Size: 42.4 KB • MIME: application/pdf • VirusTotal: 0/72 Clean</p>
-                <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500">SHA-256: d2a84f6e3c...71b4e9</p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => uiStore.addToast('info', 'Attachment static sandbox verdict: No embedded JS / Macros')}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              Sandbox Report
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 11. GEOLOCATION TAB */}
-      {activeTab === 'geolocation' && (
         <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-6 transition-colors">
-          <div className="border-b border-slate-100 dark:border-slate-800/70 pb-3 flex items-start justify-between">
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">Network Geolocation & Route Analysis</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Visual mapping of autonomous trace routes and autonomous system (AS) numbers</p>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {isPointerMode && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mr-1">COLOR:</span>
-                  {(['red', 'amber', 'emerald', 'blue'] as const).map(color => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedPinColor(color)}
-                      className={`w-4 h-4 rounded-full border-2 ${selectedPinColor === color ? 'border-slate-500 dark:border-slate-300 scale-110' : 'border-transparent opacity-70 hover:opacity-100'} transition-all cursor-pointer`}
-                      style={{
-                        backgroundColor: color === 'red' ? '#f43f5e' : color === 'amber' ? '#f59e0b' : color === 'emerald' ? '#10b981' : '#3b82f6'
-                      }}
-                      title={`Drop ${color} pin`}
-                    />
-                  ))}
-                  <button 
-                    onClick={() => setCustomPins([])}
-                    className="ml-2 text-[10px] font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
-                  >
-                    CLEAR
-                  </button>
-                </div>
-              )}
-              <button
-                onClick={() => setIsPointerMode(!isPointerMode)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
-                  isPointerMode 
-                    ? 'bg-slate-100 dark:bg-slate-800 border-blue-500/50 text-blue-600 dark:text-sky-400' 
-                    : 'bg-white dark:bg-[#0c1322] border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900'
-                }`}
-              >
-                <MapPin className="w-3.5 h-3.5" />
-                {isPointerMode ? 'Done' : 'Add Pins'}
-              </button>
-            </div>
-          </div>
-          <div className="w-full h-80 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative">
-            {isPointerMode && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 bg-slate-900/80 text-white text-[10px] font-bold rounded-full backdrop-blur-sm pointer-events-none">
-                Click anywhere on the map to drop a pin
-              </div>
-            )}
-            <GeospatialMap
-              nodes={caseMapNodes}
-              routes={caseMapRoutes}
-              initialCenter={[56.1684, 25.5463]}
-              initialZoom={1.5}
-              className={`w-full h-full ${isPointerMode ? 'cursor-crosshair' : ''}`}
-              onMapClick={(lngLat) => {
-                if (isPointerMode) {
-                  setCustomPins(prev => [...prev, {
-                    id: `custom-pin-${Date.now()}`,
-                    lng: lngLat.lng,
-                    lat: lngLat.lat,
-                    color: selectedPinColor
-                  }]);
-                }
-              }}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#090e1a] space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🇮🇳</span>
-                <div>
-                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs">Origin Sender</h4>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Bengaluru, India</span>
-                </div>
-              </div>
-              <div className="text-xs space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">
-                <p>IP: <span className="font-mono font-semibold">103.21.244.88</span></p>
-                <p>ASN: <span className="font-mono">AS13335 (Cloudflare Inc.)</span></p>
-                <p>Latency: <span className="font-mono text-emerald-600 dark:text-emerald-400">42ms</span></p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#090e1a] space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🇸🇬</span>
-                <div>
-                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs">Intermediate Relay</h4>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Jurong East, Singapore</span>
-                </div>
-              </div>
-              <div className="text-xs space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">
-                <p>IP: <span className="font-mono font-semibold">45.117.12.34</span></p>
-                <p>ASN: <span className="font-mono">AS45899 (VNPT Corp)</span></p>
-                <p>Latency: <span className="font-mono text-emerald-600 dark:text-emerald-400">89ms</span></p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#090e1a] space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🇩🇪</span>
-                <div>
-                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs">Tor Exit & Final Egress</h4>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Frankfurt, Germany</span>
-                </div>
-              </div>
-              <div className="text-xs space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">
-                <p>IP: <span className="font-mono font-semibold text-rose-600 dark:text-rose-400">185.220.101.5</span></p>
-                <p>ASN: <span className="font-mono">AS205100 (Tor Exit Node)</span></p>
-                <p>Latency: <span className="font-mono text-amber-600 dark:text-amber-400">184ms</span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 12. HISTORICAL CONTEXT TAB */}
-      {activeTab === 'history' && (
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-4 transition-colors">
           <div className="border-b border-slate-100 dark:border-slate-800/70 pb-3">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">Historical Threat Correlations (3)</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Related cluster signatures and past campaign attacks in the CDGI SOC repository</p>
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">Observed Forensic Evidence</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Raw email artifacts, headers, and extracted indicators</p>
           </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#090e1a] hover:border-blue-400 dark:hover:border-sky-500 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between font-semibold text-slate-800 dark:text-slate-200">
-                <span>Campaign: "Invoice-Phish-Wave-DE"</span>
-                <span className="text-rose-600 dark:text-rose-400 font-bold">96% Similarity</span>
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 mt-1">
-                Shares identical German Tor Exit relay (185.220.101.5) and registrar profile observed on 11 Aug 2025.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#090e1a] hover:border-blue-400 dark:hover:border-sky-500 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between font-semibold text-slate-800 dark:text-slate-200">
-                <span>Cluster: "Lookalike Financial Brands"</span>
-                <span className="text-amber-600 dark:text-amber-400 font-bold">88% Similarity</span>
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 mt-1">
-                Domain naming syntax matches previous attacks mimicking Wells Fargo and Bank of America.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#090e1a] hover:border-blue-400 dark:hover:border-sky-500 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between font-semibold text-slate-800 dark:text-slate-200">
-                <span>Target Correlation: "Finance & Accounting Sector"</span>
-                <span className="text-blue-600 dark:text-sky-400 font-bold">81% Similarity</span>
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 mt-1">
-                Recipients across 4 different corporate mailboxes received duplicate invoice lure variations within 1 hour.
-              </p>
-            </div>
+          <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+{`Return-Path: <bounce@paypal1-secure.com>
+Received: from mail.paypal1-secure.com (185.220.101.5)
+ by mx.company.com with ESMTP id 9X29A78
+ for <user@company.com>; Tue, 12 Aug 2025 10:24:00 +0000
+Message-ID: <202508121024.PAYPAL-ALERT@paypal1-secure.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="--boundary_7812"
+X-Mailer: Python-smtplib/3.10
+Authentication-Results: mx.company.com;
+ spf=pass (sender IP is 185.220.101.5);
+ dkim=none;
+ dmarc=fail (p=reject)`}
           </div>
         </div>
       )}
 
-      {/* 13. REPORT TAB */}
+      {/* TIMELINE TAB */}
+      {activeTab === 'timeline' && (
+        <div className="bg-white dark:bg-[#070b14] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden transition-colors min-h-[600px] flex flex-col">
+          <InvestigationTimeline />
+        </div>
+      )}
+
+      {/* GRAPH TAB */}
+      {activeTab === 'graph' && (
+        <div className="bg-white dark:bg-[#070b14] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden transition-colors min-h-[700px] flex flex-col p-4">
+          <EntityRelationshipGraph />
+        </div>
+      )}
+
+      {/* THREAT INTEL TAB */}
+      {activeTab === 'threat-intel' && (
+        <div className="bg-white dark:bg-[#070b14] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden transition-colors min-h-[600px] flex flex-col">
+          <ThreatIntelPanel />
+        </div>
+      )}
+
+      {/* REPORT TAB */}
       {activeTab === 'report' && (
         <div id="case-forensic-report-container" className="space-y-4">
           <ForensicReportPage caseId={caseId} embedded={true} />
         </div>
       )}
+
+      {/* OVERLAYS & MODALS */}
+      <EntityProfileDrawer />
+      <EmailEntityModal />
+      <LinkCaseModal />
+      <MergeCampaignModal />
+      <EscalateModal />
     </div>
   );
 };

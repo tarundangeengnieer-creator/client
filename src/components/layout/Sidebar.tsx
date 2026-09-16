@@ -3,6 +3,7 @@ import { useUI, uiStore } from '../../stores/ui-store.ts';
 import { useCases } from '../../stores/cases-store.ts';
 import { useCurrentRole } from '../../stores/auth-store.ts';
 import { Role } from '../../features/auth/authConfig.ts';
+import { useCapabilities } from '../../features/auth/capabilities.ts';
 import { AshielderLogo } from '../ui/AshielderLogo.tsx';
 import {
   LayoutDashboard,
@@ -32,6 +33,7 @@ interface NavItem {
   icon: React.ReactNode;
   badge?: number | string;
   roles: Role[];
+  show?: boolean;
 }
 
 export const Sidebar: React.FC = () => {
@@ -40,21 +42,25 @@ export const Sidebar: React.FC = () => {
   const currentRole = useCurrentRole();
   const totalCases = casesState.cases.length;
 
-  // Primary Navigation items mapped to roles
+  const capabilities = useCapabilities();
+
+  // Primary Navigation items mapped to capabilities
   const allNavItems: NavItem[] = [
     {
       id: 'dashboard',
       path: '/overview',
       label: 'Security Overview',
       icon: <LayoutDashboard className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR, Role.IT_ADMIN, Role.FRAUD_IR, Role.ADMIN]
+      roles: [], // Not used anymore, relying on cap filters
+      show: true // Everyone sees overview
     },
     {
       id: 'soc-dashboard',
       path: '/soc',
       label: 'SOC Dashboard',
       icon: <LayoutDashboard className="w-4 h-4" />,
-      roles: [Role.SOC_ANALYST, Role.ADMIN]
+      roles: [],
+      show: capabilities.canViewSOCDashboard
     },
     {
       id: 'inbox',
@@ -62,133 +68,90 @@ export const Sidebar: React.FC = () => {
       label: 'Case Inbox',
       icon: <Inbox className="w-4 h-4" />,
       badge: totalCases,
-      roles: [Role.SOC_ANALYST, Role.INVESTIGATOR, Role.FRAUD_IR]
+      roles: [],
+      show: capabilities.canViewCases
     },
     {
       id: 'investigation',
       path: '/investigation',
       label: 'Investigation',
       icon: <Search className="w-4 h-4" />,
-      roles: [Role.SOC_ANALYST, Role.INVESTIGATOR, Role.FRAUD_IR]
+      roles: [],
+      show: capabilities.canCreateInvestigation
     },
     {
       id: 'evidence',
       path: '/evidence',
       label: 'Evidence Vault',
       icon: <Archive className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR, Role.FRAUD_IR]
+      roles: [],
+      show: capabilities.canViewEvidence
     },
     {
       id: 'threat-intel',
       path: '/hunting',
       label: 'Threat Intelligence',
       icon: <Globe className="w-4 h-4" />,
-      roles: [Role.SOC_ANALYST, Role.INVESTIGATOR]
+      roles: [],
+      show: capabilities.canViewThreatIntel
     },
     {
       id: 'reports',
       path: '/reports',
       label: 'Reports',
       icon: <Check className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR, Role.FRAUD_IR]
+      roles: [],
+      show: capabilities.canViewReports
     },
     {
       id: 'users',
       path: '/admin/users',
       label: 'Users & Roles',
       icon: <Users className="w-4 h-4" />,
-      roles: [Role.IT_ADMIN, Role.ADMIN]
+      roles: [],
+      show: capabilities.canManageUsers
     },
     {
       id: 'integrations',
       path: '/admin/integrations',
       label: 'Integrations',
       icon: <Link className="w-4 h-4" />,
-      roles: [Role.IT_ADMIN, Role.ADMIN]
+      roles: [],
+      show: capabilities.canManageSystem
     },
     {
       id: 'audit',
       path: '/admin/audit',
       label: 'Audit Logs',
       icon: <Activity className="w-4 h-4" />,
-      roles: [Role.IT_ADMIN, Role.ADMIN]
+      roles: [],
+      show: capabilities.canViewAudit
     },
     {
       id: 'settings',
       path: '/settings',
       label: 'System Settings',
       icon: <Settings className="w-4 h-4" />,
-      roles: [Role.IT_ADMIN, Role.ADMIN]
+      roles: [],
+      show: capabilities.canManageSystem
     },
   ];
 
-  // Specialized Investigator role navigation (Cases, Graph, Timeline, Evidence, Threat Intel, Reports)
-  const investigatorNavItems: NavItem[] = [
-    {
-      id: 'cases',
-      path: '/investigator',
-      label: 'Cases',
+  let navItems = allNavItems.filter((item) => item.show);
+
+  // If we are looking at a case, dynamically add the "Active Case" item for EVERYONE who can view cases
+  if (capabilities.canViewCases && ui.currentPath.startsWith('/case/')) {
+    navItems.splice(navItems.findIndex(i => i.id === 'inbox') + 1, 0, {
+      id: 'active-case-header',
+      path: ui.currentPath,
+      label: 'ACTIVE CASE',
       icon: <Briefcase className="w-4 h-4" />,
-      badge: 4,
-      roles: [Role.INVESTIGATOR],
-    },
-    {
-      id: 'graph',
-      path: '/investigator/graph',
-      label: 'Graph',
-      icon: <Network className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR],
-    },
-    {
-      id: 'timeline',
-      path: '/investigator/timeline',
-      label: 'Timeline',
-      icon: <Clock className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR],
-    },
-    {
-      id: 'evidence',
-      path: '/evidence',
-      label: 'Evidence',
-      icon: <Archive className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR],
-    },
-    {
-      id: 'threat-intel',
-      path: '/hunting',
-      label: 'Threat Intelligence',
-      icon: <Globe className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR],
-    },
-    {
-      id: 'reports',
-      path: '/reports',
-      label: 'Reports',
-      icon: <FileText className="w-4 h-4" />,
-      roles: [Role.INVESTIGATOR],
-    },
-  ];
-
-  const navItems =
-    currentRole === Role.INVESTIGATOR
-      ? investigatorNavItems
-      : allNavItems.filter((item) => currentRole && item.roles.includes(currentRole));
+      roles: [],
+      show: true
+    });
+  }
 
   const isCurrentActive = (itemPath: string) => {
-    if (currentRole === Role.INVESTIGATOR) {
-      if (itemPath === '/investigator') {
-        return (
-          ui.currentPath === '/' ||
-          ui.currentPath === '/overview' ||
-          ui.currentPath === '/investigator' ||
-          ui.currentPath === '/cases' ||
-          ui.currentPath === '/inbox' ||
-          ui.currentPath === '/investigation'
-        );
-      }
-      return ui.currentPath === itemPath;
-    }
-
     if (itemPath === '/overview' && (ui.currentPath === '/' || ui.currentPath === '/overview')) {
       return true;
     }

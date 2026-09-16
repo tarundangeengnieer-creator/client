@@ -58,28 +58,11 @@ export default function App() {
     if (pathname && pathname !== '/') {
       uiStore.navigate(pathname);
     } else {
-      uiStore.navigate(
-        auth.isAuthenticated
-          ? auth.currentRole === Role.INVESTIGATOR
-            ? '/investigator'
-            : auth.currentRole === Role.SOC_ANALYST
-              ? '/soc'
-              : '/overview'
-          : '/login'
-      );
+      uiStore.navigate(auth.isAuthenticated ? '/overview' : '/login');
     }
 
     const handlePopState = () => {
-      uiStore.navigate(
-        window.location.pathname ||
-          (auth.isAuthenticated
-            ? auth.currentRole === Role.INVESTIGATOR
-              ? '/investigator'
-              : auth.currentRole === Role.SOC_ANALYST
-                ? '/soc'
-                : '/overview'
-            : '/login')
-      );
+      uiStore.navigate(window.location.pathname || (auth.isAuthenticated ? '/overview' : '/login'));
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -97,13 +80,7 @@ export default function App() {
       uiStore.navigate('/login');
     }
     if (auth.isAuthenticated && ui.currentPath === '/login') {
-      uiStore.navigate(
-        auth.currentRole === Role.INVESTIGATOR
-          ? '/investigator'
-          : auth.currentRole === Role.SOC_ANALYST
-            ? '/soc'
-            : '/overview'
-      );
+      uiStore.navigate('/overview');
     }
   }, [auth.isAuthenticated, ui.currentPath, auth.currentRole]);
 
@@ -121,52 +98,7 @@ export default function App() {
 
     if (!auth.isAuthenticated) return null;
 
-    // Dedicated Investigator Role Route Handling
-    if (auth.currentRole === Role.INVESTIGATOR) {
-      if (ui.currentPath.startsWith('/investigator/graph')) {
-        return <GraphInvestigationPage />;
-      }
-      
-      if (ui.currentPath.startsWith('/investigator/timeline')) {
-        return <TimelinePage />;
-      }
-      
-      if (ui.currentPath.startsWith('/evidence')) {
-        return <EvidencePage />;
-      }
-
-      if (ui.currentPath.startsWith('/hunting') || ui.currentPath.startsWith('/threat-intel')) {
-        return <HuntingPlaceholder />;
-      }
-
-      if (
-        ui.currentPath === '/' ||
-        ui.currentPath === '/overview' ||
-        ui.currentPath.startsWith('/investigator') ||
-        ui.currentPath.startsWith('/cases') ||
-        ui.currentPath === '/inbox' ||
-        ui.currentPath.startsWith('/investigation')
-      ) {
-        return <InvestigatorWorkspace />;
-      }
-
-      if (ui.currentPath.startsWith('/reports') || ui.currentPath.startsWith('/report')) {
-        return <ForensicReportPage />;
-      }
-    }
-
-    // Dedicated SOC Analyst Role Route Handling
-    if (auth.currentRole === Role.SOC_ANALYST) {
-      if (
-        ui.currentPath === '/' ||
-        ui.currentPath === '/overview' ||
-        ui.currentPath.startsWith('/soc') ||
-        ui.currentPath.startsWith('/cases') ||
-        ui.currentPath === '/inbox'
-      ) {
-        return <SOCWorkspace />;
-      }
-    }
+    // Role-based route hijacking has been removed. All roles use standard routing.
 
     if (ui.currentPath.startsWith('/soc')) {
       if (!checkAccess('/soc')) return <ForbiddenPage />;
