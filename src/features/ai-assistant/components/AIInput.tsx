@@ -62,6 +62,8 @@ export const AIInput: React.FC<AIInputProps> = ({
         type="button"
         onClick={handleSubmit}
         disabled={!input.trim() || isProcessing}
+        aria-label="Send message"
+        title="Send message"
         className={cn(
           'shrink-0 w-8 h-8 flex items-center justify-center rounded-lg mb-0.5 mr-0.5 transition-colors',
           input.trim() && !isProcessing

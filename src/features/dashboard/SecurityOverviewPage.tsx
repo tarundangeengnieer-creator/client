@@ -63,7 +63,7 @@ export const SecurityOverviewPage: React.FC = () => {
       benign: { count: 5, pct: 19 },
       inconclusive: { count: 1, pct: 4 },
       posture: 'Elevated',
-      postureColor: 'text-rose-600',
+      postureColor: 'text-rose-700 dark:text-rose-400',
       postureBg: 'bg-transparent',
       postureBorder: 'border-rose-500/30',
       note: 'Active credential-phishing lures detected during business hours today.',
@@ -74,7 +74,7 @@ export const SecurityOverviewPage: React.FC = () => {
       benign: { count: 14, pct: 19 },
       inconclusive: { count: 3, pct: 4 },
       posture: 'Guarded',
-      postureColor: 'text-amber-600',
+      postureColor: 'text-amber-700 dark:text-amber-400',
       postureBg: 'bg-transparent',
       postureBorder: 'border-amber-500/30',
       note: 'Mid-week surge in deceptive banking notification emails contained.',
@@ -85,7 +85,7 @@ export const SecurityOverviewPage: React.FC = () => {
       benign: { count: 18, pct: 17 },
       inconclusive: { count: 5, pct: 5 },
       posture: 'Elevated',
-      postureColor: 'text-rose-600',
+      postureColor: 'text-rose-700 dark:text-rose-400',
       postureBg: 'bg-transparent',
       postureBorder: 'border-rose-500/30',
       note: 'Most recent increase is associated with credential-phishing and malicious URL activity.',
@@ -96,7 +96,7 @@ export const SecurityOverviewPage: React.FC = () => {
       benign: { count: 25, pct: 17 },
       inconclusive: { count: 6, pct: 4 },
       posture: 'Elevated',
-      postureColor: 'text-rose-600',
+      postureColor: 'text-rose-700 dark:text-rose-400',
       postureBg: 'bg-transparent',
       postureBorder: 'border-rose-500/30',
       note: '30-day baseline shows steady threat containment with 78% automated triage rate.',
@@ -157,15 +157,15 @@ export const SecurityOverviewPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto animate-fadeIn">
+    <div className="p-4 sm:p-6 lg:p-8 pb-24 sm:pb-28 lg:pb-32 max-w-7xl mx-auto animate-fadeIn">
       {/* Header with Title, Status and Aligned Primary Actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 mb-6 border-b border-slate-200/80 dark:border-slate-800/80">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <span>Active Operations Overview</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Welcome back, <span className="text-slate-700 dark:text-slate-200 font-medium">{username}</span> • CDGI SOC Partition • Security Posture is{' '}
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+            Welcome back, <span className="text-slate-800 dark:text-slate-100 font-medium">{username}</span> • CDGI SOC Partition • Security Posture is{' '}
             <span className={`font-semibold ${activeThreats.postureColor}`}>
               {activeThreats.posture}
             </span>{' '}
@@ -193,10 +193,10 @@ export const SecurityOverviewPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 1. UNIFIED SEGMENTED KPI METRIC RAIL (Option 1: Enterprise Connected Status Rail) */}
+      {/* 1. UNIFIED SEGMENTED KPI METRIC RAIL */}
       <div
         id="overview-kpi-metrics-grid"
-        className="bg-white dark:bg-[#0c1322] rounded-xl lg:rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs overflow-hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0"
+        className="bg-white dark:bg-[#0c1322] rounded-xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs overflow-hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0"
       >
         {/* Segment 1: ACTIVE TRIAGE QUEUE */}
         <div
@@ -214,27 +214,27 @@ export const SecurityOverviewPage: React.FC = () => {
               uiStore.navigate('/inbox');
             }
           }}
-          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-slate-50/80 dark:hover:bg-[#101d32] border-b sm:border-r lg:border-b-0 border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+          className="group relative p-6 lg:p-7 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-slate-50/80 dark:hover:bg-[#101d32] border-b sm:border-r lg:border-b-0 border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
         >
           <div>
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center transition-colors group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 group-hover:text-blue-600 dark:group-hover:text-sky-400 group-hover:border-blue-200 dark:group-hover:border-blue-800/60">
+              <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-sky-400 border border-blue-200/80 dark:border-blue-800/50 flex items-center justify-center transition-colors group-hover:bg-blue-100/70 dark:group-hover:bg-blue-900/50">
                 <Mail className="w-4.5 h-4.5" />
               </div>
               <div className="flex items-center gap-1">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                  +4 today
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/50 text-blue-700 dark:text-sky-400 text-xs font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  Triage Active
                 </span>
                 <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
 
             <div className="mt-4">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-blue-600 dark:text-sky-400 uppercase tracking-wider">
                 ACTIVE TRIAGE QUEUE
               </span>
-              <div className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 font-mono tracking-tight">
+              <div className="text-3xl font-extrabold text-blue-600 dark:text-sky-400 mt-1 font-mono tracking-tight">
                 24
               </div>
             </div>
@@ -245,7 +245,10 @@ export const SecurityOverviewPage: React.FC = () => {
               <div className="h-full bg-blue-600 dark:bg-sky-400 rounded-full" style={{ width: '100%' }} />
             </div>
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>Active backlog</span>
+              <span className="flex items-center gap-1">
+                <span>Active backlog</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">(+4 today)</span>
+              </span>
               <span className="font-semibold text-blue-600 dark:text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity">
                 View queue →
               </span>
@@ -269,7 +272,7 @@ export const SecurityOverviewPage: React.FC = () => {
               uiStore.navigate('/inbox');
             }
           }}
-          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-rose-50/40 dark:hover:bg-rose-950/20 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-500"
+          className="group relative p-6 lg:p-7 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-rose-50/40 dark:hover:bg-rose-950/20 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-500"
         >
           <div>
             <div className="flex items-center justify-between">
@@ -286,11 +289,11 @@ export const SecurityOverviewPage: React.FC = () => {
             </div>
 
             <div className="mt-4">
-              <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
                 HIGH-CONFIDENCE THREATS
               </span>
               <div className="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1 font-mono tracking-tight">
-                08
+                8
               </div>
             </div>
           </div>
@@ -324,7 +327,7 @@ export const SecurityOverviewPage: React.FC = () => {
               uiStore.navigate('/inbox');
             }
           }}
-          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500"
+          className="group relative p-6 lg:p-7 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500"
         >
           <div>
             <div className="flex items-center justify-between">
@@ -341,10 +344,10 @@ export const SecurityOverviewPage: React.FC = () => {
             </div>
 
             <div className="mt-4">
-              <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
                 SUSPICIOUS LURES
               </span>
-              <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1 font-mono tracking-tight">
+              <div className="text-3xl font-extrabold text-amber-700 dark:text-amber-400 mt-1 font-mono tracking-tight">
                 11
               </div>
             </div>
@@ -377,7 +380,7 @@ export const SecurityOverviewPage: React.FC = () => {
               uiStore.navigate('/investigation');
             }
           }}
-          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-sky-50/40 dark:hover:bg-sky-950/20 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
+          className="group relative p-6 lg:p-7 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-sky-50/40 dark:hover:bg-sky-950/20 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
         >
           <div>
             <div className="flex items-center justify-between">
@@ -394,11 +397,11 @@ export const SecurityOverviewPage: React.FC = () => {
             </div>
 
             <div className="mt-4">
-              <span className="text-[11px] font-bold text-blue-600 dark:text-sky-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-blue-600 dark:text-sky-400 uppercase tracking-wider">
                 ACTIVE IN-FLIGHT
               </span>
               <div className="text-3xl font-extrabold text-blue-600 dark:text-sky-400 mt-1 font-mono tracking-tight">
-                05
+                5
               </div>
             </div>
           </div>
@@ -408,7 +411,7 @@ export const SecurityOverviewPage: React.FC = () => {
               <div className="h-full bg-blue-600 dark:bg-sky-400 rounded-full" style={{ width: '65%' }} />
             </div>
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>Adaptive correlation</span>
+              <span>21% of queue • In-Flight</span>
               <span className="font-semibold text-blue-600 dark:text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity">
                 Workbench →
               </span>
@@ -442,14 +445,22 @@ export const SecurityOverviewPage: React.FC = () => {
                 </span>
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">Geolocation of Malicious Senders</h3>
               </div>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
-                aria-label="Select Geolocation timeframe"
-              >
-                <span>{selectedGeoPeriod}</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                {(['7d', '30d', '90d'] as const).map((period) => (
+                  <button
+                    key={period}
+                    type="button"
+                    onClick={() => setSelectedGeoPeriod(period)}
+                    className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                      selectedGeoPeriod === period
+                        ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
+                        : 'hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {period.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Interactive World Map with Real Geographic Contours and Attack Hotspots */}
@@ -534,25 +545,18 @@ export const SecurityOverviewPage: React.FC = () => {
 
             {/* Table with fixed column widths and clear breathing room */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs table-fixed min-w-[660px]">
-                <colgroup>
-                  <col className="w-20" />
-                  <col className="w-[34%]" />
-                  <col className="w-[26%]" />
-                  <col className="w-28" />
-                  <col className="w-24" />
-                  <col className="w-32" />
-                  <col className="w-10" />
-                </colgroup>
-                <thead className="bg-slate-50/70 dark:bg-[#090e1a] text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-100 dark:border-slate-800 uppercase tracking-wider text-[11px]">
+              <table className="w-full text-left text-xs min-w-[780px]">
+                <thead className="bg-slate-50/70 dark:bg-[#090e1a] text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-100 dark:border-slate-800 uppercase tracking-wider text-xs">
                   <tr>
-                    <th className="py-3 px-4">#</th>
-                    <th className="py-3 px-4">Subject</th>
-                    <th className="py-3 px-4">Sender</th>
-                    <th className="py-3 px-4">Verdict</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Received</th>
-                    <th className="py-3 px-2 text-right"></th>
+                    <th className="py-3 px-4 w-20">#</th>
+                    <th className="py-3 px-4 min-w-[220px]">Subject</th>
+                    <th className="py-3 px-4 min-w-[200px]">Sender</th>
+                    <th className="py-3 px-4 w-28">Verdict</th>
+                    <th className="py-3 px-4 w-24">Status</th>
+                    <th className="py-3 px-4 w-36">Received</th>
+                    <th className="py-3 px-2 text-right w-10">
+                      <span className="sr-only">Actions</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -562,10 +566,10 @@ export const SecurityOverviewPage: React.FC = () => {
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
                     <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2291</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Invoice Payment Update - Action Required">
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Invoice Payment Update - Action Required">
                       Invoice Payment Update - Action Required
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="support@paypal1-secure.com">
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="support@paypal1-secure.com">
                       support@paypal1-secure.com
                     </td>
                     <td className="py-3.5 px-4">
@@ -575,7 +579,7 @@ export const SecurityOverviewPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-[11px]">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-xs">
                         Open
                       </span>
                     </td>
@@ -591,10 +595,10 @@ export const SecurityOverviewPage: React.FC = () => {
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
                     <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2290</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Your Account Has Been Limited">
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Your Account Has Been Limited">
                       Your Account Has Been Limited
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="service@account-security.com">
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="service@account-security.com">
                       service@account-security.com
                     </td>
                     <td className="py-3.5 px-4">
@@ -604,7 +608,7 @@ export const SecurityOverviewPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-500/30 text-sky-600 dark:text-sky-400 font-semibold text-[11px]">
+                      <span className="px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-500/30 text-sky-600 dark:text-sky-400 font-semibold text-xs">
                         Investigating
                       </span>
                     </td>
@@ -620,10 +624,10 @@ export const SecurityOverviewPage: React.FC = () => {
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
                     <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2289</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Meeting Schedule for Next Week">
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Meeting Schedule for Next Week">
                       Meeting Schedule for Next Week
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="hr@company.com">
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="hr@company.com">
                       hr@company.com
                     </td>
                     <td className="py-3.5 px-4">
@@ -633,7 +637,7 @@ export const SecurityOverviewPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
                         Closed
                       </span>
                     </td>
@@ -649,10 +653,10 @@ export const SecurityOverviewPage: React.FC = () => {
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
                     <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2288</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Re: Project Documents">
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Re: Project Documents">
                       Re: Project Documents
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="tarun.dange@cdgi.edu.in">
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="tarun.dange@cdgi.edu.in">
                       tarun.dange@cdgi.edu.in
                     </td>
                     <td className="py-3.5 px-4">
@@ -662,7 +666,7 @@ export const SecurityOverviewPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-[11px]">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-xs">
                         Open
                       </span>
                     </td>
@@ -678,10 +682,10 @@ export const SecurityOverviewPage: React.FC = () => {
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
                     <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2287</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Password Reset Request">
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Password Reset Request">
                       Password Reset Request
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="no-reply@secure-login.net">
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="no-reply@secure-login.net">
                       no-reply@secure-login.net
                     </td>
                     <td className="py-3.5 px-4">
@@ -691,7 +695,7 @@ export const SecurityOverviewPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
                         Closed
                       </span>
                     </td>
@@ -718,14 +722,22 @@ export const SecurityOverviewPage: React.FC = () => {
               </span>
               <h3 className="font-bold text-slate-900 dark:text-white text-sm">Top Threat Types</h3>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
-              aria-label="Select threat types timeframe"
-            >
-              <span>{selectedTypePeriod}</span>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              {(['7d', '30d', '90d'] as const).map((period) => (
+                <button
+                  key={period}
+                  type="button"
+                  onClick={() => setSelectedTypePeriod(period)}
+                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                    selectedTypePeriod === period
+                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
+                      : 'hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  {period.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-3.5 mt-4 text-xs">
@@ -780,14 +792,22 @@ export const SecurityOverviewPage: React.FC = () => {
               </span>
               <h3 className="font-bold text-slate-900 dark:text-white text-sm">Top Targeted Brands</h3>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
-              aria-label="Select targeted brands timeframe"
-            >
-              <span>{selectedBrandPeriod}</span>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              {(['7d', '30d', '90d'] as const).map((period) => (
+                <button
+                  key={period}
+                  type="button"
+                  onClick={() => setSelectedBrandPeriod(period)}
+                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                    selectedBrandPeriod === period
+                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
+                      : 'hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  {period.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-3.5 mt-4 text-xs">
@@ -805,11 +825,11 @@ export const SecurityOverviewPage: React.FC = () => {
             {/* Microsoft */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 grid grid-cols-2 gap-0.5 p-1 rounded bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800">
-                  <div className="bg-rose-500 rounded-xs" />
-                  <div className="bg-emerald-500 rounded-xs" />
-                  <div className="bg-blue-500 rounded-xs" />
-                  <div className="bg-amber-400 rounded-xs" />
+                <div className="w-6 h-6 grid grid-cols-2 gap-0.5 p-1 rounded-md bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800">
+                  <div className="bg-rose-500 rounded-sm" />
+                  <div className="bg-emerald-500 rounded-sm" />
+                  <div className="bg-blue-500 rounded-sm" />
+                  <div className="bg-amber-400 rounded-sm" />
                 </div>
                 <span className="font-medium text-slate-800 dark:text-slate-200">Microsoft</span>
               </div>
@@ -830,7 +850,7 @@ export const SecurityOverviewPage: React.FC = () => {
             {/* DHL */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded bg-slate-100 dark:bg-[#0c1322] border border-amber-500/40 text-amber-500 dark:text-amber-400 font-extrabold text-[9px] flex items-center justify-center">
+                <div className="w-6 h-6 rounded-md bg-slate-100 dark:bg-[#0c1322] border border-amber-500/40 text-amber-500 dark:text-amber-400 font-extrabold text-xs flex items-center justify-center">
                   DHL
                 </div>
                 <span className="font-medium text-slate-800 dark:text-slate-200">DHL</span>

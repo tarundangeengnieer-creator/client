@@ -10,14 +10,15 @@ export const AIAssistantButton: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 print:hidden">
+    <div className="fixed bottom-5 right-6 z-40 print:hidden">
       <button
         type="button"
         onClick={() => uiStore.openCopilot(true)}
-        className="flex items-center justify-center w-14 h-14 rounded-full bg-[#08B4ED] text-white shadow-lg hover:bg-sky-400 hover:scale-105 hover:shadow-cyan-500/30 transition-all cursor-pointer ring-4 ring-[#08B4ED]/20 focus:outline-none"
-        title="Open AI Investigation Assistant"
+        className="flex items-center justify-center w-12 h-12 rounded-full bg-[#18BFFF] hover:bg-[#15aae6] ring-[6px] ring-[#18BFFF]/25 text-[#071A2B] shadow-lg transition-all cursor-pointer group"
+        title="Open AI Investigation Copilot"
+        aria-label="Open AI Investigation Copilot"
       >
-        <Sparkles className="w-6 h-6" />
+        <Sparkles className="w-5 h-5 transition-transform group-hover:rotate-12" strokeWidth={2.5} />
       </button>
     </div>
   );

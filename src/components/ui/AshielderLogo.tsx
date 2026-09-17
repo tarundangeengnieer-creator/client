@@ -201,7 +201,7 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
       {ShieldEmblemSvg}
       <div className="flex flex-col justify-center">
         <div className="flex items-center leading-none">
-          <span className={`${textClass} font-black text-[#0284c7] tracking-tight`}>A</span>
+          <span className={`${textClass} font-black ${theme === 'dark' ? 'text-sky-400' : 'text-sky-700'} tracking-tight`}>A</span>
           <span
             className={`${textClass} font-black tracking-tight ${
               theme === 'dark' ? 'text-white' : 'text-slate-950'
@@ -220,8 +220,8 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
 
         {/* Brand Tagline */}
         <span
-          className={`${taglineClass} font-semibold tracking-wider uppercase leading-normal whitespace-nowrap ${
-            theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+          className={`${taglineClass} font-semibold tracking-wide leading-normal whitespace-nowrap ${
+            theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
           }`}
         >
           {tagline}

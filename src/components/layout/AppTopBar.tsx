@@ -334,12 +334,16 @@ export const AppTopBar: React.FC = () => {
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70'
             }`}
             title="Notifications"
+            aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
             aria-expanded={showNotifications}
             aria-haspopup="true"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-rose-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center shadow-xs animate-pulse">
+              <span
+                className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-rose-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center shadow-xs"
+                aria-hidden="true"
+              >
                 {unreadCount}
               </span>
             )}
@@ -499,7 +503,7 @@ export const AppTopBar: React.FC = () => {
               {auth.currentTenant?.name || 'Acme Security Operations'}
             </span>
             <span className="text-slate-300 dark:text-slate-700 font-normal">|</span>
-            <span className="px-1.5 py-0.5 rounded font-mono font-bold text-[9.5px] uppercase tracking-wider bg-transparent text-sky-600 dark:text-sky-400 border border-sky-500/30">
+            <span className="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] uppercase tracking-wider bg-transparent text-sky-700 dark:text-sky-400 border border-sky-600/30 dark:border-sky-500/30">
               {auth.currentRole === Role.INVESTIGATOR ? 'Investigator' : (auth.currentRole || 'Investigator')}
             </span>
             <span className="text-slate-300 dark:text-slate-700 font-normal">|</span>

@@ -214,12 +214,12 @@ export const Sidebar: React.FC = () => {
                 title={ui.isSidebarCollapsed ? item.label : undefined}
                 className={`w-full flex items-center ${ui.isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-left cursor-pointer ${
                   active
-                    ? 'bg-slate-100 text-[#08B4ED] font-semibold border-l-2 border-[#08B4ED] dark:bg-[#0c1322] dark:text-[#08B4ED] dark:border-l-2 dark:border-[#08B4ED] dark:shadow-[0_0_12px_rgba(8,180,237,0.16)]'
+                    ? 'bg-slate-100 text-sky-700 font-semibold border-l-2 border-sky-700 dark:bg-[#0c1322] dark:text-[#08B4ED] dark:border-l-2 dark:border-[#08B4ED] dark:shadow-[0_0_12px_rgba(8,180,237,0.16)]'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-900/60'
                 }`}
               >
                 <div className={`flex items-center ${ui.isSidebarCollapsed ? 'justify-center' : 'gap-3'} min-w-0`}>
-                  <span className={active ? 'text-[#08B4ED]' : 'text-slate-500 dark:text-slate-400'}>
+                  <span className={active ? 'text-sky-700 dark:text-[#08B4ED]' : 'text-slate-500 dark:text-slate-400'}>
                     {item.icon}
                   </span>
                   {!ui.isSidebarCollapsed && (
@@ -230,8 +230,8 @@ export const Sidebar: React.FC = () => {
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full font-mono transition-colors shrink-0 ${
                       active
-                        ? 'bg-transparent border border-[#08B4ED]/40 text-[#08B4ED]'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60'
+                        ? 'bg-transparent border border-sky-700/40 text-sky-700 dark:border-[#08B4ED]/40 dark:text-[#08B4ED]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60'
                     }`}
                   >
                     {item.badge}
@@ -252,10 +252,10 @@ export const Sidebar: React.FC = () => {
               <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
                 AI-Powered Email Forensic Intelligence
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-normal">
                 Safer Institutions
               </p>
-              <p className="text-xs font-bold text-[#1a68ff] dark:text-sky-400 leading-normal">
+              <p className="text-xs font-bold text-blue-700 dark:text-sky-400 leading-normal">
                 Stronger India
               </p>
             </div>

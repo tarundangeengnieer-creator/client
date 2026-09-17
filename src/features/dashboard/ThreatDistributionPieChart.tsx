@@ -52,7 +52,7 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
       color: '#FF365C',
       hoverColor: '#E0264A',
       badgeBg: 'bg-transparent border border-rose-500/30',
-      badgeText: 'text-rose-600 dark:text-rose-400',
+      badgeText: 'text-rose-700 dark:text-rose-400',
     },
     {
       id: 'suspicious',
@@ -62,7 +62,7 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
       color: '#FFB800',
       hoverColor: '#E5A500',
       badgeBg: 'bg-transparent border border-amber-500/30',
-      badgeText: 'text-amber-600 dark:text-amber-400',
+      badgeText: 'text-amber-700 dark:text-amber-400',
     },
     {
       id: 'benign',
@@ -72,7 +72,7 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
       color: '#10C98A',
       hoverColor: '#0EB078',
       badgeBg: 'bg-transparent border border-emerald-500/30',
-      badgeText: 'text-emerald-600 dark:text-emerald-400',
+      badgeText: 'text-emerald-700 dark:text-emerald-400',
     },
     {
       id: 'inconclusive',
@@ -166,44 +166,48 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
 
           <div className="flex items-center gap-1.5">
             {/* Chart Type Toggle (Donut vs Pie) */}
-            <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
               <button
                 type="button"
                 onClick={() => setChartType('donut')}
                 title="Donut Chart View"
-                className={`p-1 rounded-md transition-all cursor-pointer ${
+                aria-label="Donut Chart View"
+                className={`inline-flex items-center gap-1 min-h-[26px] min-w-[26px] px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                   chartType === 'donut'
-                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
-                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
                 }`}
               >
                 <Disc className="w-3.5 h-3.5" />
+                <span>Donut</span>
               </button>
               <button
                 type="button"
                 onClick={() => setChartType('pie')}
                 title="Pie Chart View"
-                className={`p-1 rounded-md transition-all cursor-pointer ${
+                aria-label="Pie Chart View"
+                className={`inline-flex items-center gap-1 min-h-[26px] min-w-[26px] px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                   chartType === 'pie'
-                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
-                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
                 }`}
               >
                 <PieChartIcon className="w-3.5 h-3.5" />
+                <span>Pie</span>
               </button>
             </div>
 
             {/* Timeframe Switcher: 24h, 7d, 14d, 30d */}
-            <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+            <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
               {(['24h', '7d', '14d', '30d'] as const).map((r) => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => onPeriodChange(r)}
-                  className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                  className={`min-h-[26px] px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                     threatPeriod === r
-                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
-                      : 'hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-slate-400'
+                      ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-bold'
+                      : 'hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-slate-300'
                   }`}
                 >
                   {r.toUpperCase()}
@@ -286,10 +290,10 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
                     <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight font-mono leading-none block">
                       {totalCount}
                     </span>
-                    <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mt-1">
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block mt-1">
                       TOTAL CASES
                     </span>
-                    <span className="text-[9px] font-medium text-blue-600 dark:text-sky-400 block">
+                    <span className="text-[10px] font-semibold text-blue-700 dark:text-sky-400 block">
                       {threatPeriod}
                     </span>
                   </div>
@@ -354,7 +358,7 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
               {activeThreats.posture}
             </span>
           </div>
-          <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5 leading-snug">
+          <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5 leading-snug">
             {activeThreats.note}
           </p>
         </div>

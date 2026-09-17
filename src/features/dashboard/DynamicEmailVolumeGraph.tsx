@@ -379,7 +379,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
             y={geom.PADDING_TOP + 3}
             textAnchor="end"
             fontSize={isLarge ? '8.5' : '7'}
-            className="fill-slate-400 dark:fill-slate-500 font-mono font-semibold"
+            className="fill-slate-600 dark:fill-slate-400 font-mono font-semibold"
           >
             {geom.maxVal}
           </text>
@@ -388,7 +388,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
             y={geom.PADDING_TOP + geom.chartH / 2 + 2.5}
             textAnchor="end"
             fontSize={isLarge ? '8.5' : '7'}
-            className="fill-slate-400 dark:fill-slate-500 font-mono font-semibold"
+            className="fill-slate-600 dark:fill-slate-400 font-mono font-semibold"
           >
             {Math.round(geom.maxVal / 2)}
           </text>
@@ -397,7 +397,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
             y={geom.PADDING_TOP + geom.chartH + 1}
             textAnchor="end"
             fontSize={isLarge ? '8.5' : '7'}
-            className="fill-slate-400 dark:fill-slate-500 font-mono font-semibold"
+            className="fill-slate-600 dark:fill-slate-400 font-mono font-semibold"
           >
             0
           </text>
@@ -559,7 +559,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
       </div>
 
       {/* X-Axis Tick Labels */}
-      <div className={`flex justify-between pl-7 pr-3 text-slate-400 font-mono shrink-0 ${isLarge ? 'text-[10px] mt-2' : 'text-[9px] mt-1.5'}`}>
+      <div className={`flex justify-between pl-7 pr-3 text-slate-600 dark:text-slate-400 font-mono shrink-0 ${isLarge ? 'text-[10px] mt-2' : 'text-[9px] mt-1.5'}`}>
         {geom.points
           .filter((_, i, arr) => {
             if (arr.length <= (isLarge ? 12 : 6)) return true;
@@ -568,7 +568,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
           .map((p) => (
             <span
               key={p.index}
-              className={activePoint?.index === p.index ? 'text-blue-600 dark:text-sky-400 font-bold' : ''}
+              className={activePoint?.index === p.index ? 'text-blue-700 dark:text-sky-400 font-bold' : ''}
             >
               {p.label}
             </span>
@@ -583,10 +583,10 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
    */
   const renderHeader = (isLarge: boolean = false) => (
     <div className="pb-3 border-b border-slate-100 dark:border-slate-800/80 space-y-2.5">
-      {/* Top Row: Title, Badge, Subtitle & Top-Right Expand Button (Icon-only) */}
-      <div className="flex items-start justify-between gap-2">
+      {/* Top Row: Title, Badge, Subtitle & Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2">
-          <span className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-sky-500 flex items-center justify-center">
+          <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
             <Mail className={isLarge ? 'w-5 h-5' : 'w-4 h-4'} />
           </span>
           <div>
@@ -594,7 +594,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
               <h3 className={`font-bold text-slate-900 dark:text-white ${isLarge ? 'text-base' : 'text-sm'}`}>
                 Inbound Flow & Threat Telemetry
               </h3>
-              <span className="px-1.5 py-0.2 text-[9px] font-bold rounded uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">
+              <span className="px-1.5 py-0.2 text-xs font-semibold rounded uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">
                 MDO/SOC
               </span>
             </div>
@@ -604,7 +604,23 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
           </div>
         </div>
 
-        {/* Fullscreen Expand / Exit Button (Icon only, placed at top-right) */}
+        {/* Legend indicator for color-coded bars */}
+        <div className="hidden sm:flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600" />
+            <span>Clean</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span>Suspicious</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-rose-500" />
+            <span>Malicious</span>
+          </span>
+        </div>
+
+        {/* Fullscreen Expand / Exit Button (Icon only) */}
         <button
           type="button"
           onClick={(e) => {
@@ -613,7 +629,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
           }}
           title={isExpanded ? 'Close expanded view (Esc)' : 'Expand telemetry to full screen'}
           aria-label={isExpanded ? 'Exit full screen' : 'Expand full screen'}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700/80"
+          className="p-1.5 rounded-md text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700/80"
         >
           {isExpanded ? (
             <Minimize2 className={isLarge ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
@@ -624,19 +640,19 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
       </div>
 
       {/* Controls Row: Traffic Filter, View Mode Switcher and Timeframe Switcher */}
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        {/* Series Filter: All Traffic vs Threats Only */}
-        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-medium">
+      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
+        {/* Series Filter: All Traffic vs Threats Only with High-Contrast Active State */}
+        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setTrafficFilter('all');
             }}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
               trafficFilter === 'all'
-                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-slate-900 text-white dark:bg-sky-500 dark:text-slate-950 shadow-xs font-bold'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             All Traffic
@@ -647,10 +663,10 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
               e.stopPropagation();
               setTrafficFilter('threats');
             }}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
               trafficFilter === 'threats'
-                ? 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 shadow-2xs font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400'
+                ? 'bg-rose-600 text-white dark:bg-rose-500 dark:text-white shadow-xs font-bold'
+                : 'text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400'
             }`}
           >
             Threats Only
@@ -658,7 +674,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
         </div>
 
         {/* View Mode Switcher: Telemetry vs Trendline */}
-        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px]">
+        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold">
           <button
             type="button"
             onClick={(e) => {
@@ -666,13 +682,13 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
               setViewMode('telemetry');
             }}
             title="Telemetry Stacked Breakdown"
-            className={`flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+            className={`flex items-center gap-1 px-2 py-1 rounded-md cursor-pointer transition-colors ${
               viewMode === 'telemetry'
-                ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-bold'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <BarChart3 className="w-3 h-3" />
+            <BarChart3 className="w-3.5 h-3.5" />
             <span>Stacked</span>
           </button>
           <button
@@ -682,19 +698,19 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
               setViewMode('trend');
             }}
             title="Continuous Flow Curve"
-            className={`flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+            className={`flex items-center gap-1 px-2 py-1 rounded-md cursor-pointer transition-colors ${
               viewMode === 'trend'
-                ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-bold'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <TrendingUp className="w-3 h-3" />
+            <TrendingUp className="w-3.5 h-3.5" />
             <span>Curve</span>
           </button>
         </div>
 
         {/* Timeframe Switcher: 24h, 7d, 14d, 30d */}
-        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
           {(['24h', '7d', '14d', '30d'] as TimeRange[]).map((r) => (
             <button
               key={r}
@@ -704,10 +720,10 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
                 setTimeRange(r);
                 setHoveredIndex(null);
               }}
-              className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+              className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
                 timeRange === r
-                  ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-bold'
-                  : 'hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-slate-400'
+                  ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-bold'
+                  : 'hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-slate-300'
               }`}
             >
               {r.toUpperCase()}
@@ -771,28 +787,28 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
         <div className={`${isLarge ? 'text-base' : 'text-sm'} font-bold text-slate-900 dark:text-white font-mono leading-tight`}>
           {totals.totalEmails}
         </div>
-        <div className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Inbound Total</div>
+        <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Inbound Total</div>
       </div>
 
       <div>
         <div className={`${isLarge ? 'text-base' : 'text-sm'} font-bold text-rose-600 dark:text-rose-400 font-mono leading-tight`}>
           {totals.malicious}
         </div>
-        <div className="text-[9px] text-rose-700 dark:text-rose-400 font-medium">Malicious</div>
+        <div className="text-xs text-rose-600 dark:text-rose-400 font-medium mt-0.5">Malicious</div>
       </div>
 
       <div>
         <div className={`${isLarge ? 'text-base' : 'text-sm'} font-bold text-amber-600 dark:text-amber-400 font-mono leading-tight`}>
           {totals.suspicious}
         </div>
-        <div className="text-[9px] text-amber-700 dark:text-amber-400 font-medium">Suspicious</div>
+        <div className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-0.5">Suspicious</div>
       </div>
 
       <div>
         <div className={`${isLarge ? 'text-base' : 'text-sm'} font-bold text-emerald-600 dark:text-emerald-400 font-mono leading-tight`}>
           {totals.autoCleared}
         </div>
-        <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-medium">Auto-Mitigated</div>
+        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">Auto-Mitigated</div>
       </div>
     </div>
   );
@@ -844,7 +860,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="relative z-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-5 sm:p-7 flex flex-col justify-between select-none"
+              className="relative z-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl p-5 sm:p-7 flex flex-col justify-between select-none"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Top Close Control Bar */}
