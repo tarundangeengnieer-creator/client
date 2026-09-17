@@ -15,27 +15,41 @@ export const AlertQueue: React.FC = () => {
     }
   };
 
-  const getAuthBadge = (label: string, verdict: string) => {
-    switch (verdict) {
-      case 'PASS':
-        return (
-          <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-transparent text-emerald-600 dark:text-emerald-400 font-bold text-[9px] border border-emerald-500/30">
-            {label}:P
-          </span>
-        );
-      case 'FAIL':
-        return (
-          <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-transparent text-rose-600 dark:text-rose-400 font-bold text-[9px] border border-rose-500/30">
-            {label}:F
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-transparent text-slate-500 dark:text-slate-400 text-[9px] border border-slate-200 dark:border-slate-800">
-            {label}:{verdict[0]}
-          </span>
-        );
+  const getConsolidatedAuthStatus = (spf: string, dkim: string, dmarc: string) => {
+    const checks = [spf, dkim, dmarc];
+    const fails = checks.filter(v => v === 'FAIL').length;
+    const passes = checks.filter(v => v === 'PASS').length;
+    
+    if (fails > 0) {
+      return (
+        <span 
+          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400"
+          title={`Auth Failed: SPF=${spf}, DKIM=${dkim}, DMARC=${dmarc}`}
+        >
+          <X className="w-3 h-3" strokeWidth={3} />
+        </span>
+      );
     }
+    
+    if (passes === 3) {
+      return (
+        <span 
+          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
+          title={`All checks passed (SPF/DKIM/DMARC)`}
+        >
+          <Check className="w-3 h-3" strokeWidth={3} />
+        </span>
+      );
+    }
+
+    return (
+      <span 
+        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+        title={`Mixed/Neutral: SPF=${spf}, DKIM=${dkim}, DMARC=${dmarc}`}
+      >
+        <span className="text-xs font-bold leading-none">-</span>
+      </span>
+    );
   };
 
   const hasActiveFilters = filterSeverity !== 'ALL' || filterStatus !== 'ALL' || filterCategory !== 'ALL' || filterAgingBucket !== 'ALL';
@@ -44,9 +58,9 @@ export const AlertQueue: React.FC = () => {
     return (
       <div className="flex-1 p-6 text-center text-slate-500 bg-white dark:bg-[#070b14] border border-slate-200 dark:border-slate-800 rounded-lg">
         <AlertTriangle className="w-8 h-8 mx-auto text-amber-500 mb-2" />
-        <p className="font-bold text-xs text-slate-800 dark:text-slate-200">Alert Queue Unavailable</p>
+        <p className="font-bold text-xssss text-slate-800 dark:text-slate-200">Alert Queue Unavailable</p>
         <p className="text-[11px] mt-1">{errorQueue}</p>
-        <button onClick={() => socStore.fetchQueue()} className="mt-4 text-xs font-semibold text-blue-600 hover:underline cursor-pointer">Retry Connection</button>
+        <button onClick={() => socStore.fetchQueue()} className="mt-4 text-xssss font-semibold text-blue-600 hover:underline cursor-pointer">Retry Connection</button>
       </div>
     );
   }
@@ -56,7 +70,7 @@ export const AlertQueue: React.FC = () => {
       {/* Header with active filter chips */}
       <div className="px-4 py-2.5 bg-slate-50/90 dark:bg-[#0a0f1d] border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 select-none">
         <div className="flex items-center gap-2">
-          <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 tracking-tight">
             <ShieldAlert className="w-3.5 h-3.5 text-[#1a68ff]" />
             <span>Alert Triage Queue</span>
           </h3>
@@ -111,7 +125,7 @@ export const AlertQueue: React.FC = () => {
           </div>
         )}
 
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full text-left border-collapse text-xssss">
           <thead className="sticky top-0 bg-slate-100 dark:bg-[#0e1627] z-10 shadow-xs border-b border-slate-200 dark:border-slate-800 uppercase text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wider">
             <tr>
               <th className="px-3 py-2.5 font-semibold">Severity</th>
@@ -129,8 +143,8 @@ export const AlertQueue: React.FC = () => {
             {alerts.length === 0 && !isLoadingQueue && (
               <tr>
                 <td colSpan={9} className="py-12 text-center text-slate-500">
-                  <p className="font-semibold text-xs">No alerts currently match your filter criteria.</p>
-                  <button onClick={() => socStore.resetFilters()} className="mt-2 text-xs text-blue-600 font-bold hover:underline cursor-pointer">
+                  <p className="font-semibold text-xssss">No alerts currently match your filter criteria.</p>
+                  <button onClick={() => socStore.resetFilters()} className="mt-2 text-xssss text-blue-600 font-bold hover:underline cursor-pointer">
                     Clear all filters
                   </button>
                 </td>
@@ -200,9 +214,7 @@ export const AlertQueue: React.FC = () => {
                   {/* Auth signals: SPF DKIM DMARC */}
                   <td className="px-3 py-2 font-mono whitespace-nowrap">
                     <div className="flex items-center gap-1">
-                      {getAuthBadge('S', alert.auth_signals.spf)}
-                      {getAuthBadge('D', alert.auth_signals.dkim)}
-                      {getAuthBadge('M', alert.auth_signals.dmarc)}
+                      {getConsolidatedAuthStatus(alert.auth_signals.spf, alert.auth_signals.dkim, alert.auth_signals.dmarc)}
                     </div>
                   </td>
 
@@ -228,7 +240,7 @@ export const AlertQueue: React.FC = () => {
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
                       alert.status === 'NEW' ? 'bg-transparent text-blue-600 dark:text-blue-400 border-blue-500/30' :
                       alert.status === 'INVESTIGATING' ? 'bg-transparent text-amber-600 dark:text-amber-400 border-amber-500/30' :
-                      alert.status === 'ESCALATED' ? 'bg-transparent text-purple-600 dark:text-purple-400 border-purple-500/30' :
+                      alert.status === 'ESCALATED' ? 'bg-transparent text-xsssurple-600 dark:text-xsssurple-400 border-purple-500/30' :
                       alert.status === 'CLOSED_TRUE_POSITIVE' ? 'bg-transparent text-emerald-600 dark:text-emerald-400 border-emerald-500/30' :
                       'bg-transparent text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
                     }`}>

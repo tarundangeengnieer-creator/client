@@ -160,7 +160,7 @@ export const SOCWorkspace: React.FC = () => {
       <SOCCharts />
 
       {/* Operational Alert Triage Table – fills remaining vertical space */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden pb-4">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden pb-24">
         <AlertQueue />
       </div>
 

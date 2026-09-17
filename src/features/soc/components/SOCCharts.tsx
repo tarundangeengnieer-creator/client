@@ -118,7 +118,7 @@ export const SOCCharts: React.FC = () => {
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
           {actions[currentSlide]}
         </span>
       </div>
@@ -165,13 +165,13 @@ export const SOCCharts: React.FC = () => {
               </svg>
               {/* Center Text */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Total</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Total</span>
                 <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100 font-mono leading-none">{totalThreats}</span>
               </div>
             </div>
             
             {/* Legend */}
-            <div className="flex-1 flex flex-col justify-center ml-8 sm:ml-12 space-y-1 overflow-y-auto max-h-full pr-2">
+            <div className="flex-1 flex flex-col justify-start ml-4 space-y-1 overflow-y-auto max-h-full pr-2">
               {threatTrend.map((trend, i) => {
                 const color = CATEGORY_COLORS[trend.category] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
                 const isSelected = filterCategory === trend.category;
@@ -180,17 +180,17 @@ export const SOCCharts: React.FC = () => {
                   <div 
                     key={trend.category}
                     onClick={() => socStore.setFilters({ category: isSelected ? 'ALL' : trend.category })}
-                    className={`flex items-center justify-between text-[11px] cursor-pointer p-1.5 rounded transition-colors ${isSelected ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-900/40'}`}
+                    className={`flex items-center justify-start gap-3 text-xs cursor-pointer p-1.5 rounded transition-colors ${isSelected ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-900/40'}`}
                   >
-                    <div className="flex items-center gap-2 truncate">
+                    <div className="flex items-center gap-2 truncate min-w-[120px]">
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
                       <span className={`truncate ${isSelected ? 'font-bold text-slate-900 dark:text-slate-100' : 'font-medium text-slate-600 dark:text-slate-300'}`}>
                         {trend.category}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-2">
                       <span className="font-mono font-bold text-slate-700 dark:text-slate-300 text-xs">{trend.count}</span>
-                      <span className="text-[10px] text-slate-400 font-medium w-8 text-right">{percent}%</span>
+                      <span className="text-xs text-slate-400 font-medium w-8 text-right">{percent}%</span>
                     </div>
                   </div>
                 );

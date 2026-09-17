@@ -270,24 +270,24 @@ export const AppTopBar: React.FC = () => {
           </div>
         ) : isInbox ? (
           <div className="min-w-0">
-            <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight block">Case Inbox</span>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight block">Case Inbox</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-normal sm:whitespace-nowrap">Threat evaluation & operational triage queue</p>
           </div>
         ) : isOverview ? (
           <div className="min-w-0">
-            <span className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate block">Security Overview</span>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate block">Security Overview</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Email threat detection & forensic intelligence</p>
           </div>
         ) : ui.currentPath.startsWith('/soc') ? (
           <div className="min-w-0">
-            <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate block">SOC Dashboard</span>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate block">SOC Dashboard</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Email threat triage &amp; operational telemetry</p>
           </div>
         ) : (
           <div className="min-w-0">
-            <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight capitalize truncate block">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight capitalize truncate block">
               {ui.currentPath.replace('/', '')}
-            </span>
+            </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Forensic Workstation Module</p>
           </div>
         )}
