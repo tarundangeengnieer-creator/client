@@ -148,11 +148,11 @@ export const LoginPage: React.FC = () => {
           )}
 
           {/* Email input */}
-          <div className="relative">
+          <div className="group relative flex items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1627] focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-[#1a68ff] transition-all shadow-2xs overflow-hidden">
             <label htmlFor="auth-email-input" className="sr-only">
               Email address
             </label>
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            <div className="pl-3.5 pr-1.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-[#1a68ff] dark:group-focus-within:text-[#08B4ED] transition-colors shrink-0">
               <Mail className="w-4 h-4" />
             </div>
             <input
@@ -163,16 +163,16 @@ export const LoginPage: React.FC = () => {
               placeholder="you@company.com"
               required
               autoComplete="email"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1627] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#1a68ff] transition-all shadow-2xs"
+              className="w-full pl-1.5 pr-3.5 py-2.5 bg-transparent border-0 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0"
             />
           </div>
 
           {/* Password input */}
-          <div className="relative">
+          <div className="group relative flex items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1627] focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-[#1a68ff] transition-all shadow-2xs overflow-hidden">
             <label htmlFor="auth-password-input" className="sr-only">
               Password
             </label>
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            <div className="pl-3.5 pr-1.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-[#1a68ff] dark:group-focus-within:text-[#08B4ED] transition-colors shrink-0">
               <Lock className="w-4 h-4" />
             </div>
             <input
@@ -183,12 +183,12 @@ export const LoginPage: React.FC = () => {
               placeholder="Password"
               required
               autoComplete="current-password"
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1627] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#1a68ff] transition-all shadow-2xs"
+              className="w-full pl-1.5 pr-2 py-2.5 bg-transparent border-0 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-0"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+              className="pr-3.5 pl-2 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer shrink-0"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -244,7 +244,7 @@ export const LoginPage: React.FC = () => {
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-[#08B4ED] bg-cyan-50/10 hover:bg-[#08B4ED]/10 text-[#08B4ED] font-bold text-sm transition-all shadow-[0_0_15px_rgba(8,180,237,0.15)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mb-2 group"
           >
             <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
-            <span>Launch SIH 26106 Demo (Golden Path)</span>
+            <span>Try Demo</span>
           </button>
 
           {/* Divider */}

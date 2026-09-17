@@ -249,13 +249,13 @@ export const Sidebar: React.FC = () => {
         {!ui.isSidebarCollapsed && (
           <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-[#edf3f9]/70 dark:bg-slate-900/80 p-3.5 flex items-center justify-between gap-2 overflow-hidden shadow-2xs">
             <div className="min-w-0 pr-1">
-              <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight">
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
                 AI-Powered Email Forensic Intelligence
               </p>
-              <p className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
                 Safer Institutions
               </p>
-              <p className="text-[11px] font-bold text-[#1a68ff] dark:text-sky-400 leading-tight">
+              <p className="text-xs font-bold text-[#1a68ff] dark:text-sky-400 leading-normal">
                 Stronger India
               </p>
             </div>

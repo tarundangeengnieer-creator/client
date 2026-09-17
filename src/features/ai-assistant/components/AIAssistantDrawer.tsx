@@ -31,10 +31,10 @@ export const AIAssistantDrawer: React.FC = () => {
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-[13px] font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 Investigation Assistant
               </h2>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 Evidence-Grounded AI Copilot
               </p>
             </div>

@@ -108,9 +108,10 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [timeRange, setTimeRange] = useState<TimeRange>('14d');
   const [viewMode, setViewMode] = useState<ViewMode>('telemetry');
+  const [trafficFilter, setTrafficFilter] = useState<'all' | 'threats'>('all');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Series visibility defaults (filter button row removed per request)
+  // Series visibility defaults
   const visibleSeries = useMemo(() => ({
     baseline: true,
     malicious: true,
@@ -232,7 +233,10 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
     const chartW = viewW - PADDING_LEFT - PADDING_RIGHT;
     const chartH = viewH - PADDING_TOP - PADDING_BOTTOM;
 
-    const max = Math.max(...currentData.map((d) => d.totalEmails), 10);
+    const max = Math.max(
+      ...currentData.map((d) => (trafficFilter === 'threats' ? d.threats : d.totalEmails)),
+      10
+    );
     const maxVal = Math.ceil(max / 10) * 10;
 
     const count = currentData.length;
@@ -240,10 +244,11 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
     const points = currentData.map((point, index) => {
       const x = PADDING_LEFT + (index / (count - 1)) * chartW;
       const baselineY = baselineFloorY;
-      const y = PADDING_TOP + chartH - (point.totalEmails / maxVal) * chartH;
+      const targetVal = trafficFilter === 'threats' ? point.threats : point.totalEmails;
+      const y = PADDING_TOP + chartH - (targetVal / maxVal) * chartH;
 
       // Stacked column heights (Clean -> Suspicious -> Malicious)
-      const cleanH = (point.clean / maxVal) * chartH;
+      const cleanH = trafficFilter === 'threats' ? 0 : (point.clean / maxVal) * chartH;
       const suspH = (point.suspicious / maxVal) * chartH;
       const malicH = visibleSeries.malicious ? (point.malicious / maxVal) * chartH : 0;
 
@@ -295,12 +300,12 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
   const standardGeom = useMemo(() => {
     const calcH = Math.max(180, containerHeight > 0 ? containerHeight - 20 : 220);
     return calculateGeometry(Math.max(300, containerWidth), calcH);
-  }, [containerWidth, containerHeight, currentData, visibleSeries]);
+  }, [containerWidth, containerHeight, currentData, visibleSeries, trafficFilter]);
 
   // Expanded geometry (modal card)
   const expandedGeom = useMemo(() => {
     return calculateGeometry(Math.max(480, expandedWidth), 250);
-  }, [expandedWidth, currentData, visibleSeries]);
+  }, [expandedWidth, currentData, visibleSeries, trafficFilter]);
 
   // Mouse tracking
   const handleMouseMove = (
@@ -593,7 +598,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
                 MDO/SOC
               </span>
             </div>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Gateway ingress & automated threat interception
             </p>
           </div>
@@ -618,10 +623,42 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
         </button>
       </div>
 
-      {/* Controls Row: View Mode Switcher and Timeframe Switcher */}
-      <div className="flex items-center justify-end gap-2">
+      {/* Controls Row: Traffic Filter, View Mode Switcher and Timeframe Switcher */}
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {/* Series Filter: All Traffic vs Threats Only */}
+        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-medium">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setTrafficFilter('all');
+            }}
+            className={`px-2 py-0.5 rounded transition-colors ${
+              trafficFilter === 'all'
+                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-semibold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            All Traffic
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setTrafficFilter('threats');
+            }}
+            className={`px-2 py-0.5 rounded transition-colors ${
+              trafficFilter === 'threats'
+                ? 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 shadow-2xs font-semibold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400'
+            }`}
+          >
+            Threats Only
+          </button>
+        </div>
+
         {/* View Mode Switcher: Telemetry vs Trendline */}
-        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[10px]">
+        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px]">
           <button
             type="button"
             onClick={(e) => {

@@ -140,12 +140,12 @@ export const ThreatWorldMap: React.FC = () => {
       )}
 
       {/* Bottom Map Status Bar */}
-      <div className="px-3 py-1.5 bg-slate-100/70 dark:bg-[#090e1a] border-t border-slate-200/70 dark:border-slate-800/70 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono relative z-10">
+      <div className="px-3 py-1.5 bg-slate-100/70 dark:bg-[#090e1a] border-t border-slate-200/70 dark:border-slate-800/70 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-sans relative z-10">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-          <span>8 LIVE ORIGIN NODES LOCATED</span>
+          <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+          <span className="font-medium text-slate-700 dark:text-slate-300">8 live origin nodes located</span>
         </div>
-        <span className="text-slate-400 dark:text-slate-500">MERCATOR PROJECTION</span>
+        <span className="text-slate-400 dark:text-slate-500">Mercator projection</span>
       </div>
     </div>
   );

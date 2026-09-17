@@ -181,7 +181,7 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
           <span className="h-full w-1/3 bg-emerald-600" />
         </div>
         <span
-          className={`text-[9px] font-bold tracking-[0.14em] mt-1 uppercase ${
+          className={`text-xs font-semibold tracking-wider mt-1 uppercase ${
             theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
           }`}
         >
@@ -194,7 +194,7 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
   // Default 'full' variant: horizontal logo with emblem + typography + tricolor + tagline
   const textClass = size === 'sm' ? 'text-base' : size === 'lg' ? 'text-xl' : size === 'xl' ? 'text-2xl' : 'text-lg';
   const barClass = size === 'sm' ? 'w-10 h-0.5 my-0.5' : size === 'lg' ? 'w-14 h-1 my-1' : size === 'xl' ? 'w-16 h-1 my-1.5' : 'w-12 h-0.5 my-1';
-  const taglineClass = size === 'sm' ? 'text-[7.5px]' : size === 'lg' ? 'text-[9.5px]' : size === 'xl' ? 'text-[11px]' : 'text-[8.5px]';
+  const taglineClass = size === 'sm' ? 'text-[11px]' : size === 'lg' ? 'text-xs' : size === 'xl' ? 'text-sm' : 'text-xs';
 
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
@@ -220,7 +220,7 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
 
         {/* Brand Tagline */}
         <span
-          className={`${taglineClass} font-bold tracking-[0.08em] uppercase leading-tight whitespace-nowrap ${
+          className={`${taglineClass} font-semibold tracking-wider uppercase leading-normal whitespace-nowrap ${
             theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
           }`}
         >

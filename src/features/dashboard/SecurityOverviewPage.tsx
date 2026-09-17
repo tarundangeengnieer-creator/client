@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useUI, uiStore } from '../../stores/ui-store.ts';
 import { useAuth } from '../../stores/auth-store.ts';
 import { casesStore } from '../../stores/cases-store.ts';
+import { Verdict } from '../../contracts/backend.ts';
 import { DynamicEmailVolumeGraph } from './DynamicEmailVolumeGraph.tsx';
 import { ThreatWorldMap } from './ThreatWorldMap.tsx';
 import { ThreatDistributionPieChart } from './ThreatDistributionPieChart.tsx';
@@ -11,6 +12,7 @@ import {
   AlertTriangle,
   Clock,
   ArrowUpRight,
+  ChevronRight,
   TrendingUp,
   ChevronDown,
   ArrowRight,
@@ -156,20 +158,14 @@ export const SecurityOverviewPage: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto animate-fadeIn">
-      {/* Dynamic Header */}
-      <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <span>Active Operations Overview</span>
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Welcome back, {username}. Here is the real-time forensic snapshot.
-        </p>
-      </div>
-
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-200/80 dark:border-slate-800/80">
+      {/* Header with Title, Status and Aligned Primary Actions */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 mb-6 border-b border-slate-200/80 dark:border-slate-800/80">
         <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span>Active Operations Overview</span>
+          </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            CDGI SOC Partition • Security Posture is{' '}
+            Welcome back, <span className="text-slate-700 dark:text-slate-200 font-medium">{username}</span> • CDGI SOC Partition • Security Posture is{' '}
             <span className={`font-semibold ${activeThreats.postureColor}`}>
               {activeThreats.posture}
             </span>{' '}
@@ -177,7 +173,7 @@ export const SecurityOverviewPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 self-start md:self-center">
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0c1322] text-xs font-medium text-slate-600 dark:text-slate-400 shadow-2xs">
             <Clock className="w-3.5 h-3.5 text-slate-400" />
             <span>{currentDateFormatted}</span>
@@ -186,84 +182,237 @@ export const SecurityOverviewPage: React.FC = () => {
           <button
             type="button"
             onClick={() => uiStore.navigate('/inbox')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
           >
-            <Mail className="w-3.5 h-3.5 border border-white rounded-xs" />
+            <Mail className="w-3.5 h-3.5" />
             <span>Triage Queue</span>
-            <span className="ml-1 px-1.5 py-0.2 bg-blue-700/60 dark:bg-sky-950/80 border border-sky-400/40 text-sky-200 rounded-full text-[10px] font-mono font-bold">
+            <span className="ml-0.5 px-1.5 py-0.5 bg-blue-700/80 border border-blue-400/30 text-white rounded-full text-xs font-mono font-bold">
               24
             </span>
           </button>
         </div>
       </div>
 
-      {/* 1. TOP 4 METRIC CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 [&>*]:min-w-0">
-        {/* Card 1: OPEN CASES */}
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0c1322] border border-transparent flex items-center justify-center text-slate-800 dark:text-white transition-colors">
-              <Mail className="w-5 h-5" />
+      {/* 1. UNIFIED SEGMENTED KPI METRIC RAIL (Option 1: Enterprise Connected Status Rail) */}
+      <div
+        id="overview-kpi-metrics-grid"
+        className="bg-white dark:bg-[#0c1322] rounded-xl lg:rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs overflow-hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0"
+      >
+        {/* Segment 1: ACTIVE TRIAGE QUEUE */}
+        <div
+          id="kpi-card-open-cases"
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            casesStore.setVerdictFilter('ALL');
+            uiStore.navigate('/inbox');
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              casesStore.setVerdictFilter('ALL');
+              uiStore.navigate('/inbox');
+            }
+          }}
+          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-slate-50/80 dark:hover:bg-[#101d32] border-b sm:border-r lg:border-b-0 border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center transition-colors group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 group-hover:text-blue-600 dark:group-hover:text-sky-400 group-hover:border-blue-200 dark:group-hover:border-blue-800/60">
+                <Mail className="w-4.5 h-4.5" />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  +4 today
+                </span>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+              </div>
             </div>
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-transparent border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
-              <ArrowUpRight className="w-3.5 h-3.5" />
-              +4 today
-            </span>
+
+            <div className="mt-4">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                ACTIVE TRIAGE QUEUE
+              </span>
+              <div className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 font-mono tracking-tight">
+                24
+              </div>
+            </div>
           </div>
-          <div className="mt-4">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              OPEN CASES
-            </span>
-            <div className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">24</div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Active investigations</p>
+
+          <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-blue-600 dark:bg-sky-400 rounded-full" style={{ width: '100%' }} />
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Active backlog</span>
+              <span className="font-semibold text-blue-600 dark:text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                View queue →
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Card 2: MALICIOUS */}
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0c1322] border border-transparent flex items-center justify-center text-slate-800 dark:text-white transition-colors">
-              <ShieldAlert className="w-5 h-5" />
+        {/* Segment 2: HIGH-CONFIDENCE THREATS */}
+        <div
+          id="kpi-card-malicious"
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            casesStore.setVerdictFilter(Verdict.MALICIOUS);
+            uiStore.navigate('/inbox');
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              casesStore.setVerdictFilter(Verdict.MALICIOUS);
+              uiStore.navigate('/inbox');
+            }
+          }}
+          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-rose-50/40 dark:hover:bg-rose-950/20 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rose-500"
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/50 flex items-center justify-center transition-colors group-hover:bg-rose-100/70 dark:group-hover:bg-rose-900/50">
+                <ShieldAlert className="w-4.5 h-4.5" />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/50 text-rose-700 dark:text-rose-400 text-xs font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  Action Required
+                </span>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                HIGH-CONFIDENCE THREATS
+              </span>
+              <div className="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1 font-mono tracking-tight">
+                08
+              </div>
             </div>
           </div>
-          <div className="mt-4">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              MALICIOUS
-            </span>
-            <div className="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">08</div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">High-confidence threats</p>
+
+          <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-rose-600 dark:bg-rose-500 rounded-full" style={{ width: '33%' }} />
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>33% of queue • Contain</span>
+              <span className="font-semibold text-rose-600 dark:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                Filter threats →
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Card 3: SUSPICIOUS */}
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0c1322] border border-transparent flex items-center justify-center text-slate-800 dark:text-white transition-colors">
-              <AlertTriangle className="w-5 h-5" />
+        {/* Segment 3: SUSPICIOUS LURES */}
+        <div
+          id="kpi-card-suspicious"
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            casesStore.setVerdictFilter(Verdict.SUSPICIOUS);
+            uiStore.navigate('/inbox');
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              casesStore.setVerdictFilter(Verdict.SUSPICIOUS);
+              uiStore.navigate('/inbox');
+            }
+          }}
+          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-slate-800/80 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500"
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/50 flex items-center justify-center transition-colors group-hover:bg-amber-100/70 dark:group-hover:bg-amber-900/50">
+                <AlertTriangle className="w-4.5 h-4.5" />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  Needs Review
+                </span>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                SUSPICIOUS LURES
+              </span>
+              <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1 font-mono tracking-tight">
+                11
+              </div>
             </div>
           </div>
-          <div className="mt-4">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              SUSPICIOUS
-            </span>
-            <div className="text-3xl font-extrabold text-amber-500 dark:text-amber-400 mt-1">11</div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Requires analyst review</p>
+
+          <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-amber-500 dark:bg-amber-400 rounded-full" style={{ width: '46%' }} />
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>46% of queue • Phishing</span>
+              <span className="font-semibold text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                Review lures →
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Card 4: INVESTIGATING */}
-        <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0c1322] border border-transparent flex items-center justify-center text-slate-800 dark:text-white transition-colors">
-              <Clock className="w-5 h-5" />
+        {/* Segment 4: ACTIVE IN-FLIGHT */}
+        <div
+          id="kpi-card-investigating"
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            uiStore.navigate('/investigation');
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              uiStore.navigate('/investigation');
+            }
+          }}
+          className="group relative p-5 lg:p-6 flex flex-col justify-between text-left cursor-pointer transition-colors duration-150 hover:bg-sky-50/40 dark:hover:bg-sky-950/20 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500"
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800/50 flex items-center justify-center transition-colors group-hover:bg-sky-100/70 dark:group-hover:bg-sky-900/50">
+                <Clock className="w-4.5 h-4.5" />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-800/50 text-sky-700 dark:text-sky-400 text-xs font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                  In-Flight
+                </span>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <span className="text-[11px] font-bold text-blue-600 dark:text-sky-400 uppercase tracking-wider">
+                ACTIVE IN-FLIGHT
+              </span>
+              <div className="text-3xl font-extrabold text-blue-600 dark:text-sky-400 mt-1 font-mono tracking-tight">
+                05
+              </div>
             </div>
           </div>
-          <div className="mt-4">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              INVESTIGATING
-            </span>
-            <div className="text-3xl font-extrabold text-blue-600 dark:text-sky-400 mt-1">05</div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Adaptive analysis running</p>
+
+          <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-blue-600 dark:bg-sky-400 rounded-full" style={{ width: '65%' }} />
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Adaptive correlation</span>
+              <span className="font-semibold text-blue-600 dark:text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                Workbench →
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -281,184 +430,9 @@ export const SecurityOverviewPage: React.FC = () => {
         <DynamicEmailVolumeGraph />
       </div>
 
-      {/* 3. RECENT CASES & THREAT GEOLOCATION SECTION */}
+      {/* 3. THREAT GEOLOCATION & RECENT CASES SECTION (Swapped) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 lg:gap-6 [&>*]:min-w-0">
-        {/* Left: Recent Cases Table Card */}
-        <div className="xl:col-span-8 min-w-0 bg-white dark:bg-[#0c1322] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden flex flex-col justify-between transition-colors">
-          <div>
-            <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-              <FileText className="w-4 h-4" />
-            </span>
-            <h3 className="font-bold text-slate-900 dark:text-white text-sm">Recent Cases</h3>
-          </div>
-          <button
-            type="button"
-            onClick={() => uiStore.navigate('/inbox')}
-            className="text-xs font-semibold text-blue-600 dark:text-sky-400 hover:text-blue-700 dark:hover:text-sky-300 flex items-center gap-1 cursor-pointer"
-          >
-            <span>View all</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/70 dark:bg-[#090e1a] text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-100 dark:border-slate-800 uppercase tracking-wider text-[11px]">
-              <tr>
-                <th className="py-3 px-4">#</th>
-                <th className="py-3 px-4">Subject</th>
-                <th className="py-3 px-4">Sender</th>
-                <th className="py-3 px-4">Risk</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Received</th>
-                <th className="py-3 px-4 text-right"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {/* Row 1: A2291 */}
-              <tr
-                onClick={() => handleCaseClick('A2291')}
-                className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
-              >
-                <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400">A2291</td>
-                <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-xs truncate">
-                  Invoice Payment Update - Action Required
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">support@paypal1-secure.com</td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-rose-500" />
-                    <span>Malicious</span>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4">
-                  <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-[11px]">
-                    Open
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">12 Aug 2025, 10:24</td>
-                <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
-                  <MoreHorizontal className="w-4 h-4 ml-auto" />
-                </td>
-              </tr>
-
-              {/* Row 2: A2290 */}
-              <tr
-                onClick={() => handleCaseClick('A2290')}
-                className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
-              >
-                <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400">A2290</td>
-                <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-xs truncate">
-                  Your Account Has Been Limited
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">service@account-security.com</td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400 font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span>Suspicious</span>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4">
-                  <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-sky-500/30 text-sky-600 dark:text-sky-400 font-semibold text-[11px]">
-                    Investigating
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">12 Aug 2025, 09:18</td>
-                <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
-                  <MoreHorizontal className="w-4 h-4 ml-auto" />
-                </td>
-              </tr>
-
-              {/* Row 3: A2289 */}
-              <tr
-                onClick={() => handleCaseClick('A2289')}
-                className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
-              >
-                <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400">A2289</td>
-                <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-xs truncate">
-                  Meeting Schedule for Next Week
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">hr@company.com</td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span>Benign</span>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4">
-                  <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
-                    Closed
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">12 Aug 2025, 08:41</td>
-                <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
-                  <MoreHorizontal className="w-4 h-4 ml-auto" />
-                </td>
-              </tr>
-
-              {/* Row 4: A2288 */}
-              <tr
-                onClick={() => handleCaseClick('A2288')}
-                className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
-              >
-                <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400">A2288</td>
-                <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-xs truncate">
-                  Re: Project Documents
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">tarun.dange@cdgi.edu.in</td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />
-                    <span>Inconclusive</span>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4">
-                  <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-[11px]">
-                    Open
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">11 Aug 2025, 16:20</td>
-                <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
-                  <MoreHorizontal className="w-4 h-4 ml-auto" />
-                </td>
-              </tr>
-
-              {/* Row 5: A2287 */}
-              <tr
-                onClick={() => handleCaseClick('A2287')}
-                className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
-              >
-                <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400">A2287</td>
-                <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-xs truncate">
-                  Password Reset Request
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">no-reply@secure-login.net</td>
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-rose-500" />
-                    <span>Malicious</span>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4">
-                  <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
-                    Closed
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400">11 Aug 2025, 14:03</td>
-                <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
-                  <MoreHorizontal className="w-4 h-4 ml-auto" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        </div>
-      </div>
-
-        {/* Right: Geolocation of Malicious Senders Card */}
+        {/* Left: Geolocation of Malicious Senders Card */}
         <div className="xl:col-span-4 min-w-0 bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -470,7 +444,8 @@ export const SecurityOverviewPage: React.FC = () => {
               </div>
               <button
                 type="button"
-                className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
+                aria-label="Select Geolocation timeframe"
               >
                 <span>{selectedGeoPeriod}</span>
                 <ChevronDown className="w-3.5 h-3.5" />
@@ -536,6 +511,200 @@ export const SecurityOverviewPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Right: Recent Cases Table Card */}
+        <div className="xl:col-span-8 min-w-0 bg-white dark:bg-[#0c1322] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden flex flex-col justify-between transition-colors">
+          <div>
+            <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  <FileText className="w-4 h-4" />
+                </span>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Recent Cases</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => uiStore.navigate('/inbox')}
+                className="text-xs font-semibold text-blue-600 dark:text-sky-400 hover:text-blue-700 dark:hover:text-sky-300 flex items-center gap-1 cursor-pointer"
+              >
+                <span>View all</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Table with fixed column widths and clear breathing room */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs table-fixed min-w-[660px]">
+                <colgroup>
+                  <col className="w-20" />
+                  <col className="w-[34%]" />
+                  <col className="w-[26%]" />
+                  <col className="w-28" />
+                  <col className="w-24" />
+                  <col className="w-32" />
+                  <col className="w-10" />
+                </colgroup>
+                <thead className="bg-slate-50/70 dark:bg-[#090e1a] text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-100 dark:border-slate-800 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th className="py-3 px-4">#</th>
+                    <th className="py-3 px-4">Subject</th>
+                    <th className="py-3 px-4">Sender</th>
+                    <th className="py-3 px-4">Verdict</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Received</th>
+                    <th className="py-3 px-2 text-right"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {/* Row 1: A2291 */}
+                  <tr
+                    onClick={() => handleCaseClick('A2291')}
+                    className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
+                  >
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2291</td>
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Invoice Payment Update - Action Required">
+                      Invoice Payment Update - Action Required
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="support@paypal1-secure.com">
+                      support@paypal1-secure.com
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                        <span>Malicious</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-[11px]">
+                        Open
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025, 10:24</td>
+                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                      <MoreHorizontal className="w-4 h-4 ml-auto" />
+                    </td>
+                  </tr>
+
+                  {/* Row 2: A2290 */}
+                  <tr
+                    onClick={() => handleCaseClick('A2290')}
+                    className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
+                  >
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2290</td>
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Your Account Has Been Limited">
+                      Your Account Has Been Limited
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="service@account-security.com">
+                      service@account-security.com
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                        <span>Suspicious</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-500/30 text-sky-600 dark:text-sky-400 font-semibold text-[11px]">
+                        Investigating
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025, 09:18</td>
+                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                      <MoreHorizontal className="w-4 h-4 ml-auto" />
+                    </td>
+                  </tr>
+
+                  {/* Row 3: A2289 */}
+                  <tr
+                    onClick={() => handleCaseClick('A2289')}
+                    className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
+                  >
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2289</td>
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Meeting Schedule for Next Week">
+                      Meeting Schedule for Next Week
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="hr@company.com">
+                      hr@company.com
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        <span>Benign</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+                        Closed
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025, 08:41</td>
+                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                      <MoreHorizontal className="w-4 h-4 ml-auto" />
+                    </td>
+                  </tr>
+
+                  {/* Row 4: A2288 */}
+                  <tr
+                    onClick={() => handleCaseClick('A2288')}
+                    className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
+                  >
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2288</td>
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Re: Project Documents">
+                      Re: Project Documents
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="tarun.dange@cdgi.edu.in">
+                      tarun.dange@cdgi.edu.in
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
+                        <span>Inconclusive</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-[11px]">
+                        Open
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">11 Aug 2025, 16:20</td>
+                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                      <MoreHorizontal className="w-4 h-4 ml-auto" />
+                    </td>
+                  </tr>
+
+                  {/* Row 5: A2287 */}
+                  <tr
+                    onClick={() => handleCaseClick('A2287')}
+                    className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
+                  >
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2287</td>
+                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 truncate" title="Password Reset Request">
+                      Password Reset Request
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 truncate font-mono text-[11px]" title="no-reply@secure-login.net">
+                      no-reply@secure-login.net
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                        <span>Malicious</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+                        Closed
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">11 Aug 2025, 14:03</td>
+                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                      <MoreHorizontal className="w-4 h-4 ml-auto" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 4. BOTTOM 3 COLUMNS: TOP THREAT TYPES, TOP TARGETED BRANDS, AI ASSISTANT */}
@@ -551,7 +720,8 @@ export const SecurityOverviewPage: React.FC = () => {
             </div>
             <button
               type="button"
-              className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
+              aria-label="Select threat types timeframe"
             >
               <span>{selectedTypePeriod}</span>
               <ChevronDown className="w-3.5 h-3.5" />
@@ -612,7 +782,8 @@ export const SecurityOverviewPage: React.FC = () => {
             </div>
             <button
               type="button"
-              className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
+              aria-label="Select targeted brands timeframe"
             >
               <span>{selectedBrandPeriod}</span>
               <ChevronDown className="w-3.5 h-3.5" />
@@ -669,15 +840,27 @@ export const SecurityOverviewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Card 3: AI Assistant */}
+        {/* Card 3: AI Copilot Quick Assist */}
         <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
           <div>
-            <div className="flex items-center gap-2 pb-1">
-              <Sparkles className="w-4 h-4 text-blue-600 dark:text-sky-400" />
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">AI Assistant</h3>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-[#08B4ED]">
+                  <Sparkles className="w-4 h-4" />
+                </span>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">AI Copilot</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => uiStore.openCopilot(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-sky-400 hover:underline cursor-pointer"
+              >
+                <span>Launch Assistant</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
-              Ask questions about this data, search cases, or get insights.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-snug">
+              Quickly query live telemetry or launch the comprehensive Copilot drawer.
             </p>
 
             {/* Interactive Query Input */}
@@ -700,6 +883,7 @@ export const SecurityOverviewPage: React.FC = () => {
                 type="submit"
                 disabled={!aiPrompt.trim()}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md bg-blue-600 dark:bg-blue-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed"
+                aria-label="Submit query to AI"
               >
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
@@ -728,7 +912,7 @@ export const SecurityOverviewPage: React.FC = () => {
                 setAiPrompt('Summarize recent cases');
                 handleAiQuery('Summarize recent cases');
               }}
-              className="text-[11px] font-medium bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
+              className="text-xs font-medium bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
             >
               Summarize recent cases
             </button>
@@ -738,7 +922,7 @@ export const SecurityOverviewPage: React.FC = () => {
                 setAiPrompt('Show blocked domains');
                 handleAiQuery('Show blocked domains');
               }}
-              className="text-[11px] font-medium bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
+              className="text-xs font-medium bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
             >
               Show blocked domains
             </button>
@@ -748,7 +932,7 @@ export const SecurityOverviewPage: React.FC = () => {
                 setAiPrompt('What are top threats?');
                 handleAiQuery('What are top threats?');
               }}
-              className="text-[11px] font-medium bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
+              className="text-xs font-medium bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
             >
               What are top threats?
             </button>

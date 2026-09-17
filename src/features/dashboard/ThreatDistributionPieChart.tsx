@@ -160,7 +160,7 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
             </span>
             <div>
               <h3 className="font-bold text-slate-900 dark:text-white text-sm">Threat Distribution</h3>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">Verdicts by classification</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Verdicts by classification</p>
             </div>
           </div>
 
