@@ -261,6 +261,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-cover"
+          data-pdf-section="sec-cover"
           className="mb-8 scroll-mt-24">
           {/* Header Row */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4">
@@ -346,6 +347,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-abstract"
+          data-pdf-section="sec-abstract"
           className={`mb-8 p-4 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 transition-all ${
             highlightedId === 'sec-abstract' ? 'ring-2 ring-blue-500' : ''
           } scroll-mt-24`}
@@ -369,6 +371,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-1-0"
+          data-pdf-section="sec-1-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-1-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -430,6 +433,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-2-0"
+          data-pdf-section="sec-2-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-2-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -544,6 +548,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-3-0"
+          data-pdf-section="sec-3-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-3-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -617,6 +622,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-4-0"
+          data-pdf-section="sec-4-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-4-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -705,6 +711,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-5-0"
+          data-pdf-section="sec-5-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-5-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -780,6 +787,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-6-0"
+          data-pdf-section="sec-6-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-6-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -840,6 +848,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-7-0"
+          data-pdf-section="sec-7-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-7-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -943,6 +952,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-8-0"
+          data-pdf-section="sec-8-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-8-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1011,6 +1021,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-9-0"
+          data-pdf-section="sec-9-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-9-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1090,6 +1101,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-10-0"
+          data-pdf-section="sec-10-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-10-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1172,6 +1184,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-11-0"
+          data-pdf-section="sec-11-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-11-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1246,6 +1259,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-12-0"
+          data-pdf-section="sec-12-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-12-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1313,6 +1327,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-13-0"
+          data-pdf-section="sec-13-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-13-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1388,6 +1403,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-14-0"
+          data-pdf-section="sec-14-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-14-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1487,6 +1503,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-15-0"
+          data-pdf-section="sec-15-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-15-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1553,6 +1570,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-16-0"
+          data-pdf-section="sec-16-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-16-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1616,6 +1634,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-17-0"
+          data-pdf-section="sec-17-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-17-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           } scroll-mt-24`}
@@ -1646,6 +1665,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             ======================================================================= */}
         <section
           id="sec-18-0"
+          data-pdf-section="sec-18-0"
           className={`mb-10 transition-all ${
             highlightedId === 'sec-18-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
           }`}

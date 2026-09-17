@@ -80,142 +80,289 @@ export function downloadEvidenceManifest(d: any): void {
   URL.revokeObjectURL(url);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  A2 PDF EXPORT — Section-per-page architecture
+//
+//  A2 paper  : 420 mm × 594 mm (portrait)
+//  Margins   : 12 mm each side  →  usable area 396 mm × 570 mm
+//  Capture W : 1587 px  (420 mm @ 96 dpi)
+//  Pixel ratio: 2 ×  (high-DPI / crisp)
+//  Format    : PNG (lossless, forensic-grade)
+//  Grouping  : Short sections (height < 30 % of A2 content height) are
+//              stacked onto the same page with the next section until full.
+//  Footer    : Repeated on every page — Case ID • Page N of N
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A2 dimensions & margins (all mm unless suffixed _PX) */
+const A2_W_MM   = 420;
+const A2_H_MM   = 594;
+const MARGIN_MM = 12;
+const CONTENT_W_MM = A2_W_MM - MARGIN_MM * 2;  // 396 mm
+const CONTENT_H_MM = A2_H_MM - MARGIN_MM * 2;  // 570 mm
+
+/** DOM pixel width for captures (420 mm @ 96 dpi ≈ 1587 px). */
+const CAPTURE_W_PX = 1587;
+
+/** Sections shorter than this fraction of a page may share the page. */
+const GROUP_THRESHOLD_FRAC = 0.30;
+
 /**
- * Generates and downloads the full multi-page PDF using html-to-image & jsPDF.
+ * Draws a footer line + text on the current jsPDF page.
+ */
+function addPageFooter(
+  pdf: any,
+  caseId: string,
+  pageNum: number,
+  totalPages: number
+): void {
+  const pw = pdf.internal.pageSize.getWidth() as number;
+  const ph = pdf.internal.pageSize.getHeight() as number;
+  const y  = ph - MARGIN_MM + 2;
+
+  pdf.setDrawColor(160, 160, 160);
+  pdf.setLineWidth(0.25);
+  pdf.line(MARGIN_MM, y, pw - MARGIN_MM, y);
+
+  pdf.setFontSize(7);
+  pdf.setTextColor(130, 130, 130);
+  pdf.text(
+    `ASHIELDER FORENSICS  •  CASE ${caseId}  •  CONFIDENTIAL / DEMO`,
+    MARGIN_MM,
+    y + 4
+  );
+  pdf.text(
+    `Page ${pageNum} of ${totalPages}`,
+    pw - MARGIN_MM,
+    y + 4,
+    { align: 'right' }
+  );
+  // Reset text color for next operations
+  pdf.setTextColor(0, 0, 0);
+}
+
+/**
+ * Captures one DOM element as a high-DPI PNG canvas.
+ * Temporarily expands it to CAPTURE_W_PX for consistent layout.
+ */
+async function captureSectionCanvas(el: HTMLElement): Promise<HTMLCanvasElement> {
+  const savedStyle = el.getAttribute('style') ?? '';
+
+  el.style.cssText = [
+    `width: ${CAPTURE_W_PX}px !important`,
+    'max-width: none !important',
+    'margin: 0 !important',
+    'box-shadow: none !important',
+    'border-radius: 4px !important',
+    'padding: 24px !important',
+  ].join('; ');
+
+  // Two animation frames — enough for Tailwind to reflow
+  await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+  const canvas = await toCanvas(el, {
+    pixelRatio: 2,
+    backgroundColor: '#ffffff',
+    fontEmbedCSS: '',
+    width: CAPTURE_W_PX,
+    style: {
+      width: `${CAPTURE_W_PX}px`,
+      maxWidth: 'none',
+      margin: '0',
+    },
+  });
+
+  // Restore
+  if (savedStyle) {
+    el.setAttribute('style', savedStyle);
+  } else {
+    el.removeAttribute('style');
+  }
+
+  return canvas;
+}
+
+/**
+ * Converts a canvas height (at CAPTURE_W_PX, pixelRatio 2) to mm on the PDF page.
+ * canvas.width  = CAPTURE_W_PX * 2  (because pixelRatio = 2)
+ * CONTENT_W_MM  = 396 mm
+ */
+function canvasHeightToMm(canvas: HTMLCanvasElement): number {
+  // canvas.width is already the physical pixel width (CAPTURE_W_PX * 2 = 3174)
+  return (canvas.height / canvas.width) * CONTENT_W_MM;
+}
+
+/**
+ * Places one canvas image onto the current PDF page, centred within the
+ * content area starting at `topOffsetMm` from the top margin.
+ * Returns the mm height consumed.
+ */
+function placeCanvas(
+  pdf: any,
+  canvas: HTMLCanvasElement,
+  topOffsetMm: number
+): number {
+  const imgData   = canvas.toDataURL('image/png');
+  const imgH_mm   = canvasHeightToMm(canvas);
+
+  // If the section is taller than the usable content area, scale it down
+  // proportionally so it always fits on a single A2 page.
+  const maxH = CONTENT_H_MM - topOffsetMm;
+  const finalH = Math.min(imgH_mm, maxH);
+  const finalW = (finalH / imgH_mm) * CONTENT_W_MM;
+  const xOffset = MARGIN_MM + (CONTENT_W_MM - finalW) / 2;
+
+  pdf.addImage(imgData, 'PNG', xOffset, MARGIN_MM + topOffsetMm, finalW, finalH);
+  return finalH;
+}
+
+/**
+ * Generates and downloads a multi-page A2 PDF.
+ * Each `[data-pdf-section]` element gets its own page (short sections
+ * are grouped with the next one to avoid near-empty pages).
  */
 export async function downloadPdfReport(
   elementId: string = 'exact-forensic-report-main',
   caseId: string,
   onProgress?: (msg: string) => void,
-  caseData?: any,
-  investigation?: any
+  _caseData?: any,
+  _investigation?: any
 ): Promise<boolean> {
-  onProgress?.('Initializing DOM capture...');
-  
+  onProgress?.('Initializing A2 PDF export…');
+
   try {
     const element = document.getElementById(elementId);
     if (!element) {
       throw new Error(`Element with id ${elementId} not found`);
     }
 
-    onProgress?.('Compiling A4 paginated PDF document...');
-    
-    // Ensure Light Mode for Professional Print Output
+    // ── 1. Switch to light mode for clean white-background capture ──────────
     const htmlElement = document.documentElement;
     const wasDark = htmlElement.classList.contains('dark');
     if (wasDark) htmlElement.classList.remove('dark');
 
-    // Force element to 1024px so measurements match the upcoming canvas capture
-    const originalElementCssText = element.style.cssText;
-    element.style.cssText = `width: 1024px !important; max-width: none !important; margin: 0 !important; position: relative !important;`;
+    // ── 2. Expand outer wrapper so section widths lay out at A2 size ────────
+    const origContainerStyle = element.getAttribute('style') ?? '';
+    element.style.cssText = [
+      `width: ${CAPTURE_W_PX}px !important`,
+      'max-width: none !important',
+      'margin: 0 !important',
+      'padding: 0 !important',
+      'box-shadow: none !important',
+      'border: none !important',
+      'border-radius: 0 !important',
+    ].join('; ');
 
-    // Wait a brief tick for Tailwind CSS variables and layout to settle
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    // Brief settle time for CSS reflow
+    await new Promise<void>((r) => setTimeout(r, 120));
 
-    // --- SMART PAGINATION LOGIC ---
-    const PDF_WIDTH_PX = 1024;
-    const A4_ASPECT = 297 / 210;
-    const PAGE_HEIGHT_PX = PDF_WIDTH_PX * A4_ASPECT; // ~1448.23
+    // ── 3. Collect all <section data-pdf-section> elements ──────────────────
+    const sections = Array.from(
+      element.querySelectorAll<HTMLElement>('[data-pdf-section]')
+    );
 
-    const children = Array.from(element.children) as HTMLElement[];
-    const originalMargins = new Map<HTMLElement, string>();
-    
-    // Clear margins initially for accurate base calculation
-    children.forEach(c => {
-      originalMargins.set(c, c.style.marginTop);
-      c.style.marginTop = ''; 
-    });
-
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
-      const parentRect = element.getBoundingClientRect();
-      const rect = child.getBoundingClientRect();
-      
-      const childTop = rect.top - parentRect.top;
-      const childHeight = rect.height;
-      const childBottom = childTop + childHeight;
-      
-      const currentPage = Math.floor(childTop / PAGE_HEIGHT_PX);
-      const pageBottom = (currentPage + 1) * PAGE_HEIGHT_PX;
-      
-      // If element straddles the page break AND fits on a single page
-      if (childBottom > pageBottom && childHeight < PAGE_HEIGHT_PX * 0.85) {
-        const pushAmount = pageBottom - childTop + 40; // 40px top padding for calculative space
-        const currentMargin = parseFloat(window.getComputedStyle(child).marginTop) || 0;
-        child.style.marginTop = `${currentMargin + pushAmount}px`;
-      }
+    if (sections.length === 0) {
+      throw new Error('No [data-pdf-section] elements found inside report container.');
     }
-    // --- END SMART PAGINATION LOGIC ---
 
-    const canvas = await toCanvas(element, {
-      pixelRatio: 2,
-      backgroundColor: '#ffffff',
-      fontEmbedCSS: '', // Bypass auto-font fetching if CORS errors still arise
-      width: 1024,
-      style: {
-        width: '1024px',
-        maxWidth: 'none', // Override Tailwind's max-w-4xl
-        margin: '0',      // Remove mx-auto centering for clean capture
-      }
-    });
+    onProgress?.(`Capturing ${sections.length} sections for A2 PDF…`);
 
-    // Restore DOM to its original state
-    children.forEach(c => c.style.marginTop = originalMargins.get(c) || '');
-    element.style.cssText = originalElementCssText;
+    // ── 4. Capture every section canvas + measure height ────────────────────
+    type SectionCapture = { id: string; canvas: HTMLCanvasElement; heightMm: number };
+    const captures: SectionCapture[] = [];
+
+    for (let i = 0; i < sections.length; i++) {
+      const sec = sections[i];
+      const id = sec.getAttribute('data-pdf-section') ?? `section-${i}`;
+      onProgress?.(`  Rendering section ${i + 1}/${sections.length}: ${id}…`);
+      const canvas = await captureSectionCanvas(sec);
+      captures.push({ id, canvas, heightMm: canvasHeightToMm(canvas) });
+    }
+
+    // ── 5. Restore DOM ───────────────────────────────────────────────────────
+    if (origContainerStyle) {
+      element.setAttribute('style', origContainerStyle);
+    } else {
+      element.removeAttribute('style');
+    }
     if (wasDark) htmlElement.classList.add('dark');
 
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
-    
+    // ── 6. Group captures into pages ─────────────────────────────────────────
+    //  A "short" section is one whose height is < GROUP_THRESHOLD_FRAC of
+    //  CONTENT_H_MM.  Greedily stack consecutive short sections onto the same
+    //  page as long as they fit, then flush to a new page.
+    type PdfPage = SectionCapture[];
+    const pages: PdfPage[] = [];
+    let current: PdfPage = [];
+    let currentHeight = 0;
+    const GAP_MM = 6; // vertical gap between stacked sections on same page
+
+    for (const cap of captures) {
+      const isShort  = cap.heightMm < CONTENT_H_MM * GROUP_THRESHOLD_FRAC;
+      const needed   = currentHeight + (current.length > 0 ? GAP_MM : 0) + cap.heightMm;
+      const wouldFit = needed <= CONTENT_H_MM;
+
+      if (current.length === 0) {
+        current.push(cap);
+        currentHeight = cap.heightMm;
+      } else if (isShort && wouldFit) {
+        current.push(cap);
+        currentHeight += GAP_MM + cap.heightMm;
+      } else {
+        pages.push(current);
+        current = [cap];
+        currentHeight = cap.heightMm;
+      }
+    }
+    if (current.length > 0) pages.push(current);
+
+    onProgress?.(`Building ${pages.length}-page A2 PDF…`);
+
+    // ── 7. Build PDF ─────────────────────────────────────────────────────────
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: 'a2',   // 420 × 594 mm
     });
-    
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    
-    const imgHeightInMm = (imgHeight * pdfWidth) / imgWidth;
-    let heightLeftInMm = imgHeightInMm;
-    let position = 0;
 
-    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeightInMm);
-    heightLeftInMm -= pdfHeight;
+    const totalPages = pages.length;
 
-    while (heightLeftInMm > 0) {
-      position -= pdfHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeightInMm);
-      heightLeftInMm -= pdfHeight;
+    for (let p = 0; p < totalPages; p++) {
+      if (p > 0) pdf.addPage();
+
+      let cursorMm = 0; // offset from top of content area (inside margins)
+
+      for (const cap of pages[p]) {
+        placeCanvas(pdf, cap.canvas, cursorMm);
+        cursorMm += canvasHeightToMm(cap.canvas) + GAP_MM;
+      }
+
+      addPageFooter(pdf, caseId, p + 1, totalPages);
     }
 
-    pdf.save(`ASHIELDER-Forensic-Report-CASE-${caseId}.pdf`);
-    onProgress?.('Download complete.');
-    
-    // Trigger mock endpoint request
+    // ── 8. Save ──────────────────────────────────────────────────────────────
+    pdf.save(`ASHIELDER-Forensic-Report-CASE-${caseId}-A2.pdf`);
+    onProgress?.('A2 PDF download complete.');
+
+    // Trigger mock endpoint (rate-limit requirement)
     try {
       await apiClient.get(`/case/${caseId}`);
-    } catch (e: any) {
-      if (e.name === 'RateLimitError' || e?.status === 429 || (e.message && e.message.includes('429'))) {
-        throw new Error(`Rate limit exceeded for /case/${caseId} endpoint`);
-      } else {
-        throw new Error(`Rate limit exceeded for /case/${caseId} endpoint`); // Force Rate Limit for requirements
-      }
+    } catch (_e: any) {
+      throw new Error(`Rate limit exceeded for /case/${caseId} endpoint`);
     }
-    
+
     return true;
   } catch (error) {
-    console.error('PDF generation error:', error);
+    console.error('A2 PDF generation error:', error);
     if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
-       throw error; 
+      throw error;
     }
-    onProgress?.('Error rendering PDF. Using browser print dialog as fallback...');
+    onProgress?.('Error rendering PDF. Falling back to browser print dialog…');
     window.print();
     return false;
   }
 }
+
+
 
 /**
  * Downloads a complete Forensic Evidence Package (.ZIP)
