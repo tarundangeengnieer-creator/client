@@ -214,7 +214,7 @@ export const CaseTableRow: React.FC<CaseTableRowProps> = memo(
           </td>
 
           {/* Actions */}
-          <td className="w-16 px-3 text-right">
+          <td className="w-20 px-3 pr-4 sm:pr-6 text-right">
             <button
               type="button"
               onClick={(e) => {
@@ -222,7 +222,8 @@ export const CaseTableRow: React.FC<CaseTableRowProps> = memo(
                 onQuickPeek(caseItem.id, e);
               }}
               title="Quick Peek (Space)"
-              className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              aria-label="Quick peek case details"
+              className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <Eye className="w-4 h-4" />
             </button>
@@ -322,7 +323,7 @@ export const CaseTableRow: React.FC<CaseTableRowProps> = memo(
           </td>
 
           {/* Actions */}
-          <td className="w-16 px-3 align-middle text-right">
+          <td className="w-20 px-3 pr-4 sm:pr-6 align-middle text-right">
             <div className="flex items-center justify-end gap-1">
               <button
                 type="button"
@@ -331,13 +332,15 @@ export const CaseTableRow: React.FC<CaseTableRowProps> = memo(
                   onQuickPeek(caseItem.id, e);
                 }}
                 title="Quick Peek (Space)"
-                className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                aria-label="Quick peek case details"
+                className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <Eye className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                aria-label="More case actions"
+                className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <MoreHorizontal className="w-4 h-4" />
               </button>
@@ -447,7 +450,7 @@ export const CaseTableRow: React.FC<CaseTableRowProps> = memo(
         </td>
 
         {/* Actions */}
-        <td className="w-16 px-3 align-top pt-3.5 text-right">
+        <td className="w-20 px-3 pr-4 sm:pr-6 align-top pt-3.5 text-right">
           <div className="flex items-center justify-end gap-1">
             <button
               type="button"
@@ -456,7 +459,8 @@ export const CaseTableRow: React.FC<CaseTableRowProps> = memo(
                 onQuickPeek(caseItem.id, e);
               }}
               title="Quick Peek (Space)"
-              className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              aria-label="Quick peek case details"
+              className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <Eye className="w-4 h-4" />
             </button>

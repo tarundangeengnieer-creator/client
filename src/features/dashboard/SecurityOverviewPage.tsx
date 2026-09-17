@@ -433,10 +433,10 @@ export const SecurityOverviewPage: React.FC = () => {
         <DynamicEmailVolumeGraph />
       </div>
 
-      {/* 3. THREAT GEOLOCATION & RECENT CASES SECTION (Swapped) */}
+      {/* 3. THREAT GEOLOCATION & RECENT CASES SECTION */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 lg:gap-6 [&>*]:min-w-0">
-        {/* Left: Geolocation of Malicious Senders Card */}
-        <div className="xl:col-span-4 min-w-0 bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
+        {/* Left: Geolocation of Malicious Senders Card (Now Wide 8-Column Shape) */}
+        <div className="xl:col-span-8 min-w-0 bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
@@ -463,68 +463,75 @@ export const SecurityOverviewPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Interactive World Map with Real Geographic Contours and Attack Hotspots */}
-            <div className="my-3">
-              <ThreatWorldMap />
-            </div>
-
-            {/* Country Statistics */}
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">United States</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
-                    <div className="bg-rose-500 h-full rounded-full" style={{ width: '80%' }} />
-                  </div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">12</span>
-                </div>
+            {/* In 8-col card: Map and Statistics arranged side-by-side on desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center my-3">
+              {/* Interactive World Map Canvas */}
+              <div className="lg:col-span-7">
+                <ThreatWorldMap />
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Russia</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
-                    <div className="bg-rose-400 h-full rounded-full" style={{ width: '55%' }} />
-                  </div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">7</span>
+              {/* Country Statistics */}
+              <div className="lg:col-span-5 space-y-2.5 text-xs pt-3 lg:pt-0 lg:pl-3 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider pb-1 text-[11px]">
+                  <span>Origin Country</span>
+                  <span>Threats</span>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">India</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
-                    <div className="bg-rose-300 h-full rounded-full" style={{ width: '40%' }} />
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">United States</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
+                      <div className="bg-rose-500 h-full rounded-full" style={{ width: '80%' }} />
+                    </div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">12</span>
                   </div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">5</span>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Germany</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
-                    <div className="bg-rose-300 h-full rounded-full" style={{ width: '32%' }} />
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Russia</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
+                      <div className="bg-rose-400 h-full rounded-full" style={{ width: '55%' }} />
+                    </div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">7</span>
                   </div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">4</span>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Others</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
-                    <div className="bg-slate-400 h-full rounded-full" style={{ width: '60%' }} />
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">India</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
+                      <div className="bg-rose-300 h-full rounded-full" style={{ width: '40%' }} />
+                    </div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">5</span>
                   </div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">11</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Germany</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
+                      <div className="bg-rose-300 h-full rounded-full" style={{ width: '32%' }} />
+                    </div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">4</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Others</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-100 dark:bg-[#090e1a] rounded-full overflow-hidden">
+                      <div className="bg-slate-400 h-full rounded-full" style={{ width: '60%' }} />
+                    </div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 w-5 text-right">11</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right: Recent Cases Table Card */}
-        <div className="xl:col-span-8 min-w-0 bg-white dark:bg-[#0c1322] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden flex flex-col justify-between transition-colors">
+        {/* Right: Recent Cases Table Card (Now 4-Column Shape) */}
+        <div className="xl:col-span-4 min-w-0 bg-white dark:bg-[#0c1322] rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden flex flex-col justify-between transition-colors">
           <div>
             <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
@@ -543,18 +550,18 @@ export const SecurityOverviewPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Table with fixed column widths and clear breathing room */}
+            {/* Table with compact padding for 4-column card */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[780px]">
-                <thead className="bg-slate-50/70 dark:bg-[#090e1a] text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-100 dark:border-slate-800 uppercase tracking-wider text-xs">
+              <table className="w-full text-left text-xs min-w-[560px]">
+                <thead className="bg-slate-50/70 dark:bg-[#090e1a] text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-100 dark:border-slate-800 uppercase tracking-wider text-[11px]">
                   <tr>
-                    <th className="py-3 px-4 w-20">#</th>
-                    <th className="py-3 px-4 min-w-[220px]">Subject</th>
-                    <th className="py-3 px-4 min-w-[200px]">Sender</th>
-                    <th className="py-3 px-4 w-28">Verdict</th>
-                    <th className="py-3 px-4 w-24">Status</th>
-                    <th className="py-3 px-4 w-36">Received</th>
-                    <th className="py-3 px-2 text-right w-10">
+                    <th className="py-2.5 px-3 w-16">#</th>
+                    <th className="py-2.5 px-3 min-w-[170px]">Subject</th>
+                    <th className="py-2.5 px-3 min-w-[140px]">Sender</th>
+                    <th className="py-2.5 px-3 w-24">Verdict</th>
+                    <th className="py-2.5 px-3 w-20">Status</th>
+                    <th className="py-2.5 px-3 w-28">Received</th>
+                    <th className="py-2.5 px-2 text-right w-8">
                       <span className="sr-only">Actions</span>
                     </th>
                   </tr>
@@ -565,26 +572,26 @@ export const SecurityOverviewPage: React.FC = () => {
                     onClick={() => handleCaseClick('A2291')}
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2291</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Invoice Payment Update - Action Required">
+                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2291</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Invoice Payment Update - Action Required">
                       Invoice Payment Update - Action Required
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="support@paypal1-secure.com">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-[11px]" title="support@paypal1-secure.com">
                       support@paypal1-secure.com
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
                         <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
                         <span>Malicious</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-xs">
                         Open
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025, 10:24</td>
-                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025</td>
+                    <td className="py-2.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
                       <MoreHorizontal className="w-4 h-4 ml-auto" />
                     </td>
                   </tr>
@@ -594,26 +601,26 @@ export const SecurityOverviewPage: React.FC = () => {
                     onClick={() => handleCaseClick('A2290')}
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2290</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Your Account Has Been Limited">
+                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2290</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Your Account Has Been Limited">
                       Your Account Has Been Limited
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="service@account-security.com">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-[11px]" title="service@account-security.com">
                       service@account-security.com
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400 font-semibold">
                         <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
                         <span>Suspicious</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-500/30 text-sky-600 dark:text-sky-400 font-semibold text-xs">
                         Investigating
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025, 09:18</td>
-                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025</td>
+                    <td className="py-2.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
                       <MoreHorizontal className="w-4 h-4 ml-auto" />
                     </td>
                   </tr>
@@ -623,26 +630,26 @@ export const SecurityOverviewPage: React.FC = () => {
                     onClick={() => handleCaseClick('A2289')}
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2289</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Meeting Schedule for Next Week">
+                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2289</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Meeting Schedule for Next Week">
                       Meeting Schedule for Next Week
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="hr@company.com">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-[11px]" title="hr@company.com">
                       hr@company.com
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                         <span>Benign</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
                         Closed
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025, 08:41</td>
-                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">12 Aug 2025</td>
+                    <td className="py-2.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
                       <MoreHorizontal className="w-4 h-4 ml-auto" />
                     </td>
                   </tr>
@@ -652,26 +659,26 @@ export const SecurityOverviewPage: React.FC = () => {
                     onClick={() => handleCaseClick('A2288')}
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2288</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Re: Project Documents">
+                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2288</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Re: Project Documents">
                       Re: Project Documents
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="tarun.dange@cdgi.edu.in">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-[11px]" title="tarun.dange@cdgi.edu.in">
                       tarun.dange@cdgi.edu.in
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-semibold">
                         <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
                         <span>Inconclusive</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-600 dark:text-sky-400 font-semibold text-xs">
                         Open
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">11 Aug 2025, 16:20</td>
-                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">11 Aug 2025</td>
+                    <td className="py-2.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
                       <MoreHorizontal className="w-4 h-4 ml-auto" />
                     </td>
                   </tr>
@@ -681,26 +688,26 @@ export const SecurityOverviewPage: React.FC = () => {
                     onClick={() => handleCaseClick('A2287')}
                     className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group"
                   >
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2287</td>
-                    <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Password Reset Request">
+                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 font-mono">A2287</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" title="Password Reset Request">
                       Password Reset Request
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-xs" title="no-reply@secure-login.net">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 whitespace-nowrap font-mono text-[11px]" title="no-reply@secure-login.net">
                       no-reply@secure-login.net
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
                         <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
                         <span>Malicious</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
                         Closed
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">11 Aug 2025, 14:03</td>
-                    <td className="py-3.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">11 Aug 2025</td>
+                    <td className="py-2.5 px-2 text-right text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300">
                       <MoreHorizontal className="w-4 h-4 ml-auto" />
                     </td>
                   </tr>

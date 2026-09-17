@@ -265,8 +265,8 @@ export const AppTopBar: React.FC = () => {
           </div>
         ) : isInbox ? (
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">Case Inbox</h1>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Real-time threat evaluation & operational triage queue</p>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Case Inbox</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-normal sm:whitespace-nowrap">Threat evaluation & operational triage queue</p>
           </div>
         ) : isOverview ? (
           <div className="min-w-0">

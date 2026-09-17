@@ -155,7 +155,7 @@ export const CaseInboxPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-w-0 p-4 sm:p-5 lg:p-6 space-y-5 lg:space-y-6">
+    <div className="w-full min-w-0 p-4 sm:p-5 lg:p-6 pb-24 space-y-5 lg:space-y-6">
       {/* 1. FILTER TABS (GMAIL STYLE) */}
       <div className="flex items-center border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] overflow-x-auto no-scrollbar pt-2 px-2">
         {[
@@ -164,28 +164,28 @@ export const CaseInboxPage: React.FC = () => {
             icon: <Inbox className="w-4 h-4" />, 
             subtext: 'Complete investigation queue',
             badgeColor: 'bg-blue-600 text-white',
-            activeColor: 'text-blue-600 dark:text-blue-500 border-blue-600'
+            activeColor: 'text-blue-600 dark:text-sky-400 border-blue-600 dark:border-sky-400'
           },
           { 
             id: Verdict.MALICIOUS, filter: Verdict.MALICIOUS, label: 'Malicious', count: metrics.malicious, 
             icon: <AlertTriangle className="w-4 h-4" />,
             subtext: 'Confirmed threats requiring action',
             badgeColor: 'bg-rose-600 text-white',
-            activeColor: 'text-rose-600 dark:text-rose-500 border-rose-600'
+            activeColor: 'text-rose-600 dark:text-rose-400 border-rose-600 dark:border-rose-400'
           },
           { 
             id: Verdict.SUSPICIOUS, filter: Verdict.SUSPICIOUS, label: 'Suspicious', count: metrics.suspicious, 
             icon: <ShieldAlert className="w-4 h-4" />,
             subtext: 'Anomalies under investigation',
             badgeColor: 'bg-amber-600 text-white',
-            activeColor: 'text-amber-600 dark:text-amber-500 border-amber-600'
+            activeColor: 'text-amber-600 dark:text-amber-400 border-amber-600 dark:border-amber-400'
           },
           { 
             id: Verdict.BENIGN, filter: Verdict.BENIGN, label: 'Benign', count: metrics.benign, 
             icon: <CheckCircle2 className="w-4 h-4" />,
             subtext: 'Verified safe communications',
             badgeColor: 'bg-emerald-600 text-white',
-            activeColor: 'text-emerald-600 dark:text-emerald-500 border-emerald-600'
+            activeColor: 'text-emerald-600 dark:text-emerald-400 border-emerald-600 dark:border-emerald-400'
           },
           { 
             id: Verdict.INCONCLUSIVE, filter: Verdict.INCONCLUSIVE, label: 'Inconclusive', count: metrics.inconclusive, 
@@ -201,7 +201,7 @@ export const CaseInboxPage: React.FC = () => {
               key={tab.id}
               type="button"
               onClick={() => casesStore.setVerdictFilter(tab.filter)}
-              className={`group flex items-start gap-3 px-4 py-3 min-w-[200px] max-w-[280px] border-b-2 transition-all cursor-pointer ${
+              className={`group flex items-start gap-3 px-4 py-3 min-w-[200px] max-w-[280px] border-b-2 transition-colors cursor-pointer ${
                 isActive
                   ? tab.activeColor
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40'
@@ -212,7 +212,7 @@ export const CaseInboxPage: React.FC = () => {
               </div>
               <div className="flex flex-col items-start flex-1 min-w-0">
                 <div className="flex items-center gap-2 w-full">
-                  <span className={`text-sm font-semibold truncate ${isActive ? tab.activeColor : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100'}`}>
+                  <span className={`text-sm font-semibold truncate ${isActive ? tab.activeColor : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-slate-100'}`}>
                     {tab.label}
                   </span>
                   {tab.count > 0 && (
@@ -223,7 +223,7 @@ export const CaseInboxPage: React.FC = () => {
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-slate-500 dark:text-slate-500 truncate w-full text-left mt-0.5 font-normal">
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate w-full text-left mt-0.5 font-normal">
                   {tab.subtext}
                 </span>
               </div>
@@ -233,8 +233,8 @@ export const CaseInboxPage: React.FC = () => {
       </div>
 
       {/* 2. TOOLBAR & CONTROLS CARD */}
-      <div className="bg-white dark:bg-[#0c1322] rounded-xl p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
-        {/* Left: Search input */}
+      <div className="bg-white dark:bg-[#0c1322] rounded-xl p-3 sm:p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors">
+        {/* Left: Search input (Standard height: h-9) */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
@@ -243,30 +243,33 @@ export const CaseInboxPage: React.FC = () => {
             placeholder="Search Case ID, Sender, Subject, IoC (press '/' to focus)..."
             value={casesState.searchQuery}
             onChange={(e) => casesStore.setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-[#090e1a] hover:bg-slate-100/60 dark:hover:bg-slate-900 focus:bg-white dark:focus:bg-[#0c1322] border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full h-9 pl-9 pr-8 bg-slate-50 dark:bg-[#090e1a] hover:bg-slate-100/60 dark:hover:bg-slate-900 focus:bg-white dark:focus:bg-[#0c1322] border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all flex items-center"
           />
           {casesState.searchQuery && (
             <button
               type="button"
               onClick={() => casesStore.setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-sm p-0.5 cursor-pointer leading-none"
+              title="Clear search"
+              aria-label="Clear search"
             >
               ×
             </button>
           )}
         </div>
 
-        {/* Right: Filters & Action Buttons */}
-        <div className="flex items-center gap-2.5 flex-wrap text-xs">
-          {/* Severity Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5">
+        {/* Right: Filters & Action Buttons (All standardized to h-9 for clean baseline alignment) */}
+        <div className="flex items-center gap-2 flex-wrap text-xs">
+          {/* Severity Filter - h-9 */}
+          <div className="h-9 inline-flex items-center gap-1.5 bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 rounded-lg px-3">
             <span className="text-slate-500 dark:text-slate-400 text-xs">Severity:</span>
             <select
               value={casesState.severityFilter}
               onChange={(e) =>
                 casesStore.setFilters({ severity: e.target.value })
               }
-              className="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer"
+              aria-label="Filter by severity"
+              className="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer py-0 leading-tight"
             >
               <option value="ALL" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">ALL</option>
               <option value="CRITICAL" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">Critical</option>
@@ -276,8 +279,8 @@ export const CaseInboxPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Verdict Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5">
+          {/* Verdict Filter - h-9 */}
+          <div className="h-9 inline-flex items-center gap-1.5 bg-slate-50 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 rounded-lg px-3">
             <span className="text-slate-500 dark:text-slate-400 text-xs">Verdict:</span>
             <select
               value={casesState.verdictFilter}
@@ -285,7 +288,7 @@ export const CaseInboxPage: React.FC = () => {
                 casesStore.setVerdictFilter(e.target.value as 'ALL' | Verdict)
               }
               aria-label="Filter by verdict"
-              className="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer"
+              className="bg-transparent text-slate-800 dark:text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer py-0 leading-tight"
             >
               <option value="ALL" className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">ALL</option>
               <option value={Verdict.MALICIOUS} className="dark:bg-slate-900 text-slate-800 dark:text-slate-200">Malicious</option>
@@ -295,12 +298,12 @@ export const CaseInboxPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Density Mode */}
-          <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#090e1a] p-1">
+          {/* Density Mode - h-9 */}
+          <div className="h-9 inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#090e1a] p-1">
             <button
               type="button"
               onClick={() => casesStore.setDensityMode('compact')}
-              className={`px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
+              className={`h-7 px-2.5 inline-flex items-center justify-center rounded-md text-xs font-medium cursor-pointer transition-colors ${
                 casesState.densityMode === 'compact'
                   ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -311,7 +314,7 @@ export const CaseInboxPage: React.FC = () => {
             <button
               type="button"
               onClick={() => casesStore.setDensityMode('standard')}
-              className={`px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
+              className={`h-7 px-2.5 inline-flex items-center justify-center rounded-md text-xs font-medium cursor-pointer transition-colors ${
                 casesState.densityMode === 'standard'
                   ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -322,7 +325,7 @@ export const CaseInboxPage: React.FC = () => {
             <button
               type="button"
               onClick={() => casesStore.setDensityMode('preview')}
-              className={`px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
+              className={`h-7 px-2.5 inline-flex items-center justify-center rounded-md text-xs font-medium cursor-pointer transition-colors ${
                 casesState.densityMode === 'preview'
                   ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-2xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -332,22 +335,22 @@ export const CaseInboxPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Export CSV */}
+          {/* Export CSV - Standard Secondary Button (h-9) */}
           <button
             type="button"
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors shadow-2xs cursor-pointer"
+            className="h-9 inline-flex items-center justify-center gap-1.5 px-3.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs transition-colors shadow-2xs cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Export CSV</span>
           </button>
 
-          {/* Ingest EML */}
+          {/* Ingest EML - Standard Primary Button (h-9) */}
           {capabilities.canCreateInvestigation && (
             <button
               type="button"
               onClick={() => uiStore.navigate('/ingest')}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+              className="h-9 inline-flex items-center justify-center gap-1.5 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-colors shadow-xs cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Ingest .eml</span>
@@ -366,25 +369,27 @@ export const CaseInboxPage: React.FC = () => {
 
           <div className="flex items-center gap-2">
             {capabilities.canManageCases && <>
+            {/* Standard Danger Button */}
             <button
               type="button"
               onClick={() => {
                 casesStore.bulkQuarantine();
                 uiStore.addToast('warning', `Quarantined ${selectedCount} cases`);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 border border-rose-500/40 rounded-lg font-semibold transition-colors cursor-pointer"
+              className="h-9 inline-flex items-center justify-center gap-1.5 px-3.5 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 font-medium text-xs transition-colors cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
               <span>Quarantine Selected</span>
             </button>
 
+            {/* Standard Secondary Button */}
             <button
               type="button"
               onClick={() => {
                 casesStore.bulkMarkReviewed();
                 uiStore.addToast('success', `Marked ${selectedCount} cases reviewed`);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold transition-colors cursor-pointer"
+              className="h-9 inline-flex items-center justify-center gap-1.5 px-3.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs transition-colors cursor-pointer"
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Mark Reviewed</span>
@@ -393,7 +398,7 @@ export const CaseInboxPage: React.FC = () => {
             <button
               type="button"
               onClick={() => casesStore.clearSelection()}
-              className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline ml-2 cursor-pointer"
+              className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline ml-2 cursor-pointer"
             >
               Clear
             </button>
@@ -424,7 +429,7 @@ export const CaseInboxPage: React.FC = () => {
                 <th className="w-40 px-3 py-3">Category / Auth</th>
                 <th className="w-32 px-3 py-3">Risk</th>
                 <th className="w-32 px-3 py-3">Assignee / Status</th>
-                <th className="w-16 px-3 py-3 text-right"></th>
+                <th className="w-20 px-3 pr-4 sm:pr-6 py-3 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -433,14 +438,14 @@ export const CaseInboxPage: React.FC = () => {
                   <td colSpan={7} className="py-16 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Filter className="w-8 h-8 text-slate-400" />
-                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No cases match the active filter criteria</p>
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">No cases match the active filter criteria</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         Try resetting your search query or selecting ALL verdicts.
                       </p>
                       <button
                         type="button"
                         onClick={() => casesStore.resetFilters()}
-                        className="mt-3 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold cursor-pointer"
+                        className="h-9 inline-flex items-center justify-center gap-1.5 px-3.5 mt-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs transition-colors shadow-2xs cursor-pointer"
                       >
                         Reset All Filters
                       </button>

@@ -47,7 +47,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <AppTopBar />
 
         {/* Scrollable View Area */}
-        <main className="flex-1 overflow-y-auto min-w-0 bg-[#f4f7fb] dark:bg-[#070b14] relative print:overflow-visible print:bg-white print:h-auto">
+        <main tabIndex={-1} className="flex-1 overflow-y-auto min-w-0 bg-[#f4f7fb] dark:bg-[#070b14] relative print:overflow-visible print:bg-white print:h-auto focus:outline-none outline-none">
           {children}
         </main>
       </div>

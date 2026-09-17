@@ -194,7 +194,7 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
   // Default 'full' variant: horizontal logo with emblem + typography + tricolor + tagline
   const textClass = size === 'sm' ? 'text-base' : size === 'lg' ? 'text-xl' : size === 'xl' ? 'text-2xl' : 'text-lg';
   const barClass = size === 'sm' ? 'w-10 h-0.5 my-0.5' : size === 'lg' ? 'w-14 h-1 my-1' : size === 'xl' ? 'w-16 h-1 my-1.5' : 'w-12 h-0.5 my-1';
-  const taglineClass = size === 'sm' ? 'text-[11px]' : size === 'lg' ? 'text-xs' : size === 'xl' ? 'text-sm' : 'text-xs';
+  const taglineClass = size === 'sm' ? 'text-xs' : size === 'lg' ? 'text-sm' : size === 'xl' ? 'text-base' : 'text-xs';
 
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
