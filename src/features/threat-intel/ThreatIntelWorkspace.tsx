@@ -374,6 +374,11 @@ export const ThreatIntelWorkspace: React.FC = () => {
     });
   }, [customPins]);
 
+  const formattedCaseId = useMemo(() => {
+    const cid = currentCaseId || 'CASE-2026-8812';
+    return cid.length > 12 ? `${cid.slice(0, 8)}…` : cid;
+  }, [currentCaseId]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchInput.trim()) return;
@@ -381,35 +386,33 @@ export const ThreatIntelWorkspace: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-w-0 p-4 sm:p-5 lg:p-6 space-y-5 flex flex-col min-h-full font-mono select-none bg-[#f4f7fb] dark:bg-[#070b14] transition-colors">
-      {/* Page Header */}
-      <div className="pb-3 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
-              <Globe className="w-4 h-4" />
-            </div>
-            <div>
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 uppercase tracking-wider">
-                <span>Threat Intelligence Workspace</span>
-                <ProvenanceLabel type="THREAT INTELLIGENCE" size="xs" />
-              </h1>
-              <p className="text-[11px] font-sans text-slate-500 dark:text-slate-400 mt-0.5">
-                Investigate external IOC reputation, verify provenance, correlate detection signals, and pivot across forensic surfaces.
-              </p>
-            </div>
+    <div className="w-full min-w-0 p-4 sm:p-5 lg:p-6 pb-20 lg:pb-24 space-y-5 flex flex-col min-h-full font-mono select-none bg-[#f4f7fb] dark:bg-[#070b14] transition-colors">
+      {/* Page Header: Vertically aligned title and action buttons */}
+      <div className="pb-3.5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+            <Globe className="w-4 h-4" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              Threat Intelligence Workspace
+            </h1>
+            <p className="text-xs font-sans text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+              Investigate external IOC reputation, verify provenance, correlate detection signals, and pivot across forensic surfaces.
+            </p>
           </div>
         </div>
 
         {/* Global Case Link & Pivot Toolbar */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
           <button
             type="button"
             onClick={() => uiStore.navigate('/investigator')}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] hover:border-[#08B4ED]/60 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            title={`Active Case #${currentCaseId || 'CASE-2026-8812'}`}
           >
-            <span>Active Case: #{currentCaseId || 'CASE-2026-8812'}</span>
-            <ExternalLink className="w-3 h-3 text-[#08B4ED]" />
+            <span>Active Case: #{formattedCaseId}</span>
+            <ExternalLink className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400" />
           </button>
 
           <PivotMenu
@@ -422,30 +425,36 @@ export const ThreatIntelWorkspace: React.FC = () => {
       </div>
 
       {/* SECTION 1: SEARCH & QUICK INVESTIGATION IOCS */}
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-          <div className="absolute left-3.5 text-slate-400">
+          <div className="absolute left-3.5 flex items-center gap-1.5 text-slate-500 dark:text-slate-400 pointer-events-none">
             <Search className="w-4 h-4" />
+            <span className="hidden sm:inline-block text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+              IOC LOOKUP
+            </span>
           </div>
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search indicator: e.g. 185.220.101.5, paypal1-secure.com, SHA-256 hash, or URL..."
-            className="w-full pl-10 pr-24 py-2.5 rounded-xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-purple-500/60 shadow-xs transition-colors"
+            placeholder="Query IOC / indicator (IP, domain, URL, or hash)..."
+            className="w-full pl-10 sm:pl-32 pr-28 py-2.5 rounded-xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 shadow-xs transition-colors"
           />
           <button
             type="submit"
-            className="absolute right-2 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+            className="absolute right-2 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
           >
             Investigate
           </button>
         </form>
 
         {/* Quick Picks from Current Case */}
-        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            Case #{currentCaseId || 'CASE-2026-8812'} IOCs:
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span
+            className="text-xs font-semibold text-slate-600 dark:text-slate-400"
+            title={`Case #${currentCaseId || 'CASE-2026-8812'} IOCs`}
+          >
+            Case #{formattedCaseId} IOCs:
           </span>
           {['185.220.101.5', 'paypal1-secure.com', 'https://paypal1-secure.com/invoice/INV-9041/auth'].map((ioc) => (
             <button
@@ -455,10 +464,10 @@ export const ThreatIntelWorkspace: React.FC = () => {
                 setSearchInput(ioc);
                 setSelectedIndicator(ioc);
               }}
-              className={`px-2 py-0.5 rounded border transition-colors cursor-pointer truncate max-w-[240px] ${
+              className={`px-2.5 py-1 rounded-md border transition-colors cursor-pointer truncate max-w-[240px] text-xs ${
                 selectedIndicator === ioc
-                  ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-500/50 text-purple-600 dark:text-purple-300 font-bold'
-                  : 'bg-white dark:bg-[#070b14] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-purple-500'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-400 dark:border-blue-500 text-blue-700 dark:text-sky-300 font-semibold shadow-2xs'
+                  : 'bg-white dark:bg-[#070b14] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/40'
               }`}
             >
               {ioc}
@@ -468,14 +477,14 @@ export const ThreatIntelWorkspace: React.FC = () => {
       </div>
 
       {/* Workspace Tabs: Dossier vs Provenance Grid vs Geo Pointer Map */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-slate-200/70 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 text-xs font-bold">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-2">
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-slate-200/70 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 text-xs font-medium">
           <button
             type="button"
             onClick={() => setViewTab('dossier')}
-            className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
               viewTab === 'dossier'
-                ? 'bg-white dark:bg-[#070b14] text-purple-600 dark:text-purple-400 shadow-xs border border-purple-500/30'
+                ? 'bg-white dark:bg-[#070b14] text-blue-600 dark:text-sky-400 font-semibold shadow-xs border border-slate-200 dark:border-slate-800'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
@@ -486,9 +495,9 @@ export const ThreatIntelWorkspace: React.FC = () => {
           <button
             type="button"
             onClick={() => setViewTab('provenance')}
-            className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
               viewTab === 'provenance'
-                ? 'bg-white dark:bg-[#070b14] text-purple-600 dark:text-purple-400 shadow-xs border border-purple-500/30'
+                ? 'bg-white dark:bg-[#070b14] text-blue-600 dark:text-sky-400 font-semibold shadow-xs border border-slate-200 dark:border-slate-800'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
@@ -499,9 +508,9 @@ export const ThreatIntelWorkspace: React.FC = () => {
           <button
             type="button"
             onClick={() => setViewTab('pointerMap')}
-            className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
               viewTab === 'pointerMap'
-                ? 'bg-white dark:bg-[#070b14] text-purple-600 dark:text-purple-400 shadow-xs border border-purple-500/30'
+                ? 'bg-white dark:bg-[#070b14] text-blue-600 dark:text-sky-400 font-semibold shadow-xs border border-slate-200 dark:border-slate-800'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
@@ -519,9 +528,9 @@ export const ThreatIntelWorkspace: React.FC = () => {
               if (node) investigatorStore.selectEntity(node);
               uiStore.navigate('/investigator/graph');
             }}
-            className="px-2.5 py-1 rounded bg-[#08B4ED]/10 hover:bg-[#08B4ED]/20 text-[#08B4ED] border border-[#08B4ED]/30 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium transition-colors cursor-pointer shadow-2xs"
           >
-            <Network className="w-3.5 h-3.5" />
+            <Network className="w-3.5 h-3.5 text-blue-500 dark:text-sky-400" />
             <span>Open in Graph</span>
           </button>
         </div>
@@ -534,7 +543,7 @@ export const ThreatIntelWorkspace: React.FC = () => {
           <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] shadow-xs space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
                   Indicator Overview • {activeIntel.type.toUpperCase()}
                 </span>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 break-all mt-0.5">
@@ -544,10 +553,10 @@ export const ThreatIntelWorkspace: React.FC = () => {
 
               <div className="flex flex-wrap items-center gap-2">
                 <SeverityBadge severity={activeIntel.reputation} size="md" showDot pulse />
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/40">
                   Risk: {activeIntel.risk_level}
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                   {activeIntel.confidence}% Confidence
                 </span>
               </div>
@@ -556,26 +565,26 @@ export const ThreatIntelWorkspace: React.FC = () => {
             {/* Metadata Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                <span className="text-[9.5px] font-bold uppercase text-slate-400 block">First Seen</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-0.5">
+                <span className="text-xs text-slate-600 dark:text-slate-400 block font-medium">First Seen</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-1">
                   {new Date(activeIntel.first_seen).toLocaleDateString()}
                 </span>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                <span className="text-[9.5px] font-bold uppercase text-slate-400 block">Last Seen</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-0.5">
+                <span className="text-xs text-slate-600 dark:text-slate-400 block font-medium">Last Seen</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-1">
                   {new Date(activeIntel.last_seen).toLocaleDateString()}
                 </span>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                <span className="text-[9.5px] font-bold uppercase text-slate-400 block">Origin Location</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-0.5">
+                <span className="text-xs text-slate-600 dark:text-slate-400 block font-medium">Origin Location</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-1">
                   {activeIntel.city ? `${activeIntel.city}, ` : ''}{activeIntel.country || 'N/A'}
                 </span>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                <span className="text-[9.5px] font-bold uppercase text-slate-400 block">Autonomous System</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-0.5 truncate" title={activeIntel.asn}>
+                <span className="text-xs text-slate-600 dark:text-slate-400 block font-medium">Autonomous System</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 block mt-1 truncate" title={activeIntel.asn}>
                   {activeIntel.asn || 'N/A'}
                 </span>
               </div>
@@ -589,29 +598,29 @@ export const ThreatIntelWorkspace: React.FC = () => {
               {/* Intelligence Findings Card */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] shadow-xs space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <Radio className="w-3.5 h-3.5 text-purple-500" />
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <Radio className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400" />
                     <span>Threat Intelligence Findings</span>
                   </h3>
                   <ProvenanceLabel type="THREAT INTELLIGENCE" size="xs" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2 rounded bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                    <span className="text-[9.5px] text-slate-400 block">Infrastructure:</span>
-                    <span className="font-bold text-rose-600 dark:text-rose-400">{activeIntel.infrastructure_type || 'Unknown'}</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 block">Infrastructure:</span>
+                    <span className="font-bold text-rose-700 dark:text-rose-400 mt-0.5 block">{activeIntel.infrastructure_type || 'Unknown'}</span>
                   </div>
-                  <div className="p-2 rounded bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                    <span className="text-[9.5px] text-slate-400 block">Associated Activity:</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{activeIntel.associated_activity}</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 block">Associated Activity:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">{activeIntel.associated_activity}</span>
                   </div>
-                  <div className="p-2 rounded bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                    <span className="text-[9.5px] text-slate-400 block">Known Campaigns:</span>
-                    <span className="font-bold text-[#08B4ED]">{activeIntel.known_campaigns.length} Active</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 block">Known Campaigns:</span>
+                    <span className="font-bold text-blue-700 dark:text-sky-300 mt-0.5 block">{activeIntel.known_campaigns.length} Active</span>
                   </div>
-                  <div className="p-2 rounded bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
-                    <span className="text-[9.5px] text-slate-400 block">Related Domains / URLs:</span>
-                    <span className="font-bold text-purple-500">
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 block">Related Domains / URLs:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 font-mono mt-0.5 block">
                       {activeIntel.related_domains.length} Domains / {activeIntel.related_urls.length} URLs
                     </span>
                   </div>
@@ -619,20 +628,25 @@ export const ThreatIntelWorkspace: React.FC = () => {
 
                 {/* Related Domain & URL Nodes */}
                 <div className="space-y-2 pt-1">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">Related Infrastructure:</span>
-                  <div className="space-y-1">
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Related Infrastructure:</span>
+                  <div className="space-y-1.5">
                     {activeIntel.related_domains.slice(0, 3).map((dom) => (
-                      <div
+                      <button
                         key={dom}
+                        type="button"
                         onClick={() => {
                           setSearchInput(dom);
                           setSelectedIndicator(dom);
                         }}
-                        className="p-1.5 rounded bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-purple-500/50 transition-colors cursor-pointer text-xs"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700 transition-all group cursor-pointer text-xs"
+                        aria-label={`Inspect domain ${dom}`}
                       >
-                        <span className="text-slate-700 dark:text-slate-200 font-semibold">{dom}</span>
-                        <span className="text-[10px] text-purple-500 font-bold">Inspect →</span>
-                      </div>
+                        <span className="text-slate-800 dark:text-slate-200 font-medium font-mono">{dom}</span>
+                        <div className="flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-sky-400 group-hover:underline">
+                          <span>Inspect</span>
+                          <ChevronRight className="w-4 h-4 text-blue-700 dark:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -642,8 +656,8 @@ export const ThreatIntelWorkspace: React.FC = () => {
               {activeIntel.observed_in_email && (
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] shadow-xs space-y-2.5">
                   <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                      <FileCheck className="w-3.5 h-3.5 text-[#08B4ED]" />
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <FileCheck className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400" />
                       <span>Observed In Email (Authoritative Forensic Evidence)</span>
                     </h3>
                     <ProvenanceLabel type="OBSERVED EVIDENCE" size="xs" />
@@ -652,10 +666,10 @@ export const ThreatIntelWorkspace: React.FC = () => {
                   <div className="text-xs space-y-1.5">
                     <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                       <span>Field Location: <strong className="text-slate-800 dark:text-slate-200">{activeIntel.observed_in_email.field}</strong></span>
-                      <span className="font-bold text-[#08B4ED]">Case #{activeIntel.observed_in_email.case_id}</span>
+                      <span className="font-bold text-blue-600 dark:text-sky-400">Case #{activeIntel.observed_in_email.case_id}</span>
                     </div>
 
-                    <pre className="p-2.5 rounded bg-slate-900 text-slate-200 text-[10.5px] overflow-x-auto font-mono border border-slate-800 leading-relaxed">
+                    <pre className="p-2.5 rounded bg-slate-900 text-slate-200 text-xs overflow-x-auto font-mono border border-slate-800 leading-relaxed">
                       {activeIntel.observed_in_email.header_snippet}
                     </pre>
                   </div>
@@ -671,12 +685,12 @@ export const ThreatIntelWorkspace: React.FC = () => {
                   <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
                         AI Intelligence Summary
                       </h3>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold">
-                      SUPPORTED BY: {activeIntel.ai_summary.evidence_count} RECORDS
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-sky-300 border border-blue-200 dark:border-blue-500/30">
+                      Supported by: {activeIntel.ai_summary.evidence_count} records
                     </span>
                   </div>
 
@@ -685,12 +699,12 @@ export const ThreatIntelWorkspace: React.FC = () => {
                   </p>
 
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase text-slate-400">Underlying Evidence:</span>
-                    <div className="flex flex-wrap gap-1">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Underlying Evidence:</span>
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
                       {activeIntel.ai_summary.evidence_sources.map((src) => (
                         <span
                           key={src}
-                          className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80 text-xs font-medium text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60"
                         >
                           {src}
                         </span>
@@ -698,14 +712,14 @@ export const ThreatIntelWorkspace: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                  {/* Actions: Unified visual hierarchy */}
+                  <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => investigatorStore.openEvidenceInspector(true)}
-                      className="px-2.5 py-1 rounded bg-[#08B4ED]/10 hover:bg-[#08B4ED]/20 text-[#08B4ED] border border-[#08B4ED]/30 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                     >
-                      <Archive className="w-3 h-3" />
+                      <Archive className="w-3.5 h-3.5" />
                       <span>View Evidence</span>
                     </button>
                     <button
@@ -716,18 +730,18 @@ export const ThreatIntelWorkspace: React.FC = () => {
                         if (node) investigatorStore.selectEntity(node);
                         uiStore.navigate('/investigator/graph');
                       }}
-                      className="px-2.5 py-1 rounded bg-purple-50 dark:bg-purple-950/30 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-600 dark:text-purple-400 border border-purple-500/30 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium transition-colors cursor-pointer shadow-2xs"
                     >
-                      <Network className="w-3 h-3" />
-                      <span>Open Graph</span>
+                      <Network className="w-3.5 h-3.5 text-blue-500 dark:text-sky-400" />
+                      <span>Open in Graph</span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => uiStore.navigate('/investigator')}
-                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold flex items-center gap-1 hover:bg-slate-200 transition-colors cursor-pointer"
+                      onClick={() => uiStore.openCopilot(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium transition-colors cursor-pointer shadow-2xs"
                     >
-                      <Sparkles className="w-3 h-3 text-sky-400" />
-                      <span>Ask AI in Workspace</span>
+                      <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Consult Copilot</span>
                     </button>
                   </div>
                 </div>
@@ -736,12 +750,12 @@ export const ThreatIntelWorkspace: React.FC = () => {
               {/* DETECTION SIGNALS CORRELATION (Section 16) */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] shadow-xs space-y-2.5">
                 <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                     <Cpu className="w-3.5 h-3.5 text-amber-500" />
                     <span>ML + Threat Intelligence Correlation Signals</span>
                   </h3>
-                  <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-500/30">
-                    CONCORDANT RISK: CRITICAL
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/40">
+                    Concordant Risk: CRITICAL
                   </span>
                 </div>
 
@@ -767,7 +781,7 @@ export const ThreatIntelWorkspace: React.FC = () => {
                       <ProvenanceLabel type="THREAT INTELLIGENCE" size="xs" />
                       <span className="font-semibold text-slate-800 dark:text-slate-200">External Threat Telemetry</span>
                     </div>
-                    <span className="font-bold text-purple-600 dark:text-purple-400">MATCHED — HIGH CONFIDENCE</span>
+                    <span className="font-bold text-blue-600 dark:text-sky-400">MATCHED — HIGH CONFIDENCE</span>
                   </div>
 
                   <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-slate-800">
@@ -789,15 +803,15 @@ export const ThreatIntelWorkspace: React.FC = () => {
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] shadow-xs space-y-4 animate-fadeIn">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Radio className="w-4 h-4 text-purple-500" />
+              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Radio className="w-4 h-4 text-blue-600 dark:text-sky-400" />
                 <span>Forensic Provenance & Audit Verification</span>
               </h3>
-              <p className="text-[11px] font-sans text-slate-500 mt-0.5">
+              <p className="text-xs font-sans text-slate-500 dark:text-slate-400 mt-0.5">
                 Every external indicator finding is tracked with timestamped evidence provenance to maintain forensic integrity in court.
               </p>
             </div>
-            <span className="text-[10.5px] font-mono text-[#08B4ED] font-bold">
+            <span className="text-xs font-mono text-blue-600 dark:text-sky-400 font-bold">
               {activeIntel.provenance_sources.length} Independent Providers
             </span>
           </div>
@@ -813,14 +827,14 @@ export const ThreatIntelWorkspace: React.FC = () => {
                     <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
                       {src.source_name}
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {src.category}
                     </span>
                   </div>
                   <SeverityBadge severity={src.reputation} size="sm" showDot />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10.5px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-200/60 dark:border-slate-800/60">
                   <div>
                     <span>Observed: </span>
                     <strong className="text-slate-700 dark:text-slate-300 font-mono">
@@ -835,7 +849,7 @@ export const ThreatIntelWorkspace: React.FC = () => {
                   </div>
                   <div>
                     <span>Record Ref: </span>
-                    <code className="text-[#08B4ED] font-bold">{src.source_record_ref}</code>
+                    <code className="text-blue-600 dark:text-sky-400 font-bold">{src.source_record_ref}</code>
                   </div>
                 </div>
               </div>
@@ -850,11 +864,11 @@ export const ThreatIntelWorkspace: React.FC = () => {
           {/* Geo-Intelligence Toolbar */}
           <div className="flex flex-wrap items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1322] gap-3">
             <div>
-              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs uppercase tracking-wider flex items-center gap-2">
-                <Crosshair className="w-3.5 h-3.5 text-sky-400" />
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs flex items-center gap-2">
+                <Crosshair className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400" />
                 <span>Interactive Forensic Pointer Map</span>
               </h3>
-              <p className="text-[11px] font-sans text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs font-sans text-slate-500 dark:text-slate-400 mt-0.5">
                 Drop forensic markers, plan cross-campaign correlation, and inspect relay origin trajectory.
               </p>
             </div>
@@ -862,7 +876,7 @@ export const ThreatIntelWorkspace: React.FC = () => {
             <div className="flex items-center gap-2">
               {isPointerMode && (
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] font-bold text-slate-500 mr-1">PIN COLOR:</span>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">PIN COLOR:</span>
                   {(['red', 'amber', 'emerald', 'blue'] as const).map((color) => (
                     <button
                       key={color}
@@ -879,7 +893,7 @@ export const ThreatIntelWorkspace: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setCustomPins([])}
-                    className="ml-2 text-[10px] font-bold text-rose-500 hover:underline cursor-pointer"
+                    className="ml-2 text-xs font-semibold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 hover:underline cursor-pointer"
                   >
                     CLEAR
                   </button>
@@ -889,10 +903,10 @@ export const ThreatIntelWorkspace: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsPointerMode(!isPointerMode)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
                   isPointerMode
-                    ? 'bg-blue-900/30 border-blue-800 text-blue-400'
-                    : 'bg-white dark:bg-[#0c1322] border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                    : 'bg-white dark:bg-[#0c1322] border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-2xs'
                 }`}
               >
                 <MapPin className="w-3.5 h-3.5" />

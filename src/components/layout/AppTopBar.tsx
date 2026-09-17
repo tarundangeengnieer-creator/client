@@ -240,10 +240,10 @@ export const AppTopBar: React.FC = () => {
 
         {ui.currentPath.startsWith('/investigator') ? (
           <div className="min-w-0">
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 truncate">
-              <span>Investigator Workspace</span>
-            </h1>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">
+            <span className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 truncate">
+              Investigator Workspace
+            </span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">
               Multi-hop entity relationship graph & chronological timeline
             </p>
           </div>
@@ -252,33 +252,38 @@ export const AppTopBar: React.FC = () => {
             <span className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight">Investigation</span>
           </div>
         ) : isCaseDetail ? (
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 min-w-0 truncate">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 min-w-0">
             <button
               type="button"
               onClick={() => uiStore.navigate('/inbox')}
-              className="hover:text-[#08B4ED] font-medium transition-colors cursor-pointer shrink-0"
+              className="hover:text-blue-600 dark:hover:text-sky-400 font-medium transition-colors cursor-pointer shrink-0"
             >
               Inbox / Cases
             </button>
             <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
-            <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">Case #{activeCaseId}</span>
+            <span
+              className="font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap"
+              title={`Case #${activeCaseId}`}
+            >
+              Case #{activeCaseId && activeCaseId.length > 12 ? `${activeCaseId.slice(0, 8)}…` : activeCaseId}
+            </span>
           </div>
         ) : isInbox ? (
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Case Inbox</h1>
+            <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight block">Case Inbox</span>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-normal sm:whitespace-nowrap">Threat evaluation & operational triage queue</p>
           </div>
         ) : isOverview ? (
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">Security Overview</h1>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Email threat detection & forensic intelligence</p>
+            <span className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate block">Security Overview</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Email threat detection & forensic intelligence</p>
           </div>
         ) : (
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight capitalize truncate">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight capitalize truncate block">
               {ui.currentPath.replace('/', '')}
-            </h1>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Forensic Workstation Module</p>
+            </span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Forensic Workstation Module</p>
           </div>
         )}
       </div>
@@ -489,31 +494,7 @@ export const AppTopBar: React.FC = () => {
           )}
         </div>
 
-        {/* 2. Level 1 Immediate Context: ASHIELDER | [Active Tenant] | [Investigator] | [Current User] */}
-        <div className="relative">
-          <div
-            className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1627] text-slate-700 dark:text-slate-300 shadow-2xs text-xs select-none"
-            title="Active Forensic Context: Platform | Tenant | Role | User"
-          >
-            <span className="font-extrabold text-[#1a68ff] dark:text-sky-400 tracking-tight font-mono text-[11px]">
-              ASHIELDER
-            </span>
-            <span className="text-slate-300 dark:text-slate-700 font-normal">|</span>
-            <span className="hidden sm:inline font-semibold text-slate-800 dark:text-slate-200">
-              {auth.currentTenant?.name || 'Acme Security Operations'}
-            </span>
-            <span className="text-slate-300 dark:text-slate-700 font-normal">|</span>
-            <span className="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] uppercase tracking-wider bg-transparent text-sky-700 dark:text-sky-400 border border-sky-600/30 dark:border-sky-500/30">
-              {auth.currentRole === Role.INVESTIGATOR ? 'Investigator' : (auth.currentRole || 'Investigator')}
-            </span>
-            <span className="text-slate-300 dark:text-slate-700 font-normal">|</span>
-            <span className="font-bold text-slate-900 dark:text-slate-100">
-              {auth.currentUser?.name || 'Ankit'}
-            </span>
-          </div>
-        </div>
-
-        {/* 3. User Avatar & Account Dropdown */}
+        {/* 2. User Avatar & Account Dropdown (Consolidated context) */}
         <div className="relative" ref={userMenuRef}>
           <button
             id="header-user-menu-btn"
@@ -523,13 +504,13 @@ export const AppTopBar: React.FC = () => {
               setShowNotifications(false);
               setShowTenantMenu(false);
             }}
-            className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
-            title={`${auth.currentUser?.name} Profile`}
+            className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1627] hover:bg-slate-50 dark:hover:bg-slate-800/70 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer shadow-2xs"
+            title={`${auth.currentUser?.name || 'User'} Profile & Organization`}
             aria-expanded={showUserMenu}
             aria-haspopup="true"
           >
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-[#1a68ff] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0 uppercase">
+              <div className="w-7 h-7 rounded-full bg-[#1a68ff] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0 uppercase">
                 {(auth.currentUser?.name || 'U')
                   .split(' ')
                   .map((n) => n[0])
@@ -538,10 +519,18 @@ export const AppTopBar: React.FC = () => {
               </div>
               {/* Duty status pulsating dot */}
               <span
-                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#0a0f1d] ${
+                className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-white dark:border-[#0a0f1d] ${
                   dutyStatus === 'on_duty' ? 'bg-emerald-500' : 'bg-amber-500'
                 }`}
               />
+            </div>
+            <div className="hidden sm:flex flex-col text-left min-w-0 leading-tight">
+              <span className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
+                {auth.currentUser?.name || 'Analyst'}
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                {auth.currentRole === Role.INVESTIGATOR ? 'Investigator' : (auth.currentRole || 'SOC Analyst')}
+              </span>
             </div>
             <ChevronDown
               className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
@@ -552,7 +541,7 @@ export const AppTopBar: React.FC = () => {
 
           {showUserMenu && (
             <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-[#0e1627] border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-2 z-30 text-xs animate-fadeIn">
-              {/* User Identity Header */}
+              {/* User Identity & Organization Header */}
               <div className="p-3 bg-slate-50/70 dark:bg-[#090e1c] rounded-lg border border-slate-100 dark:border-slate-800/80 mb-2">
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-full bg-[#1a68ff] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0 uppercase">
@@ -579,8 +568,22 @@ export const AppTopBar: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Organization / Tenant Info */}
+                <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-800 space-y-1 text-[11px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Organization:</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[140px]" title={auth.currentTenant?.name || 'Acme Security Operations'}>
+                      {auth.currentTenant?.name || 'Acme Security Operations'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Platform:</span>
+                    <span className="font-mono font-bold text-[10px] text-blue-600 dark:text-sky-400">ASHIELDER v2.4</span>
+                  </div>
+                </div>
+
                 {/* Duty Status Selector */}
-                <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px]">
                   <span className="text-slate-500 dark:text-slate-400">Analyst Status:</span>
                   <button
                     type="button"

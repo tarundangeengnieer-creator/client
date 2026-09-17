@@ -9,32 +9,37 @@ export const AIAssistantDrawer: React.FC = () => {
 
   return (
     <>
-      {/* Backdrop for mobile (optional, usually copilot sits next to content, but for global we can use it or just let it overlay) */}
+      {/* Backdrop */}
       {ui.isCopilotOpen && (
         <div 
-          className="fixed inset-0 bg-slate-950/20 dark:bg-slate-950/50 z-40 lg:hidden transition-opacity print:hidden"
+          className="fixed inset-0 bg-slate-950/20 dark:bg-slate-950/50 z-40 2xl:hidden transition-opacity print:hidden"
           onClick={() => uiStore.openCopilot(false)}
+          aria-hidden="true"
         />
       )}
 
-      {/* Drawer Panel */}
-      <div
+      {/* Assistant Side-Rail: Floating overlay drawer on regular desktop, integrated rail on ultra-wide 2xl screens */}
+      <aside
         className={cn(
-          'fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white dark:bg-[#0b1329] border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-in-out print:hidden',
-          ui.isCopilotOpen ? 'translate-x-0' : 'translate-x-full'
+          'transition-all duration-300 ease-in-out print:hidden flex flex-col bg-white dark:bg-[#0b1329] border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50',
+          'fixed 2xl:relative top-0 right-0 h-full',
+          ui.isCopilotOpen
+            ? 'w-full sm:w-[380px] md:w-[400px] 2xl:w-[400px] shrink-0 translate-x-0 opacity-100'
+            : 'w-0 overflow-hidden translate-x-full 2xl:translate-x-0 2xl:w-0 border-l-0 opacity-0 pointer-events-none'
         )}
+        aria-label="Investigation Assistant Side Rail"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#070b14]">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-7 h-7 rounded-md bg-[#08B4ED]/10 text-[#08B4ED]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#070b14] shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center justify-center w-7 h-7 rounded-md bg-[#08B4ED]/10 text-[#08B4ED] shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                 Investigation Assistant
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
                 Evidence-Grounded AI Copilot
               </p>
             </div>
@@ -42,18 +47,19 @@ export const AIAssistantDrawer: React.FC = () => {
           <button
             type="button"
             onClick={() => uiStore.openCopilot(false)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer shrink-0"
             title="Close Assistant"
+            aria-label="Close Investigation Assistant"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0">
           <AIChat />
         </div>
-      </div>
+      </aside>
     </>
   );
 };

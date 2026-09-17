@@ -232,7 +232,7 @@ export const Sidebar: React.FC = () => {
             return (
               <div key={group.title || groupIdx} className="space-y-1">
                 {!ui.isSidebarCollapsed && group.title && (
-                  <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+                  <div className="px-3 py-1 text-xs font-semibold tracking-wider text-slate-600 dark:text-slate-400 uppercase">
                     {group.title}
                   </div>
                 )}
@@ -291,7 +291,7 @@ export const Sidebar: React.FC = () => {
                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
                   Forensic Pipeline
                 </p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                   Operational • Engine v2.4
                 </p>
               </div>

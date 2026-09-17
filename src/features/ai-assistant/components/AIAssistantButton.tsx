@@ -10,11 +10,11 @@ export const AIAssistantButton: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-5 right-6 z-40 print:hidden">
+    <div className="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 z-40 print:hidden">
       <button
         type="button"
         onClick={() => uiStore.openCopilot(true)}
-        className="flex items-center justify-center w-12 h-12 rounded-full bg-[#18BFFF] hover:bg-[#15aae6] ring-[6px] ring-[#18BFFF]/25 text-[#071A2B] shadow-lg transition-all cursor-pointer group"
+        className="flex items-center justify-center w-12 h-12 rounded-full bg-[#18BFFF] hover:bg-[#15aae6] ring-4 ring-[#18BFFF]/25 text-[#071A2B] shadow-xl hover:shadow-2xl hover:scale-105 transition-all cursor-pointer group"
         title="Open AI Investigation Copilot"
         aria-label="Open AI Investigation Copilot"
       >

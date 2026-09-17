@@ -38,43 +38,43 @@ export const SeverityBadge: React.FC<SeverityBadgeProps> = ({
       case 'CRITICAL':
       case 'MALICIOUS':
         return {
-          container: 'bg-[#0c1322] border-rose-500/40 text-rose-500 dark:text-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.12)]',
+          container: 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-500/40 text-rose-700 dark:text-rose-400',
           dot: 'bg-rose-500',
-          icon: <ShieldAlert className="w-3 h-3 text-rose-500" />,
+          icon: <ShieldAlert className="w-3 h-3 text-rose-600 dark:text-rose-400" />,
         };
       case 'HIGH':
         return {
-          container: 'bg-[#0c1322] border-orange-500/40 text-orange-500 dark:text-orange-400 shadow-[0_0_8px_rgba(249,115,22,0.12)]',
+          container: 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-500/40 text-orange-700 dark:text-orange-400',
           dot: 'bg-orange-500',
-          icon: <AlertTriangle className="w-3 h-3 text-orange-500" />,
+          icon: <AlertTriangle className="w-3 h-3 text-orange-600 dark:text-orange-400" />,
         };
       case 'MEDIUM':
       case 'SUSPICIOUS':
         return {
-          container: 'bg-[#0c1322] border-amber-500/40 text-amber-500 dark:text-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.12)]',
-          dot: 'bg-amber-400',
-          icon: <AlertCircle className="w-3 h-3 text-amber-400" />,
+          container: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-500/40 text-amber-700 dark:text-amber-400',
+          dot: 'bg-amber-500',
+          icon: <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />,
         };
       case 'LOW':
       case 'INFO':
         return {
-          container: 'bg-[#0c1322] border-[#08B4ED]/40 text-[#08B4ED]',
-          dot: 'bg-[#08B4ED]',
-          icon: <Info className="w-3 h-3 text-[#08B4ED]" />,
+          container: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-500/40 text-blue-700 dark:text-sky-300',
+          dot: 'bg-blue-500',
+          icon: <Info className="w-3 h-3 text-blue-600 dark:text-sky-400" />,
         };
       case 'SAFE':
       case 'BENIGN':
         return {
-          container: 'bg-[#0c1322] border-emerald-500/40 text-emerald-500 dark:text-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.12)]',
+          container: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400',
           dot: 'bg-emerald-500',
-          icon: <ShieldCheck className="w-3 h-3 text-emerald-400" />,
+          icon: <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />,
         };
       case 'INCONCLUSIVE':
       default:
         return {
-          container: 'bg-[#0c1322] border-slate-700/70 text-slate-400',
+          container: 'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300',
           dot: 'bg-slate-400',
-          icon: <HelpCircle className="w-3 h-3 text-slate-400" />,
+          icon: <HelpCircle className="w-3 h-3 text-slate-500 dark:text-slate-400" />,
         };
     }
   };

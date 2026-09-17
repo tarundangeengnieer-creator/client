@@ -209,11 +209,29 @@ export const CaseDetailPage: React.FC = () => {
 
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Case #{caseData.id}</h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[11px] font-semibold">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                    Case #{caseData.id.length > 12 ? `${caseData.id.slice(0, 8)}…` : caseData.id}
+                  </h1>
+                  {caseData.id.length > 12 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(caseData.id);
+                        uiStore.addToast('info', `Full Case UUID copied: ${caseData.id}`);
+                      }}
+                      title={`Copy full UUID: ${caseData.id}`}
+                      aria-label="Copy full Case UUID"
+                      className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-transparent border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold">
                   {caseData.verdict}
                 </span>
-                <span className={`px-2.5 py-0.5 rounded-full bg-transparent border text-[11px] font-semibold ${caseData.riskScore >= 80 ? 'border-rose-500/30 text-rose-600 dark:text-rose-400' : 'border-amber-500/30 text-amber-600 dark:text-amber-400'}`}>
+                <span className={`px-2.5 py-0.5 rounded-full bg-transparent border text-xs font-semibold ${caseData.riskScore >= 80 ? 'border-rose-500/30 text-rose-600 dark:text-rose-400' : 'border-amber-500/30 text-amber-600 dark:text-amber-400'}`}>
                   Risk: {caseData.riskScore}
                 </span>
               </div>
@@ -233,7 +251,16 @@ export const CaseDetailPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-slate-400 dark:text-slate-500">Received: </span>
-                  <span className="text-slate-700 dark:text-slate-300">{new Date(caseData.timestamp).toLocaleString()}</span>
+                  <span className="text-slate-700 dark:text-slate-300">
+                    {new Date(caseData.timestamp).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    }).replace(' AM', ' am').replace(' PM', ' pm')}
+                  </span>
                 </div>
                 <div>
                   <span className="text-slate-400 dark:text-slate-500">Status: </span>
@@ -249,7 +276,7 @@ export const CaseDetailPage: React.FC = () => {
               type="button"
               onClick={handleReinvestigate}
               disabled={isReinvestigating}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white dark:bg-[#0e1627] hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+              className="h-9 px-3.5 flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
             >
               <RotateCw className={`w-3.5 h-3.5 ${isReinvestigating ? 'animate-spin text-blue-600' : ''}`} />
               <span>Re-investigate</span>
@@ -260,7 +287,7 @@ export const CaseDetailPage: React.FC = () => {
               id="btn-download-report-pdf"
               onClick={handleDownloadMainReport}
               disabled={isDownloadingPdf}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer disabled:opacity-60"
+              className="h-9 px-3.5 flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors shadow-xs cursor-pointer disabled:opacity-60"
               title="Download Main Exact Forensic Report (NIST SP 800-86)"
             >
               <FileDown className={`w-3.5 h-3.5 ${isDownloadingPdf ? 'animate-bounce' : ''}`} />
@@ -345,7 +372,7 @@ export const CaseDetailPage: React.FC = () => {
                     <div className="text-xs font-bold text-slate-900 dark:text-white">
                       Key Threat: <span className="text-rose-600 dark:text-rose-400">Impersonation + Credential Theft</span>
                     </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-snug">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-snug">
                       Targeted credentials harvester mimicking official PayPal payment dispute workflow.
                     </p>
                   </div>
@@ -380,7 +407,7 @@ export const CaseDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-xs text-slate-400 dark:text-slate-500 flex items-center justify-between">
                 <span>Investigation Engine: ASH-Adaptive v3.2</span>
                 <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">8 Tools Executed</span>
               </div>
@@ -394,7 +421,14 @@ export const CaseDetailPage: React.FC = () => {
                     <Shield className="w-4 h-4 text-blue-600 dark:text-sky-400" />
                     <h3 className="font-bold text-slate-900 dark:text-white text-sm">Key Findings</h3>
                   </div>
-                  <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">6 Items</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('findings')}
+                    className="text-xs font-semibold text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>View All Findings</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
 
                 {/* 6 Key Findings */}
@@ -497,14 +531,10 @@ export const CaseDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('findings')}
-                className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-sky-400 hover:text-blue-700 transition-colors cursor-pointer"
-              >
-                <span>View All Findings</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-xs text-slate-400 dark:text-slate-500 flex items-center justify-between">
+                <span>All 6 indicators correlated</span>
+                <span className="text-rose-600 dark:text-rose-400 font-semibold">High confidence</span>
+              </div>
             </div>
 
             {/* Col 3: Threat Preview with Segmented Mode Switcher */}
@@ -522,11 +552,11 @@ export const CaseDetailPage: React.FC = () => {
                 </div>
 
                 {/* Segmented view mode buttons */}
-                <div className="mt-3 flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px]">
+                <div className="mt-3 flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
                   <button
                     type="button"
                     onClick={() => setThreatPreviewMode('rendered')}
-                    className={`flex-1 py-1 px-2 rounded-md font-medium text-center transition-colors cursor-pointer ${
+                    className={`flex-1 h-7 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer text-xs ${
                       threatPreviewMode === 'rendered'
                         ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-xs font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -537,7 +567,7 @@ export const CaseDetailPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setThreatPreviewMode('text')}
-                    className={`flex-1 py-1 px-2 rounded-md font-medium text-center transition-colors cursor-pointer ${
+                    className={`flex-1 h-7 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer text-xs ${
                       threatPreviewMode === 'text'
                         ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-xs font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -548,7 +578,7 @@ export const CaseDetailPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setThreatPreviewMode('raw')}
-                    className={`flex-1 py-1 px-2 rounded-md font-medium text-center transition-colors cursor-pointer ${
+                    className={`flex-1 h-7 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer text-xs ${
                       threatPreviewMode === 'raw'
                         ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-xs font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -562,7 +592,7 @@ export const CaseDetailPage: React.FC = () => {
                 {threatPreviewMode === 'rendered' && (
                   <div className="mt-3 p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 text-xs space-y-3 font-sans">
                     {/* Email headers */}
-                    <div className="space-y-1 pb-2.5 border-b border-slate-200/80 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                    <div className="space-y-1 pb-2.5 border-b border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-mono">
                       <p>
                         <strong className="text-slate-700 dark:text-slate-300 font-sans">From:</strong> PayPal Support &lt;support@paypal1-secure.com&gt;
                       </p>
@@ -586,22 +616,29 @@ export const CaseDetailPage: React.FC = () => {
 
                       <h4 className="font-bold text-slate-900 dark:text-white text-xs">Payment Confirmation Required</h4>
 
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                         Dear customer, We detected an unusual transaction of $349.00 USD on your account. If you did not authorize this, please review and cancel the invoice immediately.
                       </p>
 
-                      {/* Phishing Call to Action */}
+                      {/* Phishing Call to Action - Sandboxed & Muted with warning indicator */}
                       <div className="pt-1">
-                        <button
-                          type="button"
-                          onClick={() => uiStore.addToast('warning', 'Live click intercepted: URL points to phishing harvester!')}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-bold transition-colors cursor-pointer shadow-xs"
-                        >
-                          View Invoice
-                        </button>
+                        <div className="inline-flex items-center gap-2 p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                          <button
+                            type="button"
+                            onClick={() => uiStore.addToast('warning', 'Live click intercepted: URL points to phishing harvester!')}
+                            className="h-8 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-md text-xs font-medium transition-colors cursor-pointer"
+                            title="Untrusted simulated phishing link"
+                          >
+                            View Invoice
+                          </button>
+                          <span className="text-xs font-medium text-amber-700 dark:text-amber-300 flex items-center gap-1 pr-1.5">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                            Phishing Link (Sandboxed)
+                          </span>
+                        </div>
                       </div>
 
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <p className="text-xs text-slate-400 dark:text-slate-500 pt-1 border-t border-slate-100 dark:border-slate-800">
                         PayPal Pte. Ltd. All rights reserved.
                       </p>
                     </div>
@@ -609,7 +646,7 @@ export const CaseDetailPage: React.FC = () => {
                 )}
 
                 {threatPreviewMode === 'text' && (
-                  <div className="mt-3 p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                  <div className="mt-3 p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
 {`From: PayPal Support <support@paypal1-secure.com>
 To: user@company.com
 Subject: Invoice Payment Update - Action Required
@@ -628,7 +665,7 @@ PayPal Security & Fraud Department`}
                 )}
 
                 {threatPreviewMode === 'raw' && (
-                  <div className="mt-3 p-3 rounded-xl bg-slate-900 text-slate-300 font-mono text-[10px] overflow-x-auto max-h-48 border border-slate-800">
+                  <div className="mt-3 p-3 rounded-xl bg-slate-900 text-slate-300 font-mono text-xs overflow-x-auto max-h-48 border border-slate-800">
                     <pre>{`Return-Path: <bounce@paypal1-secure.com>
 Received: from mail.paypal1-secure.com (185.220.101.5)
  by mx.company.com with ESMTP id 9X29A78
@@ -650,7 +687,7 @@ Authentication-Results: mx.company.com;
                 <div className="flex items-center gap-2 min-w-0">
                   <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                    <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
                       Suspicious URL Detected
                     </div>
                     <div className="text-xs font-mono text-slate-900 dark:text-white truncate">
@@ -662,9 +699,9 @@ Authentication-Results: mx.company.com;
                 <button
                   type="button"
                   onClick={handleCopyUrl}
-                  className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[11px] font-semibold flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                  className="h-7 px-2.5 rounded-md bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
                 >
-                  {copiedUrl ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                  {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedUrl ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
@@ -699,9 +736,9 @@ Authentication-Results: mx.company.com;
                       <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm shadow-xs mb-1.5">
                         🇮🇳
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Sender IP</span>
-                      <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 truncate">103.21.244.88</p>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400">India</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Sender IP</span>
+                      <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">103.21.244.88</p>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">India</span>
                     </div>
 
                     <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
@@ -711,9 +748,9 @@ Authentication-Results: mx.company.com;
                       <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm shadow-xs mb-1.5">
                         🇸🇬
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Relay</span>
-                      <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 truncate">45.117.12.34</p>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Singapore</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Relay</span>
+                      <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">45.117.12.34</p>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Singapore</span>
                     </div>
 
                     <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
@@ -723,15 +760,15 @@ Authentication-Results: mx.company.com;
                       <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm shadow-xs mb-1.5">
                         🇩🇪
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Destination</span>
-                      <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 truncate">185.112.36.21</p>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Germany</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Destination</span>
+                      <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">185.112.36.21</p>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Germany</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-3 pt-2 text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
+              <div className="mt-3 pt-2 text-xs text-slate-400 dark:text-slate-500 flex items-center justify-between">
                 <span>Multi-hop proxy chain detected</span>
                 <span className="text-rose-500 font-semibold font-mono">AS205100 (Tor)</span>
               </div>
@@ -783,7 +820,7 @@ Authentication-Results: mx.company.com;
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-[11px] text-slate-400 dark:text-slate-500">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-xs text-slate-400 dark:text-slate-500">
                 Calculated across 42 SIEM heuristical vectors
               </div>
             </div>
@@ -802,9 +839,9 @@ Authentication-Results: mx.company.com;
                   <button
                     type="button"
                     onClick={() => uiStore.addToast('success', 'Sender domain added to CDGI SOC Watchlist')}
-                    className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group cursor-pointer"
+                    className="h-9 px-3 w-full flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group cursor-pointer"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <Bookmark className="w-4 h-4 text-slate-500 group-hover:text-blue-600 dark:group-hover:text-sky-400" />
                       <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-sky-400">
                         Add to Watchlist
@@ -819,9 +856,9 @@ Authentication-Results: mx.company.com;
                       uiStore.navigate('/inbox');
                       uiStore.addToast('info', 'Searching inbox for similar sender pattern...');
                     }}
-                    className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group cursor-pointer"
+                    className="h-9 px-3 w-full flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group cursor-pointer"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <Search className="w-4 h-4 text-slate-500 group-hover:text-blue-600 dark:group-hover:text-sky-400" />
                       <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-sky-400">
                         Search Similar Emails
@@ -833,9 +870,9 @@ Authentication-Results: mx.company.com;
                   <button
                     type="button"
                     onClick={() => setActiveTab('report')}
-                    className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group cursor-pointer"
+                    className="h-9 px-3 w-full flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group cursor-pointer"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <FileText className="w-4 h-4 text-slate-500 group-hover:text-blue-600 dark:group-hover:text-sky-400" />
                       <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-sky-400">
                         Create Investigation Report
@@ -846,7 +883,7 @@ Authentication-Results: mx.company.com;
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-[11px] text-slate-400 dark:text-slate-500">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-xs text-slate-400 dark:text-slate-500">
                 Recommended playbook: Quarantine & Firewall Block
               </div>
             </div>
@@ -883,7 +920,7 @@ Authentication-Results: mx.company.com;
             <h3 className="font-bold text-slate-900 dark:text-white text-base">Observed Forensic Evidence</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">Raw email artifacts, headers, and extracted indicators</p>
           </div>
-          <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+          <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
 {`Return-Path: <bounce@paypal1-secure.com>
 Received: from mail.paypal1-secure.com (185.220.101.5)
  by mx.company.com with ESMTP id 9X29A78

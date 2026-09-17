@@ -41,15 +41,18 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       {/* Left Full-Height Dark Sidebar matching Image 1 */}
       <Sidebar />
 
-      {/* Right Main Content Column */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#f4f7fb] dark:bg-[#070b14] print:h-auto print:overflow-visible print:bg-white">
-        {/* Top Header Bar matching Image 1 and Image 2 */}
-        <AppTopBar />
+      {/* Right Main Area: Content Column + Dedicated Non-Overlapping Assistant Rail */}
+      <div className="flex-1 flex flex-row min-w-0 h-full overflow-hidden bg-[#f4f7fb] dark:bg-[#070b14] print:h-auto print:overflow-visible print:bg-white relative">
+        {/* Main Content Column (TopBar + Scrollable View Area) */}
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+          <AppTopBar />
+          <main tabIndex={-1} className="flex-1 overflow-y-auto min-w-0 bg-[#f4f7fb] dark:bg-[#070b14] relative print:overflow-visible print:bg-white print:h-auto focus:outline-none outline-none">
+            {children}
+          </main>
+        </div>
 
-        {/* Scrollable View Area */}
-        <main tabIndex={-1} className="flex-1 overflow-y-auto min-w-0 bg-[#f4f7fb] dark:bg-[#070b14] relative print:overflow-visible print:bg-white print:h-auto focus:outline-none outline-none">
-          {children}
-        </main>
+        {/* Dedicated Assistant Side-Rail (Integrated into Grid, pushes content) */}
+        <AIAssistantDrawer />
       </div>
 
       {/* Modals and Floating Feedback Overlays */}
@@ -57,7 +60,6 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <GlobalSearchModal />
         <ToastContainer />
         <AIAssistantButton />
-        <AIAssistantDrawer />
       </div>
 
       {/* Keyboard Shortcuts Help Modal */}
