@@ -19,8 +19,7 @@ export interface ActiveThreatsData {
 }
 
 interface ThreatDistributionPieChartProps {
-  threatPeriod: '24h' | '7d' | '14d' | '30d';
-  onPeriodChange: (period: '24h' | '7d' | '14d' | '30d') => void;
+  threatPeriod: '24h' | '7d' | '30d' | '90d' | 'custom';
   activeThreats: ActiveThreatsData;
 }
 
@@ -37,7 +36,6 @@ interface SliceItem {
 
 export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProps> = ({
   threatPeriod,
-  onPeriodChange,
   activeThreats,
 }) => {
   const [hoveredSlice, setHoveredSlice] = useState<SliceItem['id'] | null>(null);
@@ -195,24 +193,6 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
                 <PieChartIcon className="w-3.5 h-3.5" />
                 <span>Pie</span>
               </button>
-            </div>
-
-            {/* Timeframe Switcher: 24h, 7d, 14d, 30d */}
-            <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              {(['24h', '7d', '14d', '30d'] as const).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => onPeriodChange(r)}
-                  className={`min-h-[26px] px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                    threatPeriod === r
-                      ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-bold'
-                      : 'hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-slate-300'
-                  }`}
-                >
-                  {r.toUpperCase()}
-                </button>
-              ))}
             </div>
           </div>
         </div>

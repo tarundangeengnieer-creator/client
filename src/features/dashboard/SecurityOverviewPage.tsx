@@ -38,13 +38,10 @@ export const SecurityOverviewPage: React.FC = () => {
     day: 'numeric',
   }).format(new Date());
 
-  const [threatPeriod, setThreatPeriod] = useState<'24h' | '7d' | '14d' | '30d'>('30d');
-  const [selectedGeoPeriod, setSelectedGeoPeriod] = useState('Last 30 days');
-  const [selectedBrandPeriod, setSelectedBrandPeriod] = useState('Last 30 days');
-  const [selectedTypePeriod, setSelectedTypePeriod] = useState('Last 30 days');
+  const [globalTimeRange, setGlobalTimeRange] = useState<'24h' | '7d' | '30d' | '90d' | 'custom'>('7d');
 
   const threatTimeframeData: Record<
-    '24h' | '7d' | '14d' | '30d',
+    '24h' | '7d' | '30d' | '90d' | 'custom',
     {
       malicious: { count: number; pct: number };
       suspicious: { count: number; pct: number };
@@ -79,17 +76,6 @@ export const SecurityOverviewPage: React.FC = () => {
       postureBorder: 'border-amber-500/30',
       note: 'Mid-week surge in deceptive banking notification emails contained.',
     },
-    '14d': {
-      malicious: { count: 35, pct: 33 },
-      suspicious: { count: 48, pct: 45 },
-      benign: { count: 18, pct: 17 },
-      inconclusive: { count: 5, pct: 5 },
-      posture: 'Elevated',
-      postureColor: 'text-rose-700 dark:text-rose-400',
-      postureBg: 'bg-transparent',
-      postureBorder: 'border-rose-500/30',
-      note: 'Most recent increase is associated with credential-phishing and malicious URL activity.',
-    },
     '30d': {
       malicious: { count: 48, pct: 33 },
       suspicious: { count: 67, pct: 46 },
@@ -101,9 +87,31 @@ export const SecurityOverviewPage: React.FC = () => {
       postureBorder: 'border-rose-500/30',
       note: '30-day baseline shows steady threat containment with 78% automated triage rate.',
     },
+    '90d': {
+      malicious: { count: 145, pct: 34 },
+      suspicious: { count: 192, pct: 45 },
+      benign: { count: 70, pct: 16 },
+      inconclusive: { count: 21, pct: 5 },
+      posture: 'Elevated',
+      postureColor: 'text-rose-700 dark:text-rose-400',
+      postureBg: 'bg-transparent',
+      postureBorder: 'border-rose-500/30',
+      note: 'Quarterly review indicates sustained high volume of credential phishing attacks.',
+    },
+    'custom': {
+      malicious: { count: 48, pct: 33 },
+      suspicious: { count: 67, pct: 46 },
+      benign: { count: 25, pct: 17 },
+      inconclusive: { count: 6, pct: 4 },
+      posture: 'Elevated',
+      postureColor: 'text-rose-700 dark:text-rose-400',
+      postureBg: 'bg-transparent',
+      postureBorder: 'border-rose-500/30',
+      note: 'Custom range data aligns with 30-day baseline trend.',
+    },
   };
 
-  const activeThreats = threatTimeframeData[threatPeriod];
+  const activeThreats = threatTimeframeData[globalTimeRange];
 
   // AI Assistant state
   const [aiPrompt, setAiPrompt] = useState('');
@@ -161,9 +169,26 @@ export const SecurityOverviewPage: React.FC = () => {
       {/* Header with Title, Status and Aligned Primary Actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 mb-6 border-b border-slate-200/80 dark:border-slate-800/80">
         <div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3"><h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>Active Operations Overview</span>
-          </h1><button type="button" onClick={() => uiStore.navigate('/inbox')} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"><Mail className="w-3.5 h-3.5" /><span>Triage Queue</span><span className="ml-0.5 px-1.5 py-0.5 bg-blue-700/80 border border-blue-400/30 text-white rounded-full text-xs font-mono font-bold">24</span></button></div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>Security Overview</span>
+            </h1>
+            <div className="relative inline-block ml-2">
+              <select
+                value={globalTimeRange}
+                onChange={(e) => setGlobalTimeRange(e.target.value as any)}
+                className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0c1322] text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+                <option value="custom">Custom Range</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <button type="button" onClick={() => uiStore.navigate('/inbox')} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"><Mail className="w-3.5 h-3.5" /><span>Triage Queue</span><span className="ml-0.5 px-1.5 py-0.5 bg-blue-700/80 border border-blue-400/30 text-white rounded-full text-xs font-mono font-bold">24</span></button>
+          </div>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
             Welcome back, <span className="text-slate-800 dark:text-slate-100 font-medium">{username}</span> • CDGI SOC Partition • Security Posture is{' '}
             <span className={`font-semibold ${activeThreats.postureColor}`}>
@@ -175,7 +200,6 @@ export const SecurityOverviewPage: React.FC = () => {
 
         <div className="flex items-center gap-2.5 shrink-0 self-start md:self-center">
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0c1322] text-xs font-medium text-slate-600 dark:text-slate-400 shadow-2xs"> <Clock className="w-3.5 h-3.5 text-slate-400" /> <span>{currentDateFormatted}</span> </div>
-
         </div>
       </div>
 
@@ -402,13 +426,12 @@ export const SecurityOverviewPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6 [&>*]:min-w-0">
         {/* Threat Distribution Pie Chart Card */}
         <ThreatDistributionPieChart
-          threatPeriod={threatPeriod}
-          onPeriodChange={setThreatPeriod}
+          threatPeriod={globalTimeRange}
           activeThreats={activeThreats}
         />
 
         {/* Dynamic Email Volume Trend Card */}
-        <DynamicEmailVolumeGraph />
+        <DynamicEmailVolumeGraph timeRange={globalTimeRange} />
       </div>
 
       {/* 3. THREAT GEOLOCATION & RECENT CASES SECTION */}
@@ -422,22 +445,6 @@ export const SecurityOverviewPage: React.FC = () => {
                   <Globe className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                 </span>
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">Geolocation of Malicious Senders</h3>
-              </div>
-              <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
-                {(['7d', '30d', '90d'] as const).map((period) => (
-                  <button
-                    key={period}
-                    type="button"
-                    onClick={() => setSelectedGeoPeriod(period)}
-                    className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                      selectedGeoPeriod === period
-                        ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                    }`}
-                  >
-                    {period.toUpperCase()}
-                  </button>
-                ))}
               </div>
             </div>
 
@@ -707,22 +714,6 @@ export const SecurityOverviewPage: React.FC = () => {
               </span>
               <h3 className="font-bold text-slate-900 dark:text-white text-sm">Top Threat Types</h3>
             </div>
-            <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
-              {(['7d', '30d', '90d'] as const).map((period) => (
-                <button
-                  key={period}
-                  type="button"
-                  onClick={() => setSelectedTypePeriod(period)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    selectedTypePeriod === period
-                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                  }`}
-                >
-                  {period.toUpperCase()}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="space-y-3.5 mt-4 text-xs">
@@ -776,22 +767,6 @@ export const SecurityOverviewPage: React.FC = () => {
                 <Shield className="w-4 h-4" />
               </span>
               <h3 className="font-bold text-slate-900 dark:text-white text-sm">Top Targeted Brands</h3>
-            </div>
-            <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
-              {(['7d', '30d', '90d'] as const).map((period) => (
-                <button
-                  key={period}
-                  type="button"
-                  onClick={() => setSelectedBrandPeriod(period)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    selectedBrandPeriod === period
-                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                  }`}
-                >
-                  {period.toUpperCase()}
-                </button>
-              ))}
             </div>
           </div>
 

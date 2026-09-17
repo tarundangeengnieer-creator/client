@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export type TimeRange = '24h' | '7d' | '14d' | '30d';
+export type TimeRange = '24h' | '7d' | '30d' | '90d' | 'custom';
 export type ViewMode = 'telemetry' | 'trend';
 
 export interface DefenderTelemetryPoint {
@@ -104,9 +104,8 @@ function createSmoothPath(points: { x: number; y: number }[]): string {
   return path;
 }
 
-export const DynamicEmailVolumeGraph: React.FC = () => {
+export const DynamicEmailVolumeGraph: React.FC<{ timeRange: '24h' | '7d' | '30d' | '90d' | 'custom' }> = ({ timeRange }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [timeRange, setTimeRange] = useState<TimeRange>('14d');
   const [viewMode, setViewMode] = useState<ViewMode>('telemetry');
   const [trafficFilter, setTrafficFilter] = useState<'all' | 'threats'>('all');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -140,10 +139,10 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
       case '7d':
         return DEFENDER_DATA_7D;
       case '30d':
-        return DEFENDER_DATA_30D;
-      case '14d':
+      case '90d':
+      case 'custom':
       default:
-        return DEFENDER_DATA_14D;
+        return DEFENDER_DATA_30D;
     }
   }, [timeRange]);
 
@@ -709,27 +708,7 @@ export const DynamicEmailVolumeGraph: React.FC = () => {
           </button>
         </div>
 
-        {/* Timeframe Switcher: 24h, 7d, 14d, 30d */}
-        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
-          {(['24h', '7d', '14d', '30d'] as TimeRange[]).map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setTimeRange(r);
-                setHoveredIndex(null);
-              }}
-              className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
-                timeRange === r
-                  ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-sky-400 shadow-2xs font-bold'
-                  : 'hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-slate-300'
-              }`}
-            >
-              {r.toUpperCase()}
-            </button>
-          ))}
-        </div>
+
       </div>
     </div>
   );
