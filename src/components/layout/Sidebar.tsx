@@ -263,7 +263,7 @@ export const Sidebar: React.FC = () => {
                       </div>
                       {!ui.isSidebarCollapsed && item.badge !== undefined && (
                         <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full font-mono transition-colors shrink-0 ${
+                          className={`text-xs font-bold px-1.5 py-0.5 rounded-full font-mono transition-colors shrink-0 ${
                             active
                               ? 'bg-transparent border border-blue-600/30 text-blue-700 dark:border-sky-400/30 dark:text-sky-400'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60'
@@ -306,3 +306,4 @@ export const Sidebar: React.FC = () => {
     </aside>
   );
 };
+

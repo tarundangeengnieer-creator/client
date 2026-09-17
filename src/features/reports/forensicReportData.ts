@@ -64,7 +64,7 @@ export const EXACT_REPORT_DATA = {
   division: 'ASHIELDER / FORENSIC INTELLIGENCE DIVISION',
   verdictBadge: 'VERDICT: MALICIOUS • SCORE: 91 / 100',
   notice: 'NOTICE: DEMO REPORT — NOT FOR REAL-WORLD EVIDENCE',
-  title: 'FORENSIC INVESTIGATION REPORT',
+  title: 'Forensic Investigation Report',
   subtitle: 'Automated MIME Ingestion, Cryptographic Custody, Protocol Alignment & Multi-Vector Threat Analysis',
 
   metadata: {
@@ -1405,3 +1405,4 @@ export function generateStandaloneReportHtml(customData?: typeof EXACT_REPORT_DA
 </body>
 </html>`;
 }
+

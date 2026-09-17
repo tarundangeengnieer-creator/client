@@ -158,13 +158,13 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xs sm:text-sm tracking-tight text-slate-900 dark:text-white font-sans">
-                    ASHIELDER FORENSICS
+                    Ashielder Forensics
                   </span>
-                  <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <span className="text-xs uppercase font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                     NIST SP 800-86
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-mono">
                   <span>
                     CASE: <strong className="text-slate-800 dark:text-slate-200">{d.metadata.caseId}</strong>
                   </span>
@@ -182,7 +182,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveSectionDropdown(!activeSectionDropdown)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-700 cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold border border-transparent shadow-sm cursor-pointer transition-colors"
               >
                 <span>Jump to Section</span>
                 <ChevronDown className="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                   className="absolute right-0 mt-1 w-64 max-h-96 overflow-y-auto bg-white dark:bg-[#0e172a] border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 z-50 text-xs font-medium font-sans"
                   onMouseLeave={() => setActiveSectionDropdown(false)}
                 >
-                  <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+                  <div className="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
                     Forensic Dossier Sections
                   </div>
                   {sectionsNav.map((sec) => (
@@ -255,20 +255,22 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
       {/* =========================================================================
           EXACT REPORT DOCUMENT CANVAS (High-Fidelity Clone)
           ========================================================================= */}
-      <main id="exact-forensic-report-main" className="max-w-4xl mx-auto mt-4 sm:mt-6 px-4 sm:px-8 py-8 sm:py-12 bg-white dark:bg-[#0b1322] border border-slate-200 dark:border-slate-800 shadow-lg rounded-sm print:m-0 print:p-0 print:border-none print:shadow-none print:max-w-none print:bg-white print:text-black">
+      <main id="exact-forensic-report-main" className="max-w-4xl mx-auto mt-4 sm:mt-6 pl-4 pr-16 sm:px-8 py-8 sm:py-12 bg-white dark:bg-[#0b1322] border border-slate-200 dark:border-slate-800 shadow-lg rounded-sm print:m-0 print:p-0 print:border-none print:shadow-none print:max-w-none print:bg-white print:text-black">
         {/* =======================================================================
             PAGE 1: COVER, METADATA, ABSTRACT, 1.0 COVER / CASE SUMMARY, 2.0 PART 1
             ======================================================================= */}
-        <section id="sec-cover" className="mb-8">
+        <section
+          id="sec-cover"
+          className="mb-8 scroll-mt-24">
           {/* Header Row */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4">
             <div>
-              <div className="text-[11px] font-bold tracking-wider text-slate-500 dark:text-slate-400 font-mono uppercase">
+              <div className="text-xs font-bold tracking-wider text-slate-500 dark:text-slate-400 font-mono uppercase">
                 {d.division}
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1 font-sans">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1 font-sans">
                 {d.title}
-              </h1>
+              </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-sans">
                 {d.subtitle}
               </p>
@@ -346,9 +348,9 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-abstract"
           className={`mb-8 p-4 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 transition-all ${
             highlightedId === 'sec-abstract' ? 'ring-2 ring-blue-500' : ''
-          }`}
+          } scroll-mt-24`}
         >
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 font-sans">
+          <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 font-sans">
             FORMAL FORENSIC ABSTRACT
           </div>
           <div className="font-serif text-sm leading-relaxed text-slate-800 dark:text-slate-200 text-justify">
@@ -369,26 +371,26 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-1-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-1-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-block bg-black text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
               1.0
             </span>
-            <h2 className="font-sans font-bold text-sm tracking-wide text-slate-900 dark:text-white uppercase">
-              COVER / CASE SUMMARY
+            <h2 className="font-sans font-bold text-sm tracking-wide text-slate-900 dark:text-white">
+              Cover / Case Summary
             </h2>
           </div>
 
           <div className="p-4 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
               TRIAGE & SIGNAL IDENTIFICATION:
             </div>
             <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed mb-4">
               {d.triageSummary}
             </p>
 
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               KEY FINDINGS & DIRECT EVIDENCE CORROBORATION:
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -407,14 +409,14 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     >
                       {finding.id} {finding.status}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-xs text-slate-400 font-mono">
                       &rarr; {finding.ref}
                     </span>
                   </div>
                   <div className="font-bold text-xs text-slate-900 dark:text-white">
                     {finding.title}
                   </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {finding.desc}
                   </div>
                 </div>
@@ -430,7 +432,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-2-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-2-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-block bg-black text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
@@ -451,7 +453,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                 <span>&bull;</span>
                 <span>{d.executive.verdict}</span>
               </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {d.executive.verdictSub}
               </span>
             </div>
@@ -466,7 +468,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                   {d.executive.riskMax}
                 </span>
               </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {d.executive.riskSub}
               </span>
             </div>
@@ -478,7 +480,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               <div className="text-base font-extrabold text-slate-900 dark:text-white my-1">
                 {d.executive.confidence}
               </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {d.executive.confidenceSub}
               </span>
             </div>
@@ -488,11 +490,11 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                 PRIMARY THREAT TYPE
               </span>
               <div className="my-1.5">
-                <span className="inline-block px-2 py-0.5 rounded text-[11px] font-semibold bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30">
                   {d.executive.threatType}
                 </span>
               </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {d.executive.threatSub}
               </span>
             </div>
@@ -500,14 +502,14 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           {/* Narrative & Flags Box */}
           <div className="p-4 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
               EXECUTIVE SYNTHESIS & CASE NARRATIVE:
             </div>
             <p className="font-serif text-xs leading-relaxed text-slate-800 dark:text-slate-200 text-justify mb-4">
               {d.executive.narrative}
             </p>
 
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               WHY ASHIELDER FLAGGED THIS EMAIL:
             </div>
             <ul className="space-y-1 text-xs text-slate-800 dark:text-slate-200 mb-4">
@@ -528,7 +530,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                   key={ev}
                   type="button"
                   onClick={() => scrollToAnchor('sec-4-0')}
-                  className="px-1.5 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono text-[11px] hover:border-blue-400 cursor-pointer transition-colors"
+                  className="px-1.5 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 font-mono text-xs hover:border-blue-500 hover:underline cursor-pointer transition-colors"
                 >
                   {ev}
                 </button>
@@ -544,7 +546,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-3-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-3-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-block bg-black text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
@@ -592,13 +594,13 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           {/* Pipeline Breadcrumbs */}
           <div className="p-3.5 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               FORENSIC PROCESSING PIPELINE:
             </div>
             <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300">
               {d.methodology.pipeline.map((step, idx) => (
                 <React.Fragment key={step}>
-                  <span className="px-2 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-xs">
                     {step}
                   </span>
                   {idx < d.methodology.pipeline.length - 1 && (
@@ -617,7 +619,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-4-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-4-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -635,15 +637,15 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-md">
             <table className="w-full text-left text-xs border-collapse font-sans">
-              <thead className="bg-slate-50 dark:bg-[#08101d] text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-[#08101d] text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="py-2.5 px-3">EVIDENCE ID</th>
-                  <th className="py-2.5 px-3">TYPE</th>
-                  <th className="py-2.5 px-3">DESCRIPTION</th>
-                  <th className="py-2.5 px-3">SOURCE</th>
-                  <th className="py-2.5 px-3">SHA-256 CHECKSUM (DEMO)</th>
-                  <th className="py-2.5 px-3">ACQUIRED</th>
-                  <th className="py-2.5 px-3">STATUS</th>
+                  <th className="py-3 px-4 leading-relaxed">EVIDENCE ID</th>
+                  <th className="py-3 px-4 leading-relaxed">TYPE</th>
+                  <th className="py-3 px-4 leading-relaxed">DESCRIPTION</th>
+                  <th className="py-3 px-4 leading-relaxed">SOURCE</th>
+                  <th className="py-3 px-4 leading-relaxed">SHA-256 CHECKSUM (DEMO)</th>
+                  <th className="py-3 px-4 leading-relaxed">ACQUIRED</th>
+                  <th className="py-3 px-4 leading-relaxed">STATUS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-[#0b1322]">
@@ -653,23 +655,23 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     id={`artifact-${e.id.replace(/[[\]]/g, '')}`}
                     className="hover:bg-slate-50/80 dark:hover:bg-[#0e192c]/50 transition-colors"
                   >
-                    <td className="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-white">
+                    <td className="py-3 px-4 leading-relaxed font-mono font-bold text-slate-900 dark:text-white">
                       {e.id}
                     </td>
-                    <td className="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
                       {e.type}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 max-w-xs">
+                    <td className="py-3 px-4 leading-relaxed text-slate-600 dark:text-slate-300 max-w-xs">
                       {e.description}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {e.source}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => copyToClipboard(e.sha256, e.id)}
-                        className="hover:text-blue-500 flex items-center gap-1 cursor-pointer"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline flex items-center gap-1 cursor-pointer"
                         title="Click to copy hash"
                       >
                         <span>{e.sha256}</span>
@@ -680,11 +682,11 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                         )}
                       </button>
                     </td>
-                    <td className="py-2.5 px-3 text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {e.acquired}
                     </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <td className="py-3 px-4 leading-relaxed whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {e.status}
                       </span>
                     </td>
@@ -693,7 +695,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               </tbody>
             </table>
           </div>
-          <div className="text-[10px] text-slate-400 italic mt-1.5 font-sans">
+          <div className="text-xs text-slate-400 italic mt-1.5 font-sans">
             Notice: All hashes are synthetic DEMO HASH VALUES used to illustrate cryptographic custody and state verification.
           </div>
         </section>
@@ -705,7 +707,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-5-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-5-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-block bg-black text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
@@ -717,13 +719,13 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           </div>
 
           <div className="p-3.5 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 mb-3">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               LINEAR FORENSIC CUSTODY FLOW:
             </div>
             <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300">
               {d.custodyFlow.map((step, idx) => (
                 <React.Fragment key={step}>
-                  <span className="px-2 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-[11px]">
+                  <span className="px-2 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-xs">
                     {step}
                   </span>
                   {idx < d.custodyFlow.length - 1 && (
@@ -736,13 +738,13 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-md">
             <table className="w-full text-left text-xs border-collapse font-sans">
-              <thead className="bg-slate-50 dark:bg-[#08101d] text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-[#08101d] text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="py-2.5 px-3">TIMESTAMP (UTC)</th>
-                  <th className="py-2.5 px-3">ACTION / EVENT</th>
-                  <th className="py-2.5 px-3">ACTOR</th>
-                  <th className="py-2.5 px-3">EVIDENCE REF</th>
-                  <th className="py-2.5 px-3">RESULTING STATE / STATUS</th>
+                  <th className="py-3 px-4 leading-relaxed">TIMESTAMP (UTC)</th>
+                  <th className="py-3 px-4 leading-relaxed">ACTION / EVENT</th>
+                  <th className="py-3 px-4 leading-relaxed">ACTOR</th>
+                  <th className="py-3 px-4 leading-relaxed">EVIDENCE REF</th>
+                  <th className="py-3 px-4 leading-relaxed">RESULTING STATE / STATUS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-[#0b1322]">
@@ -751,19 +753,19 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     key={idx}
                     className="hover:bg-slate-50/80 dark:hover:bg-[#0e192c]/50 transition-colors"
                   >
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {c.timestamp}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-800 dark:text-slate-200 font-medium">
+                    <td className="py-3 px-4 leading-relaxed text-slate-800 dark:text-slate-200 font-medium">
                       {c.action}
                     </td>
-                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-bold text-slate-900 dark:text-white whitespace-nowrap">
                       {c.actor}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-xs text-slate-700 dark:text-slate-300">
                       {c.evidenceRef}
                     </td>
-                    <td className="py-2.5 px-3 text-[11px] text-slate-600 dark:text-slate-400">
+                    <td className="py-3 px-4 leading-relaxed text-xs text-slate-600 dark:text-slate-400">
                       {c.resultingState}
                     </td>
                   </tr>
@@ -780,7 +782,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-6-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-6-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -798,33 +800,33 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           <div className="p-3.5 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3 font-sans">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 block uppercase">FROM:</span>
+              <span className="text-xs font-bold text-slate-400 block uppercase">FROM:</span>
               <span className="font-mono text-slate-800 dark:text-slate-200">{d.originalEmail.from}</span>
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-400 block uppercase">TO:</span>
+              <span className="text-xs font-bold text-slate-400 block uppercase">TO:</span>
               <span className="font-mono text-slate-800 dark:text-slate-200">{d.originalEmail.to}</span>
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-400 block uppercase">SUBJECT:</span>
+              <span className="text-xs font-bold text-slate-400 block uppercase">SUBJECT:</span>
               <strong className="text-slate-900 dark:text-white">{d.originalEmail.subject}</strong>
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-400 block uppercase">RECEIVED (UTC):</span>
+              <span className="text-xs font-bold text-slate-400 block uppercase">RECEIVED (UTC):</span>
               <span className="text-slate-700 dark:text-slate-300">{d.originalEmail.received}</span>
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-400 block uppercase">MESSAGE-ID:</span>
-              <span className="font-mono text-slate-600 dark:text-slate-400 text-[11px]">{d.originalEmail.messageId}</span>
+              <span className="text-xs font-bold text-slate-400 block uppercase">MESSAGE-ID:</span>
+              <span className="font-mono text-slate-600 dark:text-slate-400 text-xs">{d.originalEmail.messageId}</span>
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-400 block uppercase">REPLY-TO / RETURN-PATH:</span>
-              <span className="font-mono text-slate-600 dark:text-slate-400 text-[11px]">{d.originalEmail.replyTo}</span>
+              <span className="text-xs font-bold text-slate-400 block uppercase">REPLY-TO / RETURN-PATH:</span>
+              <span className="font-mono text-slate-600 dark:text-slate-400 text-xs">{d.originalEmail.replyTo}</span>
             </div>
           </div>
 
           <div className="p-3.5 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               DECODED MESSAGE BODY (DEFANGED TEXT PREVIEW):
             </div>
             <pre className="p-3 rounded bg-white dark:bg-[#0e1728] border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
@@ -840,7 +842,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-7-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-7-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -858,30 +860,30 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-md mb-4">
             <table className="w-full text-left text-xs border-collapse font-sans">
-              <thead className="bg-slate-50 dark:bg-[#08101d] text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-[#08101d] text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="py-2.5 px-3">HEADER FIELD</th>
-                  <th className="py-2.5 px-3">VALUE</th>
-                  <th className="py-2.5 px-3">ASSESSMENT</th>
-                  <th className="py-2.5 px-3">STATUS</th>
-                  <th className="py-2.5 px-3">EVIDENCE</th>
+                  <th className="py-3 px-4 leading-relaxed">HEADER FIELD</th>
+                  <th className="py-3 px-4 leading-relaxed">VALUE</th>
+                  <th className="py-3 px-4 leading-relaxed">ASSESSMENT</th>
+                  <th className="py-3 px-4 leading-relaxed">STATUS</th>
+                  <th className="py-3 px-4 leading-relaxed">EVIDENCE</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-[#0b1322]">
                 {d.headersAnalysis.map((h, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-[#0e192c]/50 transition-colors">
-                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-bold text-slate-900 dark:text-white whitespace-nowrap">
                       {h.field}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 dark:text-slate-300 max-w-xs">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-xs text-slate-700 dark:text-slate-300 max-w-xs">
                       {h.value}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300">
+                    <td className="py-3 px-4 leading-relaxed text-slate-600 dark:text-slate-300">
                       {h.assessment}
                     </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed whitespace-nowrap">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                        className={`px-2 py-0.5 rounded text-xs font-semibold uppercase ${
                           h.status === 'FAIL'
                             ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30'
                             : h.status === 'FLAGGED'
@@ -894,7 +896,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                         {h.status}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {h.evidenceRef}
                     </td>
                   </tr>
@@ -905,7 +907,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           {/* 4 Hop Relay Cards */}
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               TRANSPORT RELAY HOPS SEQUENCE (RFC 5737 SAFE DOCUMENTATION IPS):
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -914,20 +916,20 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                   key={hop.hopNumber}
                   className="p-3 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 text-xs"
                 >
-                  <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono font-bold mb-1">
+                  <div className="flex justify-between items-center text-xs text-slate-400 font-mono font-bold mb-1">
                     <span>{hop.hopNumber}</span>
                     <span>{hop.time}</span>
                   </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm">
                     {hop.role}
                   </div>
-                  <div className="font-mono text-blue-600 dark:text-sky-400 font-semibold text-[11px] my-0.5">
+                  <div className="font-mono text-blue-600 dark:text-sky-400 font-semibold text-xs my-0.5">
                     {hop.ip}
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                     {hop.host}
                   </div>
-                  <div className="text-[10px] font-semibold text-rose-600 dark:text-rose-400 mt-2">
+                  <div className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-2">
                     {hop.state}
                   </div>
                 </div>
@@ -943,7 +945,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-8-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-8-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -971,11 +973,11 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     <span className="font-bold text-sm text-slate-900 dark:text-white uppercase">
                       {key}
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30">
                       {proto.status}
                     </span>
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono mb-2">
+                  <div className="text-xs text-slate-400 font-mono mb-2">
                     Specification: {proto.spec}
                   </div>
                   <p className="text-xs text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
@@ -985,10 +987,10 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                   <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                     RAW HEADER LINE EXCERPT:
                   </div>
-                  <pre className="p-2 rounded bg-white dark:bg-[#0e1728] border border-slate-200 dark:border-slate-700 font-mono text-[10px] text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-tight break-all mb-2">
+                  <pre className="p-2 rounded bg-white dark:bg-[#0e1728] border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-tight break-all mb-2">
                     {proto.rawHeader}
                   </pre>
-                  <div className="text-[10px] text-slate-400 font-mono">
+                  <div className="text-xs text-slate-400 font-mono">
                     Evidence Reference: <strong>{proto.ref}</strong>
                   </div>
                 </div>
@@ -1011,7 +1013,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-9-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-9-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1030,13 +1032,13 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           <div className="p-4 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 mb-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/70 dark:border-slate-800/70 mb-3">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                   DISPLAY-SAFE TARGET URL:
                 </span>
                 <div className="font-mono font-bold text-amber-600 dark:text-amber-400 text-sm mt-0.5 break-all">
                   {d.urlAnalysis.targetUrl}
                 </div>
-                <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                <div className="text-xs text-slate-400 font-mono mt-0.5">
                   Defanged: {d.urlAnalysis.defangedUrl}
                 </div>
               </div>
@@ -1052,7 +1054,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
             {/* Workflow sequence steps */}
             <div className="mb-3">
-              <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                 ARTIFACT ANALYSIS WORKFLOW SEQUENCE:
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
@@ -1061,10 +1063,10 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     key={w.step}
                     className="p-2 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700/80"
                   >
-                    <div className="text-[10px] font-mono font-bold text-slate-400">
+                    <div className="text-xs font-mono font-bold text-slate-400">
                       {w.step} {w.label}
                     </div>
-                    <div className="text-slate-800 dark:text-slate-200 text-[11px] font-medium mt-0.5 truncate">
+                    <div className="text-slate-800 dark:text-slate-200 text-xs font-medium mt-0.5 truncate">
                       {w.value}
                     </div>
                   </div>
@@ -1090,7 +1092,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-10-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-10-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1115,7 +1117,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   MIME: {d.attachmentAnalysis.mime} • Size: {d.attachmentAnalysis.size}
                 </div>
-                <div className="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                <div className="font-mono text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   SHA-256: {d.attachmentAnalysis.sha256}
                 </div>
               </div>
@@ -1129,7 +1131,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               </div>
             </div>
 
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
               STATIC PDF OBJECT STRUCTURE HEURISTIC DETECTIONS:
             </div>
             <div className="space-y-1.5 mb-3">
@@ -1147,7 +1149,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     </span>
                   </div>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                    className={`px-2 py-0.5 rounded text-xs font-semibold ${
                       h.severity === 'Critical' || h.severity === 'High'
                         ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30'
                         : 'bg-transparent text-amber-600 dark:text-amber-400 border border-amber-500/30'
@@ -1159,7 +1161,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               ))}
             </div>
 
-            <div className="text-[10px] text-slate-400 italic">
+            <div className="text-xs text-slate-400 italic">
               {d.attachmentAnalysis.notice}
             </div>
           </div>
@@ -1172,7 +1174,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-11-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-11-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1190,31 +1192,31 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-md">
             <table className="w-full text-left text-xs border-collapse font-sans">
-              <thead className="bg-slate-50 dark:bg-[#08101d] text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-[#08101d] text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="py-2.5 px-3">INDICATOR</th>
-                  <th className="py-2.5 px-3">TYPE</th>
-                  <th className="py-2.5 px-3">SOURCE (DEMO)</th>
-                  <th className="py-2.5 px-3">RESULT</th>
-                  <th className="py-2.5 px-3">CONFIDENCE</th>
-                  <th className="py-2.5 px-3">CHECKED (UTC)</th>
+                  <th className="py-3 px-4 leading-relaxed">INDICATOR</th>
+                  <th className="py-3 px-4 leading-relaxed">TYPE</th>
+                  <th className="py-3 px-4 leading-relaxed">SOURCE (DEMO)</th>
+                  <th className="py-3 px-4 leading-relaxed">RESULT</th>
+                  <th className="py-3 px-4 leading-relaxed">CONFIDENCE</th>
+                  <th className="py-3 px-4 leading-relaxed">CHECKED (UTC)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-[#0b1322]">
                 {d.threatIntel.map((t, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-[#0e192c]/50 transition-colors">
-                    <td className="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-white">
+                    <td className="py-3 px-4 leading-relaxed font-mono font-bold text-slate-900 dark:text-white">
                       {t.indicator}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-700 dark:text-slate-300 font-medium">
+                    <td className="py-3 px-4 leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
                       {t.type}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400">
+                    <td className="py-3 px-4 leading-relaxed text-slate-500 dark:text-slate-400">
                       {t.source}
                     </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed whitespace-nowrap">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                        className={`px-2 py-0.5 rounded text-xs font-semibold uppercase ${
                           t.result === 'Malicious'
                             ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30'
                             : 'bg-transparent text-amber-600 dark:text-amber-400 border border-amber-500/30'
@@ -1223,10 +1225,10 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                         {t.result}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-700 dark:text-slate-300">
+                    <td className="py-3 px-4 leading-relaxed text-slate-700 dark:text-slate-300">
                       {t.confidence}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {t.checked}
                     </td>
                   </tr>
@@ -1234,7 +1236,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               </tbody>
             </table>
           </div>
-          <div className="text-[10px] text-slate-400 italic mt-1.5 font-sans">
+          <div className="text-xs text-slate-400 italic mt-1.5 font-sans">
             Notice: Indicators originate from internal synthetic demo repositories; no real external commercial threat feeds were queried.
           </div>
         </section>
@@ -1246,7 +1248,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-12-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-12-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1269,11 +1271,11 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                 className="p-3.5 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800"
               >
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                     {m.name}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                    className={`px-2 py-0.5 rounded text-xs font-semibold ${
                       m.verdictSeverity === 'MALICIOUS'
                         ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30'
                         : 'bg-transparent text-amber-600 dark:text-amber-400 border border-amber-500/30'
@@ -1293,7 +1295,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           </div>
 
           <div className="p-3.5 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 mb-2">
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
               ENSEMBLE MULTI-SIGNAL REASONING DRIVER:
             </div>
             <p className="font-serif text-xs text-slate-800 dark:text-slate-200 leading-relaxed text-justify">
@@ -1301,7 +1303,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             </p>
           </div>
 
-          <div className="text-[10px] text-slate-400 italic font-sans">
+          <div className="text-xs text-slate-400 italic font-sans">
             {d.aiAnalysis.notice}
           </div>
         </section>
@@ -1313,7 +1315,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-13-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-13-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1324,7 +1326,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                 ANALYST REVIEW & DISPOSITION
               </h2>
             </div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
               {d.analystReview.badge}
             </span>
           </div>
@@ -1332,7 +1334,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           <div className="p-4 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-3 border-b border-slate-200/70 dark:border-slate-800/70 mb-3 text-xs">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                   REVIEWING EXAMINER
                 </span>
                 <strong className="text-slate-900 dark:text-white mt-0.5 block">
@@ -1340,7 +1342,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                 </strong>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                   ANALYST VERDICT DISPOSITION
                 </span>
                 <span className="text-rose-600 dark:text-rose-400 font-bold mt-0.5 flex items-center gap-1">
@@ -1349,7 +1351,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                 </span>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                   SIGN-OFF TIMESTAMP (UTC)
                 </span>
                 <span className="font-mono text-slate-600 dark:text-slate-300 mt-0.5 block">
@@ -1359,7 +1361,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             </div>
 
             <div className="mb-3">
-              <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-sans">
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-sans">
                 FREEFORM ANALYST EXAMINATION NOTES:
               </div>
               <p className="font-serif text-xs text-slate-800 dark:text-slate-200 leading-relaxed text-justify">
@@ -1368,13 +1370,13 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200/70 dark:border-slate-800/70 text-xs">
-              <div className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+              <div className="font-mono text-xs text-slate-500 dark:text-slate-400">
                 Digital Sign-Off Digest:{' '}
                 <strong className="text-slate-800 dark:text-slate-200">
                   {d.analystReview.digest}
                 </strong>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                 DISPOSITION RECORDED & SEALED
               </span>
             </div>
@@ -1388,7 +1390,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-14-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-14-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-block bg-black text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
@@ -1400,7 +1402,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           </div>
 
           <div className="p-4 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 mb-4">
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
               MULTI-SIGNAL FUSION ARCHITECTURE:
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -1425,13 +1427,13 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
               </div>
 
               <div className="w-full sm:w-1/2 p-4 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700/80 text-center">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                   CONSOLIDATED DISPOSITION
                 </span>
                 <div className="text-sm font-bold text-slate-900 dark:text-white my-1">
                   Signal correlation complete.
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Refer to Section 2.0 (Executive Summary) for aggregate verdict, risk score, and primary classification.
                 </p>
               </div>
@@ -1440,29 +1442,29 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-md">
             <table className="w-full text-left text-xs border-collapse font-sans">
-              <thead className="bg-slate-50 dark:bg-[#08101d] text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-[#08101d] text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="py-2.5 px-3">SIGNAL COMPONENT</th>
-                  <th className="py-2.5 px-3">DEMO WEIGHT</th>
-                  <th className="py-2.5 px-3">SCORE CONTRIBUTION</th>
-                  <th className="py-2.5 px-3">STATE</th>
+                  <th className="py-3 px-4 leading-relaxed">SIGNAL COMPONENT</th>
+                  <th className="py-3 px-4 leading-relaxed">DEMO WEIGHT</th>
+                  <th className="py-3 px-4 leading-relaxed">SCORE CONTRIBUTION</th>
+                  <th className="py-3 px-4 leading-relaxed">STATE</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-[#0b1322]">
                 {d.riskWeights.map((rw) => (
                   <tr key={rw.component} className="hover:bg-slate-50/80 dark:hover:bg-[#0e192c]/50 transition-colors">
-                    <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">
+                    <td className="py-3 px-4 leading-relaxed font-semibold text-slate-900 dark:text-white">
                       {rw.component}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-slate-600 dark:text-slate-400">
+                    <td className="py-3 px-4 leading-relaxed font-mono text-slate-600 dark:text-slate-400">
                       {rw.weight}
                     </td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-white">
+                    <td className="py-3 px-4 leading-relaxed font-mono font-bold text-slate-900 dark:text-white">
                       {rw.scoreContribution}
                     </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
+                    <td className="py-3 px-4 leading-relaxed whitespace-nowrap">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                        className={`px-2 py-0.5 rounded text-xs font-semibold uppercase ${
                           rw.state === 'Fail' || rw.state === 'Malicious'
                             ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30'
                             : rw.state === 'Suspicious' || rw.state === 'Untrusted'
@@ -1487,7 +1489,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-15-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-15-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1514,7 +1516,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     <span className="font-mono mr-1">{f.id}</span> {f.title}
                   </div>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                    className={`px-2 py-0.5 rounded text-xs font-semibold uppercase ${
                       f.severity === 'MALICIOUS'
                         ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30'
                         : 'bg-transparent text-amber-600 dark:text-amber-400 border border-amber-500/30'
@@ -1535,7 +1537,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                       key={ev}
                       type="button"
                       onClick={() => scrollToAnchor('sec-4-0')}
-                      className="px-1.5 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono text-[11px] hover:border-blue-400 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded bg-white dark:bg-[#0d1726] border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 font-mono text-xs hover:border-blue-500 hover:underline cursor-pointer"
                     >
                       {ev}
                     </button>
@@ -1553,7 +1555,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-16-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-16-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-block bg-black text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
@@ -1566,7 +1568,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
 
           <div className="p-3.5 rounded-md bg-slate-50 dark:bg-[#08101d] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                 CASE DISPOSITION CROSS-REFERENCE
               </span>
               <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5">
@@ -1582,7 +1584,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
             </span>
           </div>
 
-          <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
             RECOMMENDED INCIDENT RESPONSE ACTIONS:
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -1616,7 +1618,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
           id="sec-17-0"
           className={`mb-8 transition-all ${
             highlightedId === 'sec-17-0' ? 'ring-2 ring-blue-500 rounded p-1' : ''
-          }`}
+          } scroll-mt-24`}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-block bg-black text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
@@ -1675,12 +1677,12 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                     </span>
                     {app.title}
                   </span>
-                  <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
                     {app.hash}
                   </span>
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 mb-1">{app.desc}</p>
-                <div className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="font-mono text-xs text-slate-500 dark:text-slate-400">
                   {app.meta}
                 </div>
               </div>
@@ -1691,7 +1693,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
         {/* =======================================================================
             RUNNING DOCUMENT CERTIFIED FOOTER
             ======================================================================= */}
-        <footer className="pt-4 border-t-2 border-slate-900 dark:border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-sans">
+        <footer className="pt-4 border-t-2 border-slate-900 dark:border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-sans">
           <div>
             <strong>{d.footer.engine}</strong> • {d.footer.caseString} • {d.footer.timestamp}
           </div>
@@ -1709,3 +1711,4 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
     </div>
   );
 };
+
