@@ -25,6 +25,7 @@ import {
   Info,
   X,
   Radio,
+  Sparkles,
 } from 'lucide-react';
 
 interface NotificationItem {
@@ -311,6 +312,17 @@ export const AppTopBar: React.FC = () => {
             className="w-48 lg:w-64 xl:w-80 2xl:w-96 pl-9 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-[#0e1627] hover:bg-slate-100/70 dark:hover:bg-[#131d33] focus:bg-white dark:focus:bg-[#0e1627] border border-slate-200 dark:border-slate-800 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
         </div>
+
+        {/* AI Copilot Button */}
+        <button
+          type="button"
+          onClick={() => uiStore.openCopilot(true)}
+          className="relative flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-blue-600 dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all cursor-pointer border border-transparent hover:border-blue-200 dark:hover:border-blue-800 font-semibold text-xs"
+          title="Open AI Investigation Copilot"
+        >
+          <Sparkles className="w-4 h-4 transition-transform hover:rotate-12 shrink-0" />
+          <span className="hidden sm:inline">Copilot</span>
+        </button>
 
         {/* Theme Toggle Button (Light / Dark) */}
         <button

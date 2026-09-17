@@ -1,7 +1,7 @@
 import React from 'react';
 import { useUI, uiStore } from '../../stores/ui-store.ts';
 import { useCases } from '../../stores/cases-store.ts';
-import { useCurrentRole } from '../../stores/auth-store.ts';
+import { useCurrentRole, useCurrentUser } from '../../stores/auth-store.ts';
 import { Role } from '../../features/auth/authConfig.ts';
 import { useCapabilities } from '../../features/auth/capabilities.ts';
 import { AshielderLogo } from '../ui/AshielderLogo.tsx';
@@ -45,6 +45,7 @@ export const Sidebar: React.FC = () => {
   const ui = useUI();
   const casesState = useCases();
   const currentRole = useCurrentRole();
+  const currentUser = useCurrentUser();
   const totalCases = casesState.cases.length;
 
   const capabilities = useCapabilities();
@@ -281,25 +282,42 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Bottom Auxiliary Section: Operational Telemetry Status */}
+      {/* Bottom Auxiliary Section: User & Theme */}
       <div className="p-3 border-t border-slate-100 dark:border-slate-800/80">
         {!ui.isSidebarCollapsed ? (
           <div className="rounded-lg border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-2.5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0 border border-blue-200 dark:border-blue-800">
+                <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                  Forensic Pipeline
+                  {currentUser?.name || 'User'}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Operational • Engine v2.4
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate uppercase">
+                  {currentRole ? currentRole.replace('_', ' ') : ''}
                 </p>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => uiStore.toggleTheme()}
+              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer"
+              title={ui.theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {ui.theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400 hover:text-amber-300" /> : <Moon className="w-3.5 h-3.5 hover:text-blue-600" />}
+            </button>
           </div>
         ) : (
-          <div className="flex justify-center" title="Operational • Engine v2.4">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <div className="flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={() => uiStore.toggleTheme()}
+              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title={ui.theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {ui.theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+            </button>
           </div>
         )}
       </div>
