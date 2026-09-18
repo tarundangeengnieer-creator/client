@@ -1,74 +1,38 @@
 import re
 
-with open('src/features/dashboard/SecurityOverviewPage.tsx', 'r') as f:
+with open('src/features/investigation/ForensicWorkflowModal.tsx', 'r') as f:
     content = f.read()
 
-# Pattern for the buttons container
-pattern_geo = r'<div className="flex items-center bg-slate-100 dark:bg-\[#090e1a\] p-0\.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">\s*\{\(\[\'7d\', \'30d\', \'90d\'\] as const\)\.map\(\(period\) => \(\s*<button\s*key=\{period\}\s*type="button"\s*onClick=\{\(\) => setSelectedGeoPeriod\(period\)\}\s*className=\{`(.*?)`\}\s*>\s*\{period\.toUpperCase\(\)\}\s*</button>\s*\)\)\}\s*</div>'
+# Make sure we have CheckCircle2 imported
+if 'CheckCircle2' not in content:
+    content = content.replace("import {", "import { CheckCircle2,", 1)
 
-replacement_geo = '''<div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
-                {(['7d', '30d', '90d'] as const).map((period) => (
-                  <button
-                    key={period}
-                    type="button"
-                    onClick={() => setSelectedGeoPeriod(period)}
-                    className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                      selectedGeoPeriod === period
-                        ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                    }`}
-                  >
-                    {period.toUpperCase()}
-                  </button>
-                ))}
-              </div>'''
+content = content.replace("? 'border-blue-500 bg-slate-100 dark:bg-slate-800/80 shadow-xs'", "? 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 shadow-xs'")
+content = content.replace(": 'border-slate-200 dark:border-slate-800 hover:border-blue-300 bg-white dark:bg-slate-900/80'", ": 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80'")
 
-content = re.sub(pattern_geo, replacement_geo, content, flags=re.DOTALL)
+def replacer(match):
+    return (
+        '<div className="flex items-start justify-between gap-2">\n'
+        + match.group(1) + '<div className="flex items-start gap-2 min-w-0">\n'
+        + match.group(1) + '  {selectedSpecimen?.id === specimen.id && <CheckCircle2 className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />}\n'
+        + match.group(1) + '  <div className="min-w-0">\n'
+        + match.group(1) + '    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">\n'
+        + match.group(1) + '      {specimen.subject}\n'
+        + match.group(1) + '    </p>\n'
+        + match.group(1) + '    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">\n'
+        + match.group(1) + '      From: {specimen.sender}' + match.group(2) + '\n'
+        + match.group(1) + '    </p>\n'
+        + match.group(1) + '  </div>\n'
+        + match.group(1) + '</div>'
+    )
 
+pattern = re.compile(
+    r'<div className="flex items-start justify-between gap-2">\n(\s*)<div className="min-w-0">\n\s*<p className="text-xs font-bold text-slate-900 dark:text-white truncate">\n\s*\{specimen\.subject\}\n\s*</p>\n\s*<p className="text-\[11px\] text-slate-500 dark:text-slate-400 truncate mt-0\.5">\n\s*From: \{specimen\.sender\}(.*?)\n\s*</p>\n\s*</div>'
+)
 
-pattern_type = r'<div className="flex items-center bg-slate-100 dark:bg-\[#090e1a\] p-0\.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">\s*\{\(\[\'7d\', \'30d\', \'90d\'\] as const\)\.map\(\(period\) => \(\s*<button\s*key=\{period\}\s*type="button"\s*onClick=\{\(\) => setSelectedTypePeriod\(period\)\}\s*className=\{`(.*?)`\}\s*>\s*\{period\.toUpperCase\(\)\}\s*</button>\s*\)\)\}\s*</div>'
+new_content = pattern.sub(replacer, content)
 
-replacement_type = '''<div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
-              {(['7d', '30d', '90d'] as const).map((period) => (
-                <button
-                  key={period}
-                  type="button"
-                  onClick={() => setSelectedTypePeriod(period)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    selectedTypePeriod === period
-                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                  }`}
-                >
-                  {period.toUpperCase()}
-                </button>
-              ))}
-            </div>'''
+with open('src/features/investigation/ForensicWorkflowModal.tsx', 'w') as f:
+    f.write(new_content)
 
-content = re.sub(pattern_type, replacement_type, content, flags=re.DOTALL)
-
-
-pattern_brand = r'<div className="flex items-center bg-slate-100 dark:bg-\[#090e1a\] p-0\.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">\s*\{\(\[\'7d\', \'30d\', \'90d\'\] as const\)\.map\(\(period\) => \(\s*<button\s*key=\{period\}\s*type="button"\s*onClick=\{\(\) => setSelectedBrandPeriod\(period\)\}\s*className=\{`(.*?)`\}\s*>\s*\{period\.toUpperCase\(\)\}\s*</button>\s*\)\)\}\s*</div>'
-
-replacement_brand = '''<div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-lg border border-slate-200 dark:border-slate-800">
-              {(['7d', '30d', '90d'] as const).map((period) => (
-                <button
-                  key={period}
-                  type="button"
-                  onClick={() => setSelectedBrandPeriod(period)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    selectedBrandPeriod === period
-                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                  }`}
-                >
-                  {period.toUpperCase()}
-                </button>
-              ))}
-            </div>'''
-
-content = re.sub(pattern_brand, replacement_brand, content, flags=re.DOTALL)
-
-
-with open('src/features/dashboard/SecurityOverviewPage.tsx', 'w') as f:
-    f.write(content)
+print(len(new_content) != len(content))

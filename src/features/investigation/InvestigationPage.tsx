@@ -294,7 +294,7 @@ export const InvestigationPage: React.FC = () => {
               <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm mt-2">
                 Connect Gmail
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-snug">
                 Import and analyze emails from your inbox
               </p>
             </div>
@@ -312,7 +312,7 @@ export const InvestigationPage: React.FC = () => {
               <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm mt-2">
                 Connect Microsoft
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-snug">
                 Outlook / Office 365 integration
               </p>
             </div>
@@ -329,7 +329,7 @@ export const InvestigationPage: React.FC = () => {
               <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm mt-2">
                 Upload .EML File
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-snug">
                 Drag &amp; drop or browse from your device
               </p>
             </div>
@@ -346,7 +346,7 @@ export const InvestigationPage: React.FC = () => {
               <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm mt-2">
                 Send Email to Server
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-snug">
                 Forward suspicious email to analyze
               </p>
             </div>

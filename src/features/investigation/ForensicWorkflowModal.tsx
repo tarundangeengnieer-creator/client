@@ -439,7 +439,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
   return (
     <div
       id="forensic-workflow-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150"
     >
       <div
         className="w-full max-w-2xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all"
@@ -573,20 +573,23 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                         onClick={() => setSelectedSpecimen(specimen)}
                         className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                           selectedSpecimen?.id === specimen.id
-                            ? 'border-blue-500 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-300 bg-white dark:bg-slate-900/80'
+                            ? 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                              {specimen.subject}
-                            </p>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                              From: {specimen.sender}
-                            </p>
+                          <div className="flex items-start gap-2 min-w-0">
+                            {selectedSpecimen?.id === specimen.id && <CheckCircle2 className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                                {specimen.subject}
+                              </p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                From: {specimen.sender}
+                              </p>
+                            </div>
                           </div>
-                          <span className="text-[10px] text-slate-500 font-mono shrink-0">{specimen.date}</span>
+                          <span className="text-xs text-slate-500 font-mono shrink-0">{specimen.date}</span>
                         </div>
                       </div>
                     ))}
@@ -618,20 +621,23 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                         onClick={() => setSelectedSpecimen(specimen)}
                         className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                           selectedSpecimen?.id === specimen.id
-                            ? 'border-blue-500 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-300 bg-white dark:bg-slate-900/80'
+                            ? 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                              {specimen.subject}
-                            </p>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                              From: {specimen.sender}
-                            </p>
+                          <div className="flex items-start gap-2 min-w-0">
+                            {selectedSpecimen?.id === specimen.id && <CheckCircle2 className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                                {specimen.subject}
+                              </p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                From: {specimen.sender}
+                              </p>
+                            </div>
                           </div>
-                          <span className="text-[10px] text-slate-500 font-mono shrink-0">{specimen.date}</span>
+                          <span className="text-xs text-slate-500 font-mono shrink-0">{specimen.date}</span>
                         </div>
                       </div>
                     ))}
@@ -676,7 +682,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                     <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-white">
                       Drag and drop your raw RFC 822 (.eml) file here
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       or <span className="text-blue-600 underline font-medium">browse from your computer</span> (Max 25MB)
                     </p>
                   </div>
@@ -690,20 +696,23 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                       onClick={() => setSelectedSpecimen(specimen)}
                       className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                         selectedSpecimen?.id === specimen.id
-                          ? 'border-blue-500 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-blue-300 bg-white dark:bg-slate-900/80'
+                          ? 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
+                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {specimen.subject}
-                          </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                            From: {specimen.sender} ({formatBytes(specimen.fileSize)})
-                          </p>
+                        <div className="flex items-start gap-2 min-w-0">
+                          {selectedSpecimen?.id === specimen.id && <CheckCircle2 className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />}
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                              {specimen.subject}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                              From: {specimen.sender} ({formatBytes(specimen.fileSize)})
+                            </p>
+                          </div>
                         </div>
-                        <span className="text-[10px] text-slate-500 font-mono shrink-0">{specimen.date}</span>
+                        <span className="text-xs text-slate-500 font-mono shrink-0">{specimen.date}</span>
                       </div>
                     </div>
                   ))}
@@ -987,7 +996,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                 type="button"
                 disabled={!selectedSpecimen}
                 onClick={() => setActiveStage('PLAN')}
-                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+                className="pl-4 pr-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-2 disabled:opacity-50 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
               >
                 <span>Proceed to Investigation Plan</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -1043,7 +1052,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   onClose();
                   uiStore.navigate(`/case/${assignedCaseId}`);
                 }}
-                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+                className="pl-4 pr-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
               >
                 <span>Enter Full Forensic Workspace</span>
                 <ExternalLink className="w-3.5 h-3.5" />

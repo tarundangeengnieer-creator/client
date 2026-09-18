@@ -12,7 +12,7 @@ export const AIAssistantDrawer: React.FC = () => {
       {/* Backdrop */}
       {ui.isCopilotOpen && (
         <div 
-          className="fixed inset-0 bg-slate-950/20 dark:bg-slate-950/50 z-40 2xl:hidden transition-opacity print:hidden"
+          className="fixed inset-0 bg-slate-950/20 dark:bg-slate-950/50 z-40 transition-opacity print:hidden"
           onClick={() => uiStore.openCopilot(false)}
           aria-hidden="true"
         />
@@ -21,11 +21,11 @@ export const AIAssistantDrawer: React.FC = () => {
       {/* Assistant Side-Rail: Floating overlay drawer on regular desktop, integrated rail on ultra-wide 2xl screens */}
       <aside
         className={cn(
-          'transition-all duration-300 ease-in-out print:hidden flex flex-col bg-white dark:bg-[#0b1329] border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50',
-          'fixed 2xl:relative top-0 right-0 h-full',
+          'transition-transform duration-300 ease-in-out print:hidden flex flex-col bg-white dark:bg-[#0b1329] border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50',
+          'fixed top-0 right-0 h-full',
           ui.isCopilotOpen
-            ? 'w-full sm:w-[380px] md:w-[400px] 2xl:w-[400px] shrink-0 translate-x-0 opacity-100'
-            : 'w-0 overflow-hidden translate-x-full 2xl:translate-x-0 2xl:w-0 border-l-0 opacity-0 pointer-events-none'
+            ? 'w-full sm:w-[380px] md:w-[400px] translate-x-0 opacity-100'
+            : 'w-full sm:w-[380px] md:w-[400px] translate-x-full opacity-0 pointer-events-none'
         )}
         aria-label="Investigation Assistant Side Rail"
       >
