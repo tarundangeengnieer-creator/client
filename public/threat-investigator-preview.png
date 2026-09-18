@@ -1,0 +1,566 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 840" width="100%" height="100%">
+  <defs>
+    <!-- Card Shadow -->
+    <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.04" />
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.03" />
+    </filter>
+    
+    <!-- Outer Window Shadow -->
+    <filter id="windowShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="16" stdDeviation="32" flood-color="#071a2b" flood-opacity="0.35" />
+    </filter>
+
+    <!-- Risk Gauge Gradient -->
+    <linearGradient id="riskGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="50%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="graphGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e8edf3" stroke-width="0.8" />
+    </pattern>
+  </defs>
+
+  <style>
+    .font-sans { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .font-mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+
+  <!-- Main Window Frame (Enterprise Light Theme) -->
+  <g filter="url(#windowShadow)">
+    <rect x="10" y="10" width="1060" height="820" rx="24" ry="24" fill="#f4f7fb" stroke="#cbd5e1" stroke-width="1.2" />
+
+    <!-- 1. Top Window Chrome Header -->
+    <rect x="10" y="10" width="1060" height="52" rx="24" ry="24" fill="#ffffff" />
+    <rect x="10" y="38" width="1060" height="24" fill="#ffffff" />
+    <line x1="10" y1="62" x2="1070" y2="62" stroke="#e2e8f0" stroke-width="1" />
+
+    <!-- macOS Window Action Dots -->
+    <circle cx="36" cy="36" r="6.5" fill="#ff5f56" />
+    <circle cx="56" cy="36" r="6.5" fill="#ffbd2e" />
+    <circle cx="76" cy="36" r="6.5" fill="#27c93f" />
+
+    <!-- Address / Breadcrumb Bar -->
+    <g transform="translate(108, 20)">
+      <rect x="0" y="0" width="370" height="32" rx="16" ry="16" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1" />
+      <!-- Lock Icon -->
+      <g transform="translate(16, 8)" stroke="#64748b" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1.5" y="5.5" width="10" height="8" rx="1.5" />
+        <path d="M4 5.5V3.5a2.5 2.5 0 0 1 5 0v2" />
+      </g>
+      <text x="38" y="20" class="font-sans" font-size="13" font-weight="500" fill="#64748b">ashielder <tspan fill="#cbd5e1">/</tspan> investigator <tspan fill="#cbd5e1">/</tspan> <tspan fill="#0f172a" font-weight="700">case-A2291</tspan></text>
+    </g>
+
+    <!-- Top Right: Active Threat + Malicious Badge -->
+    <g transform="translate(710, 20)">
+      <!-- Active Threat -->
+      <circle cx="12" cy="16" r="4.5" fill="#ef4444" />
+      <text x="24" y="21" class="font-sans" font-size="13" font-weight="800" fill="#ef4444" letter-spacing="0.5">ACTIVE THREAT</text>
+
+      <!-- Malicious Badge -->
+      <g transform="translate(160, 0)">
+        <rect x="0" y="0" width="160" height="32" rx="8" ry="8" fill="#ffffff" stroke="#f43f5e" stroke-width="1.5" />
+        <!-- Shield Alert Icon -->
+        <g transform="translate(16, 7)" stroke="#e11d48" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 1.5l5 2.5v4c0 3.8-3 6.5-5 7.5-2-1-5-3.7-5-7.5V4l5-2.5z" />
+          <line x1="7" y1="5.5" x2="7" y2="8.5" />
+          <circle cx="7" cy="11.5" r="0.5" fill="#e11d48" />
+        </g>
+        <text x="38" y="21" class="font-sans" font-size="13" font-weight="800" fill="#e11d48" letter-spacing="0.6">MALICIOUS</text>
+      </g>
+    </g>
+
+    <!-- 2. Workflow Pipeline Stepper Bar -->
+    <rect x="10" y="63" width="1060" height="46" fill="#ffffff" />
+    <line x1="10" y1="109" x2="1070" y2="109" stroke="#e2e8f0" stroke-width="1" />
+
+    <g transform="translate(36, 76)">
+      <!-- Step 1: EMAIL -->
+      <g transform="translate(0, 0)">
+        <circle cx="10" cy="10" r="9" fill="none" stroke="#10b981" stroke-width="1.8" />
+        <path d="M6.5 10l2.5 2.5 4.5-4.5" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="14" class="font-sans" font-size="12" font-weight="800" fill="#047857" letter-spacing="0.4">EMAIL</text>
+      </g>
+      <text x="100" y="14" class="font-sans" font-size="13" font-weight="bold" fill="#cbd5e1">&gt;</text>
+
+      <!-- Step 2: EXTRACT -->
+      <g transform="translate(130, 0)">
+        <circle cx="10" cy="10" r="9" fill="none" stroke="#10b981" stroke-width="1.8" />
+        <path d="M6.5 10l2.5 2.5 4.5-4.5" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="14" class="font-sans" font-size="12" font-weight="800" fill="#047857" letter-spacing="0.4">EXTRACT</text>
+      </g>
+      <text x="245" y="14" class="font-sans" font-size="13" font-weight="bold" fill="#cbd5e1">&gt;</text>
+
+      <!-- Step 3: DETECT -->
+      <g transform="translate(275, 0)">
+        <circle cx="10" cy="10" r="9" fill="none" stroke="#10b981" stroke-width="1.8" />
+        <path d="M6.5 10l2.5 2.5 4.5-4.5" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="14" class="font-sans" font-size="12" font-weight="800" fill="#047857" letter-spacing="0.4">DETECT</text>
+      </g>
+      <text x="380" y="14" class="font-sans" font-size="13" font-weight="bold" fill="#cbd5e1">&gt;</text>
+
+      <!-- Step 4: CORRELATE -->
+      <g transform="translate(410, 0)">
+        <circle cx="10" cy="10" r="9" fill="none" stroke="#10b981" stroke-width="1.8" />
+        <path d="M6.5 10l2.5 2.5 4.5-4.5" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="14" class="font-sans" font-size="12" font-weight="800" fill="#047857" letter-spacing="0.4">CORRELATE</text>
+      </g>
+      <text x="535" y="14" class="font-sans" font-size="13" font-weight="bold" fill="#cbd5e1">&gt;</text>
+
+      <!-- Step 5: INTELLIGENCE -->
+      <g transform="translate(565, 0)">
+        <circle cx="10" cy="10" r="9" fill="none" stroke="#10b981" stroke-width="1.8" />
+        <path d="M6.5 10l2.5 2.5 4.5-4.5" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="14" class="font-sans" font-size="12" font-weight="800" fill="#047857" letter-spacing="0.4">INTELLIGENCE</text>
+      </g>
+      <text x="705" y="14" class="font-sans" font-size="13" font-weight="bold" fill="#cbd5e1">&gt;</text>
+
+      <!-- Step 6: INVESTIGATE (Active Tab) -->
+      <g transform="translate(730, -6)">
+        <rect x="0" y="0" width="138" height="32" rx="8" ry="8" fill="#f0f9ff" stroke="#38bdf8" stroke-width="1.8" />
+        <!-- Search Icon -->
+        <g transform="translate(14, 8)" stroke="#0284c7" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="6" r="4.5" />
+          <line x1="9.5" y1="9.5" x2="13" y2="13" />
+        </g>
+        <text x="36" y="20" class="font-sans" font-size="12" font-weight="800" fill="#0284c7" letter-spacing="0.4">INVESTIGATE</text>
+      </g>
+      <text x="890" y="14" class="font-sans" font-size="13" font-weight="bold" fill="#cbd5e1">&gt;</text>
+
+      <!-- Step 7: REPORT -->
+      <g transform="translate(915, 0)">
+        <!-- File Document Icon -->
+        <g transform="translate(0, 2)" stroke="#64748b" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 1.5h6l4 4v9a1.5 1.5 0 0 1-1.5 1.5h-8.5A1.5 1.5 0 0 1 1.5 14.5v-11.5A1.5 1.5 0 0 1 3 1.5z" />
+          <path d="M9 1.5v4h4" />
+        </g>
+        <text x="22" y="14" class="font-sans" font-size="12" font-weight="700" fill="#64748b" letter-spacing="0.4">REPORT</text>
+      </g>
+    </g>
+
+    <!-- 3. MAIN DASHBOARD CONTENT AREA -->
+    <!-- ============================================== -->
+    <!-- LEFT COLUMN (X=30, width=270) -->
+    <!-- ============================================== -->
+    <g transform="translate(30, 126)">
+      <!-- Card 1: EMAIL DETAILS (Height=165) -->
+      <g filter="url(#cardShadow)">
+        <rect x="0" y="0" width="270" height="162" rx="16" ry="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        <!-- Card Header -->
+        <g transform="translate(16, 16)">
+          <g stroke="#0f2441" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="0" y="1" width="18" height="13" rx="2" />
+            <path d="M1 2l8 6 8-6" />
+          </g>
+          <text x="26" y="12" class="font-sans" font-size="12" font-weight="800" fill="#0f2441" letter-spacing="0.6">EMAIL DETAILS</text>
+        </g>
+        
+        <!-- Subject Field -->
+        <g transform="translate(16, 48)">
+          <text x="0" y="10" class="font-sans" font-size="10" font-weight="700" fill="#64748b" letter-spacing="0.6">SUBJECT</text>
+          <text x="0" y="28" class="font-sans" font-size="13" font-weight="700" fill="#0f172a">Urgent: Verify Your PayPal</text>
+          <text x="0" y="44" class="font-sans" font-size="13" font-weight="700" fill="#0f172a">Account</text>
+          <!-- Copy icon -->
+          <g transform="translate(222, 16)" stroke="#94a3b8" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="9" height="9" rx="1.5" />
+            <path d="M1.5 7.5v-5a1 1 0 0 1 1-1h5" />
+          </g>
+        </g>
+
+        <!-- Sender Field -->
+        <g transform="translate(16, 110)">
+          <text x="0" y="10" class="font-sans" font-size="10" font-weight="700" fill="#64748b" letter-spacing="0.6">SENDER</text>
+          <text x="0" y="28" class="font-mono" font-size="12" font-weight="500" fill="#0f172a">security-alert@paypal-...</text>
+          <!-- Copy icon -->
+          <g transform="translate(222, 16)" stroke="#94a3b8" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="9" height="9" rx="1.5" />
+            <path d="M1.5 7.5v-5a1 1 0 0 1 1-1h5" />
+          </g>
+        </g>
+      </g>
+
+      <!-- Card 2: AUTHENTICATION (Height=165, y=176) -->
+      <g transform="translate(0, 176)" filter="url(#cardShadow)">
+        <rect x="0" y="0" width="270" height="162" rx="16" ry="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        
+        <!-- Header -->
+        <g transform="translate(16, 16)">
+          <g stroke="#0f2441" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 1.5l5 2.5v4c0 3.8-3 6.5-5 7.5-2-1-5-3.7-5-7.5V4l5-2.5z" />
+            <path d="M7 5v3l2 1" />
+          </g>
+          <text x="24" y="12" class="font-sans" font-size="12" font-weight="800" fill="#0f2441" letter-spacing="0.6">AUTHENTICATION</text>
+          <!-- FAILED Badge -->
+          <rect x="180" y="-3" width="58" height="22" rx="6" ry="6" fill="#fff1f2" stroke="#f43f5e" stroke-width="1" />
+          <text x="209" y="12" class="font-sans" font-size="10" font-weight="800" fill="#e11d48" text-anchor="middle" letter-spacing="0.5">FAILED</text>
+        </g>
+
+        <!-- Donut & Status list -->
+        <g transform="translate(20, 52)">
+          <!-- Donut Chart -->
+          <g transform="translate(42, 50)">
+            <circle cx="0" cy="0" r="38" fill="none" stroke="#fee2e2" stroke-width="9" />
+            <circle cx="0" cy="0" r="38" fill="none" stroke="#ef4444" stroke-width="9" stroke-dasharray="190 240" stroke-linecap="round" transform="rotate(-90)" />
+            <text x="0" y="1" class="font-sans" font-size="18" font-weight="900" fill="#e11d48" text-anchor="middle">0/3</text>
+            <text x="0" y="14" class="font-sans" font-size="9" font-weight="800" fill="#64748b" text-anchor="middle" letter-spacing="0.5">PASS</text>
+          </g>
+
+          <!-- Status List -->
+          <g transform="translate(110, 20)">
+            <!-- SPF -->
+            <circle cx="6" cy="10" r="4" fill="#ef4444" />
+            <text x="20" y="14" class="font-sans" font-size="12" font-weight="700" fill="#0f172a">SPF</text>
+            <text x="100" y="14" class="font-sans" font-size="12" font-weight="800" fill="#ef4444" text-anchor="end">FAIL</text>
+
+            <!-- DKIM -->
+            <circle cx="6" cy="38" r="4" fill="#ef4444" />
+            <text x="20" y="42" class="font-sans" font-size="12" font-weight="700" fill="#0f172a">DKIM</text>
+            <text x="100" y="42" class="font-sans" font-size="12" font-weight="800" fill="#ef4444" text-anchor="end">FAIL</text>
+
+            <!-- DMARC -->
+            <circle cx="6" cy="66" r="4" fill="#ef4444" />
+            <text x="20" y="70" class="font-sans" font-size="12" font-weight="700" fill="#0f172a">DMARC</text>
+            <text x="100" y="70" class="font-sans" font-size="12" font-weight="800" fill="#ef4444" text-anchor="end">FAIL</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Card 3: RISK ASSESSMENT (Height=210, y=352) -->
+      <g transform="translate(0, 352)" filter="url(#cardShadow)">
+        <rect x="0" y="0" width="270" height="205" rx="16" ry="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        
+        <!-- Header -->
+        <g transform="translate(16, 16)">
+          <g stroke="#0f2441" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 1.5L1 12h12L7 1.5z" />
+            <line x1="7" y1="5.5" x2="7" y2="8" />
+            <circle cx="7" cy="10" r="0.5" fill="#0f2441" />
+          </g>
+          <text x="24" y="12" class="font-sans" font-size="12" font-weight="800" fill="#0f2441" letter-spacing="0.6">RISK ASSESSMENT</text>
+          <!-- CRITICAL Badge -->
+          <rect x="175" y="-3" width="65" height="22" rx="6" ry="6" fill="#fff1f2" stroke="#f43f5e" stroke-width="1" />
+          <text x="207" y="12" class="font-sans" font-size="10" font-weight="800" fill="#e11d48" text-anchor="middle" letter-spacing="0.5">CRITICAL</text>
+        </g>
+
+        <!-- Semicircular Gauge -->
+        <g transform="translate(135, 126)">
+          <!-- Arc track background -->
+          <path d="M -80 0 A 80 80 0 0 1 80 0" fill="none" stroke="#f1f5f9" stroke-width="14" stroke-linecap="round" />
+          <!-- Active Gradient Arc -->
+          <path d="M -80 0 A 80 80 0 0 1 80 0" fill="none" stroke="url(#riskGrad)" stroke-width="14" stroke-linecap="round" />
+          
+          <!-- Knob Needle at 91% position (approx 16 deg from right end) -->
+          <circle cx="72" cy="-28" r="6.5" fill="#ffffff" stroke="#ef4444" stroke-width="3.5" />
+
+          <!-- Center Stats -->
+          <text x="-6" y="-12" class="font-sans" font-size="34" font-weight="900" fill="#e11d48" text-anchor="middle">91<tspan font-size="14" font-weight="700" fill="#64748b">/100</tspan></text>
+          <text x="0" y="8" class="font-sans" font-size="12" font-weight="900" fill="#e11d48" text-anchor="middle" letter-spacing="0.8">MALICIOUS</text>
+
+          <!-- 0 and 100 Scale labels -->
+          <text x="-82" y="20" class="font-sans" font-size="10" font-weight="600" fill="#94a3b8" text-anchor="middle">0</text>
+          <text x="82" y="20" class="font-sans" font-size="10" font-weight="600" fill="#94a3b8" text-anchor="middle">100</text>
+
+          <!-- Bottom Assessment Tagline -->
+          <text x="0" y="52" class="font-sans" font-size="12" font-weight="700" fill="#334155" text-anchor="middle">High Risk Phishing Attack</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- CENTER COLUMN (X=320, width=410) -->
+    <!-- ============================================== -->
+    <g transform="translate(320, 126)">
+      <!-- Card 1: ENTITY RELATIONSHIP GRAPH (Height=400) -->
+      <g filter="url(#cardShadow)">
+        <rect x="0" y="0" width="410" height="395" rx="16" ry="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        
+        <!-- Header -->
+        <g transform="translate(18, 16)">
+          <!-- Network Icon -->
+          <g stroke="#0f2441" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="4" r="2.5" />
+            <circle cx="4" cy="14" r="2.5" />
+            <circle cx="16" cy="14" r="2.5" />
+            <line x1="10" y1="6" x2="5.5" y2="12" />
+            <line x1="13" y1="6" x2="15" y2="12" />
+          </g>
+          <text x="26" y="12" class="font-sans" font-size="12" font-weight="800" fill="#0f2441" letter-spacing="0.6">ENTITY RELATIONSHIP GRAPH</text>
+          
+          <text x="325" y="6" class="font-sans" font-size="10" font-weight="600" fill="#64748b" text-anchor="end">5 primary</text>
+          <text x="325" y="18" class="font-sans" font-size="10" font-weight="600" fill="#64748b" text-anchor="end">nodes</text>
+          
+          <!-- Expand Icon -->
+          <g transform="translate(348, 0)" stroke="#64748b" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 1 13 1 13 5" />
+            <line x1="8" y1="6" x2="13" y2="1" />
+            <polyline points="5 13 1 13 1 9" />
+            <line x1="6" y1="8" x2="1" y2="13" />
+          </g>
+        </g>
+
+        <!-- Legend Pill -->
+        <g transform="translate(230, 48)">
+          <circle cx="6" cy="6" r="3.5" fill="#ef4444" />
+          <text x="14" y="9.5" class="font-sans" font-size="10.5" font-weight="600" fill="#64748b">Malicious</text>
+          <circle cx="74" cy="6" r="3.5" fill="#f59e0b" />
+          <text x="82" y="9.5" class="font-sans" font-size="10.5" font-weight="600" fill="#64748b">Suspicious</text>
+        </g>
+
+        <!-- Visual Canvas with Grid -->
+        <g transform="translate(16, 68)">
+          <rect x="0" y="0" width="378" height="310" rx="12" ry="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+          <rect x="0" y="0" width="378" height="310" rx="12" ry="12" fill="url(#graphGrid)" />
+
+          <!-- Connecting Branch Lines -->
+          <g stroke="#94a3b8" stroke-width="1.4" fill="none">
+            <!-- Root (189, 82) to Child 1 (55, 195) -->
+            <path d="M 189 95 L 55 185" />
+            <!-- Root to Child 2 (145, 195) -->
+            <path d="M 189 95 L 145 185" />
+            <!-- Root to Child 3 (235, 195) -->
+            <path d="M 189 95 L 235 185" />
+            <!-- Root to Child 4 (325, 195) -->
+            <path d="M 189 95 L 325 185" />
+          </g>
+
+          <!-- ROOT NODE: EMAIL SOURCE -->
+          <g transform="translate(189, 70)">
+            <circle cx="0" cy="0" r="28" fill="#ffffff" stroke="#0284c7" stroke-width="2.5" />
+            <!-- Mail Icon -->
+            <g transform="translate(-8, -7)" stroke="#0284c7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="0" y="0" width="16" height="12" rx="2" />
+              <path d="M0 1l8 6 8-6" />
+            </g>
+            <text x="0" y="42" class="font-sans" font-size="10" font-weight="900" fill="#0284c7" text-anchor="middle" letter-spacing="0.5">EMAIL</text>
+            <text x="0" y="53" class="font-sans" font-size="9" font-weight="800" fill="#0284c7" text-anchor="middle" letter-spacing="0.5">SOURCE</text>
+          </g>
+
+          <!-- CHILD 1: IP (RELATED) -->
+          <g transform="translate(55, 205)">
+            <circle cx="0" cy="0" r="24" fill="#ffffff" stroke="#ef4444" stroke-width="2.5" />
+            <!-- Crosshairs/Pin Icon -->
+            <g transform="translate(-7, -7)" stroke="#ef4444" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="7" cy="7" r="5" />
+              <line x1="7" y1="0" x2="7" y2="4" />
+              <line x1="7" y1="10" x2="7" y2="14" />
+              <line x1="0" y1="7" x2="4" y2="7" />
+              <line x1="10" y1="7" x2="14" y2="7" />
+            </g>
+            <text x="0" y="38" class="font-sans" font-size="9.5" font-weight="800" fill="#334155" text-anchor="middle">IP</text>
+            <text x="0" y="48" class="font-sans" font-size="8" font-weight="700" fill="#64748b" text-anchor="middle">(RELATED)</text>
+          </g>
+
+          <!-- CHILD 2: DOMAIN (SPOOFED) -->
+          <g transform="translate(145, 205)">
+            <circle cx="0" cy="0" r="24" fill="#ffffff" stroke="#ef4444" stroke-width="2.5" />
+            <!-- Globe Icon -->
+            <g transform="translate(-7, -7)" stroke="#ef4444" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="7" cy="7" r="6" />
+              <line x1="1" y1="7" x2="13" y2="7" />
+              <path d="M7 1a8 8 0 0 0 0 12 8 8 0 0 0 0-12" />
+            </g>
+            <text x="0" y="38" class="font-sans" font-size="9.5" font-weight="800" fill="#334155" text-anchor="middle">DOMAIN</text>
+            <text x="0" y="48" class="font-sans" font-size="8" font-weight="700" fill="#64748b" text-anchor="middle">(SPOOFED)</text>
+          </g>
+
+          <!-- CHILD 3: URL (HARVEST) -->
+          <g transform="translate(235, 205)">
+            <circle cx="0" cy="0" r="24" fill="#ffffff" stroke="#f59e0b" stroke-width="2.5" />
+            <!-- Link Icon -->
+            <g transform="translate(-7, -7)" stroke="#f59e0b" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8a3 3 0 0 0 4.2 0l2-2a3 3 0 0 0-4.2-4.2l-1 1" />
+              <path d="M8 6a3 3 0 0 0-4.2 0l-2 2a3 3 0 0 0 4.2 4.2l1-1" />
+            </g>
+            <text x="0" y="38" class="font-sans" font-size="9.5" font-weight="800" fill="#334155" text-anchor="middle">URL</text>
+            <text x="0" y="48" class="font-sans" font-size="8" font-weight="700" fill="#64748b" text-anchor="middle">(HARVEST)</text>
+          </g>
+
+          <!-- CHILD 4: ATTACHMENT (MALICIOUS) -->
+          <g transform="translate(325, 205)">
+            <circle cx="0" cy="0" r="24" fill="#ffffff" stroke="#ef4444" stroke-width="2.5" />
+            <!-- File Document Icon -->
+            <g transform="translate(-6, -7)" stroke="#ef4444" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 1h5l3 3v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />
+              <path d="M7 1v3h3" />
+            </g>
+            <text x="0" y="38" class="font-sans" font-size="9.5" font-weight="800" fill="#334155" text-anchor="middle">ATTACHMENT</text>
+            <text x="0" y="48" class="font-sans" font-size="7.5" font-weight="700" fill="#64748b" text-anchor="middle">(MALICIOUS)</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Card 2: EVIDENCE CORRELATIONS (Height=150, y=410) -->
+      <g transform="translate(0, 410)" filter="url(#cardShadow)">
+        <rect x="0" y="0" width="410" height="147" rx="16" ry="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        
+        <!-- Header -->
+        <g transform="translate(18, 16)">
+          <!-- Clock Icon -->
+          <g stroke="#0f2441" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="8" r="7" />
+            <polyline points="8 4 8 8 11 9.5" />
+          </g>
+          <text x="26" y="12" class="font-sans" font-size="12" font-weight="800" fill="#0f2441" letter-spacing="0.6">EVIDENCE CORRELATIONS</text>
+          
+          <text x="345" y="12" class="font-sans" font-size="11" font-weight="600" fill="#64748b" text-anchor="end">3 confirmed matches</text>
+          <g transform="translate(356, 4)" stroke="#0f2441" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="0" y1="6" x2="10" y2="6" />
+            <polyline points="6 2 10 6 6 10" />
+          </g>
+        </g>
+
+        <!-- 3 Bullet Items -->
+        <g transform="translate(18, 48)">
+          <!-- Bullet 1 -->
+          <circle cx="6" cy="8" r="4.5" fill="#ef4444" />
+          <text x="22" y="12" class="font-sans" font-size="12" font-weight="600" fill="#0f172a">Domain registered 2 days ago mimics PayPal</text>
+
+          <!-- Bullet 2 -->
+          <circle cx="6" cy="40" r="4.5" fill="#ef4444" />
+          <text x="22" y="44" class="font-sans" font-size="12" font-weight="600" fill="#0f172a">Sender IP is a known unauthorized relay</text>
+
+          <!-- Bullet 3 -->
+          <circle cx="6" cy="72" r="4.5" fill="#f59e0b" />
+          <text x="22" y="76" class="font-sans" font-size="12" font-weight="600" fill="#0f172a">Embedded link leads to fake login credentials</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- RIGHT COLUMN (X=745, width=285) -->
+    <!-- ============================================== -->
+    <g transform="translate(745, 126)">
+      <!-- Card: THREAT INDICATORS (Height=557) -->
+      <g filter="url(#cardShadow)">
+        <rect x="0" y="0" width="285" height="557" rx="16" ry="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        
+        <!-- Header -->
+        <g transform="translate(16, 16)">
+          <!-- Signal/Radio Icon -->
+          <g stroke="#0f2441" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 12a10 10 0 0 1 0-8" />
+            <path d="M15.5 12a10 10 0 0 0 0-8" />
+            <path d="M5.5 10a5 5 0 0 1 0-4" />
+            <path d="M12.5 10a5 5 0 0 0 0-4" />
+            <circle cx="9" cy="8" r="1.5" fill="#0f2441" />
+          </g>
+          <text x="26" y="8" class="font-sans" font-size="12" font-weight="800" fill="#0f2441" letter-spacing="0.6">THREAT</text>
+          <text x="26" y="22" class="font-sans" font-size="12" font-weight="800" fill="#0f2441" letter-spacing="0.6">INDICATORS</text>
+
+          <!-- Attack Path Badge -->
+          <rect x="185" y="0" width="70" height="34" rx="8" ry="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1" />
+          <text x="220" y="14" class="font-sans" font-size="10" font-weight="700" fill="#475569" text-anchor="middle">Attack</text>
+          <text x="220" y="26" class="font-sans" font-size="10" font-weight="700" fill="#475569" text-anchor="middle">Path</text>
+        </g>
+
+        <!-- Vertical Timeline Track -->
+        <g transform="translate(26, 75)">
+          <!-- Red segment 1 to 2 -->
+          <line x1="0" y1="45" x2="0" y2="195" stroke="#ef4444" stroke-width="3" stroke-linecap="round" />
+          <!-- Orange segment 2 to 3 -->
+          <line x1="0" y1="215" x2="0" y2="365" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
+
+          <!-- MILESTONE 1 -->
+          <g transform="translate(0, 35)">
+            <!-- Circle 1 -->
+            <circle cx="0" cy="0" r="14" fill="#ffffff" stroke="#ef4444" stroke-width="2.5" />
+            <text x="0" y="4.5" class="font-sans" font-size="12" font-weight="900" fill="#ef4444" text-anchor="middle">1</text>
+
+            <!-- Content Card -->
+            <g transform="translate(24, -18)">
+              <!-- Server Icon + ORIGIN IP -->
+              <g transform="translate(0, 2)" stroke="#475569" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="0" y="0" width="13" height="6" rx="1.5" />
+                <rect x="0" y="8" width="13" height="6" rx="1.5" />
+                <circle cx="3" cy="3" r="0.5" fill="#475569" />
+                <circle cx="3" cy="11" r="0.5" fill="#475569" />
+              </g>
+              <text x="18" y="11" class="font-sans" font-size="10" font-weight="800" fill="#475569" letter-spacing="0.5">ORIGIN IP</text>
+              
+              <!-- MALICIOUS Pill -->
+              <rect x="92" y="0" width="76" height="18" rx="4" ry="4" fill="#fff1f2" stroke="#f43f5e" stroke-width="1" />
+              <circle cx="102" cy="9" r="2.5" fill="#ef4444" />
+              <text x="110" y="12" class="font-sans" font-size="8.5" font-weight="800" fill="#e11d48">MALICIOUS</text>
+
+              <!-- Value + Chevron -->
+              <text x="0" y="44" class="font-mono" font-size="17" font-weight="900" fill="#0f172a">185.234.21.9</text>
+              <g transform="translate(180, 32)" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="0 0 5 5 0 10" />
+              </g>
+
+              <!-- Subtitle -->
+              <text x="0" y="68" class="font-sans" font-size="11.5" font-weight="600" fill="#64748b">Unauthorized Origin</text>
+              <text x="0" y="83" class="font-sans" font-size="11.5" font-weight="600" fill="#64748b">IP</text>
+            </g>
+          </g>
+
+          <!-- MILESTONE 2 -->
+          <g transform="translate(0, 205)">
+            <!-- Circle 2 -->
+            <circle cx="0" cy="0" r="14" fill="#ffffff" stroke="#ef4444" stroke-width="2.5" />
+            <text x="0" y="4.5" class="font-sans" font-size="12" font-weight="900" fill="#ef4444" text-anchor="middle">2</text>
+
+            <!-- Content Card -->
+            <g transform="translate(24, -18)">
+              <!-- Globe Icon + DOMAIN -->
+              <g transform="translate(0, 2)" stroke="#475569" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="6" r="5.5" />
+                <line x1="0.5" y1="6" x2="11.5" y2="6" />
+                <path d="M6 0.5a7 7 0 0 0 0 11 7 7 0 0 0 0-11" />
+              </g>
+              <text x="18" y="11" class="font-sans" font-size="10" font-weight="800" fill="#475569" letter-spacing="0.5">DOMAIN</text>
+              
+              <!-- MALICIOUS Pill -->
+              <rect x="92" y="0" width="76" height="18" rx="4" ry="4" fill="#fff1f2" stroke="#f43f5e" stroke-width="1" />
+              <circle cx="102" cy="9" r="2.5" fill="#ef4444" />
+              <text x="110" y="12" class="font-sans" font-size="8.5" font-weight="800" fill="#e11d48">MALICIOUS</text>
+
+              <!-- Value + Chevron -->
+              <text x="0" y="44" class="font-sans" font-size="16" font-weight="900" fill="#0f172a">paypal-verify...</text>
+              <g transform="translate(180, 32)" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="0 0 5 5 0 10" />
+              </g>
+
+              <!-- Subtitle -->
+              <text x="0" y="68" class="font-sans" font-size="11.5" font-weight="600" fill="#64748b">Brand Impersonation</text>
+            </g>
+          </g>
+
+          <!-- MILESTONE 3 -->
+          <g transform="translate(0, 375)">
+            <!-- Circle 3 -->
+            <circle cx="0" cy="0" r="14" fill="#ffffff" stroke="#f59e0b" stroke-width="2.5" />
+            <text x="0" y="4.5" class="font-sans" font-size="12" font-weight="900" fill="#f59e0b" text-anchor="middle">3</text>
+
+            <!-- Content Card -->
+            <g transform="translate(24, -18)">
+              <!-- Link Icon + URL TARGET -->
+              <g transform="translate(0, 2)" stroke="#475569" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 6.5a2.5 2.5 0 0 0 3.5 0l1.5-1.5a2.5 2.5 0 0 0-3.5-3.5l-1 1" />
+                <path d="M7 5.5a2.5 2.5 0 0 0-3.5 0L2 7a2.5 2.5 0 0 0 3.5 3.5l1-1" />
+              </g>
+              <text x="18" y="11" class="font-sans" font-size="10" font-weight="800" fill="#475569" letter-spacing="0.5">URL TARGET</text>
+              
+              <!-- SUSPICIOUS Pill -->
+              <rect x="92" y="0" width="84" height="18" rx="4" ry="4" fill="#fffbeb" stroke="#f59e0b" stroke-width="1" />
+              <circle cx="102" cy="9" r="2.5" fill="#f59e0b" />
+              <text x="110" y="12" class="font-sans" font-size="8.5" font-weight="800" fill="#d97706">SUSPICIOUS</text>
+
+              <!-- Value + Chevron -->
+              <text x="0" y="44" class="font-sans" font-size="16" font-weight="900" fill="#0f172a">login-secure...</text>
+              <g transform="translate(180, 32)" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="0 0 5 5 0 10" />
+              </g>
+
+              <!-- Subtitle -->
+              <text x="0" y="68" class="font-sans" font-size="11.5" font-weight="600" fill="#64748b">Credential Harvester</text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
