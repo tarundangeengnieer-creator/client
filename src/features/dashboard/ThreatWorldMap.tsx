@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { GeospatialMap, MapNode } from '../../components/ui/GeospatialMap.tsx';
 
 interface Hotspot {
@@ -23,7 +23,18 @@ const ATTACK_HOTSPOTS: Hotspot[] = [
   { id: 'nl-ams', country: 'Netherlands', city: 'Amsterdam', ip: '45.154.255.8', lng: 4.9041, lat: 52.3676, threats: 5, risk: 'HIGH' },
 ];
 
-export const ThreatWorldMap: React.FC = () => {
+export interface ThreatWorldMapProps {
+  className?: string;
+  mapHeightClassName?: string;
+  showOverlayLegend?: boolean;
+}
+
+export const ThreatWorldMap: React.FC<ThreatWorldMapProps> = ({
+  className = '',
+  mapHeightClassName = 'h-44 sm:h-48',
+  showOverlayLegend = false,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredHotspot, setHoveredHotspot] = useState<Hotspot | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
@@ -89,8 +100,14 @@ export const ThreatWorldMap: React.FC = () => {
     });
   }, []);
 
+  const containerWidth = containerRef.current?.clientWidth || 600;
+  const clampedTooltipX = Math.max(70, Math.min(tooltipPos.x, containerWidth - 70));
+
   return (
-    <div className="relative w-full rounded-xl overflow-hidden bg-[#070c18] border border-slate-200/80 dark:border-slate-800/80 shadow-inner transition-colors map-container">
+    <div
+      ref={containerRef}
+      className={`relative w-full rounded-xl overflow-hidden bg-[#070c18] border border-slate-200/80 dark:border-slate-800/80 shadow-inner transition-colors map-container ${className}`}
+    >
       {/* Subtle Coordinate Grid Lines */}
       <div className="absolute inset-0 pointer-events-none opacity-30 dark:opacity-15 z-10">
         <div className="w-full h-full" style={{
@@ -99,8 +116,26 @@ export const ThreatWorldMap: React.FC = () => {
         }} />
       </div>
 
+      {/* Optional Overlay Legend */}
+      {showOverlayLegend && (
+        <div className="absolute top-3 right-3 z-20 bg-[#0c1322]/90 border border-slate-800 rounded-lg p-2.5 space-y-1.5 backdrop-blur-sm shadow-lg pointer-events-none">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-[11px] font-mono text-slate-300">Critical threat origin</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span className="text-[11px] font-mono text-slate-300">Suspicious relay node</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-sky-400" />
+            <span className="text-[11px] font-mono text-slate-300">Target perimeter</span>
+          </div>
+        </div>
+      )}
+
       {/* Geospatial Map */}
-      <div className="w-full h-44 sm:h-48 relative z-0">
+      <div className={`w-full ${mapHeightClassName} relative z-0`}>
         <GeospatialMap 
           nodes={mapNodes}
           initialZoom={0.5}
@@ -113,9 +148,9 @@ export const ThreatWorldMap: React.FC = () => {
       {/* Floating Tactical Geolocation Popover Tooltip */}
       {hoveredHotspot && (
         <div
-          className="absolute z-20 pointer-events-none px-2.5 py-2 rounded-lg bg-slate-950/95 text-white border border-slate-800 shadow-xl backdrop-blur-sm text-[11px] font-sans flex flex-col gap-1 transition-all duration-75"
+          className="absolute z-30 pointer-events-none px-2.5 py-2 rounded-lg bg-slate-950/95 text-white border border-slate-800 shadow-xl backdrop-blur-sm text-[11px] font-sans flex flex-col gap-1 transition-all duration-75 whitespace-nowrap"
           style={{
-            left: `${Math.max(10, Math.min(tooltipPos.x, 300))}px`,
+            left: `${clampedTooltipX}px`,
             top: `${Math.max(10, tooltipPos.y - 15)}px`,
             transform: 'translate(-50%, -100%)',
           }}

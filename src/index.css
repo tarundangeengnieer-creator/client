@@ -118,36 +118,51 @@ html:not(.dark) [class*="bg-[#0b1329]"] svg.lucide {
   stroke: #ffffff !important;
 }
 
-/* Dark mode: All SVG icons shift to solid white to be completely viable and blend with dark system */
-html.dark svg.lucide,
-html.dark svg[class*="lucide"],
-html.dark .lucide,
-html.dark svg[data-lucide],
-.dark svg.lucide,
-.dark svg[class*="lucide"],
-.dark .lucide,
-.dark svg[data-lucide] {
+/* Dark mode: All SVG icons shift to solid white to be completely viable and blend with dark system (except within explicit light-preview) */
+html.dark :not(.light-preview *) > svg.lucide,
+html.dark :not(.light-preview *) > svg[class*="lucide"],
+html.dark :not(.light-preview *) > .lucide,
+html.dark :not(.light-preview *) > svg[data-lucide],
+.dark :not(.light-preview *) > svg.lucide,
+.dark :not(.light-preview *) > svg[class*="lucide"],
+.dark :not(.light-preview *) > .lucide,
+.dark :not(.light-preview *) > svg[data-lucide] {
   color: #ffffff !important;
   stroke: #ffffff !important;
   border-color: transparent !important;
 }
 
-html.dark svg.lucide *,
-html.dark svg[class*="lucide"] *,
-html.dark .lucide *,
-.dark svg.lucide *,
-.dark svg[class*="lucide"] *,
-.dark .lucide * {
+html.dark :not(.light-preview *) > svg.lucide *,
+html.dark :not(.light-preview *) > svg[class*="lucide"] *,
+html.dark :not(.light-preview *) > .lucide *,
+.dark :not(.light-preview *) > svg.lucide *,
+.dark :not(.light-preview *) > svg[class*="lucide"] *,
+.dark :not(.light-preview *) > .lucide * {
   stroke: #ffffff !important;
 }
 
-html.dark svg.lucide[fill]:not([fill="none"]),
-html.dark svg[class*="lucide"][fill]:not([fill="none"]),
-html.dark .lucide[fill]:not([fill="none"]),
-.dark svg.lucide[fill]:not([fill="none"]),
-.dark svg[class*="lucide"][fill]:not([fill="none"]),
-.dark .lucide[fill]:not([fill="none"]) {
+html.dark :not(.light-preview *) > svg.lucide[fill]:not([fill="none"]),
+html.dark :not(.light-preview *) > svg[class*="lucide"][fill]:not([fill="none"]),
+html.dark :not(.light-preview *) > .lucide[fill]:not([fill="none"]),
+.dark :not(.light-preview *) > svg.lucide[fill]:not([fill="none"]),
+.dark :not(.light-preview *) > svg[class*="lucide"][fill]:not([fill="none"]),
+.dark :not(.light-preview *) > .lucide[fill]:not([fill="none"]) {
   fill: #ffffff !important;
+}
+
+/* Explicit Light Preview overrides: ensure icons use their local classes or currentColor */
+.light-preview svg.lucide,
+.light-preview svg[class*="lucide"],
+.light-preview .lucide,
+.light-preview svg[data-lucide] {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.light-preview svg.lucide *,
+.light-preview svg[class*="lucide"] *,
+.light-preview .lucide * {
+  stroke: currentColor !important;
 }
 
 /* Icon container wrappers: background-color #ffffff in light mode, equal to dark mode surface in dark mode */
@@ -161,19 +176,26 @@ span:has(> .lucide:only-child) {
   background-color: #ffffff;
 }
 
-html.dark div:has(> svg.lucide:only-child),
-html.dark div:has(> svg[class*="lucide"]:only-child),
-html.dark div:has(> .lucide:only-child),
-html.dark span:has(> svg.lucide:only-child),
-html.dark span:has(> svg[class*="lucide"]:only-child),
-html.dark span:has(> .lucide:only-child),
-.dark div:has(> svg.lucide:only-child),
-.dark div:has(> svg[class*="lucide"]:only-child),
-.dark div:has(> .lucide:only-child),
-.dark span:has(> svg.lucide:only-child),
-.dark span:has(> svg[class*="lucide"]:only-child),
-.dark span:has(> .lucide:only-child) {
+html.dark div:not(.light-preview *):has(> svg.lucide:only-child),
+html.dark div:not(.light-preview *):has(> svg[class*="lucide"]:only-child),
+html.dark div:not(.light-preview *):has(> .lucide:only-child),
+html.dark span:not(.light-preview *):has(> svg.lucide:only-child),
+html.dark span:not(.light-preview *):has(> svg[class*="lucide"]:only-child),
+html.dark span:not(.light-preview *):has(> .lucide:only-child),
+.dark div:not(.light-preview *):has(> svg.lucide:only-child),
+.dark div:not(.light-preview *):has(> svg[class*="lucide"]:only-child),
+.dark div:not(.light-preview *):has(> .lucide:only-child),
+.dark span:not(.light-preview *):has(> svg.lucide:only-child),
+.dark span:not(.light-preview *):has(> svg[class*="lucide"]:only-child),
+.dark span:not(.light-preview *):has(> .lucide:only-child) {
   background-color: #0c1322 !important;
+}
+
+.light-preview div:has(> svg.lucide:only-child),
+.light-preview span:has(> svg.lucide:only-child),
+.light-preview div:has(> svg[class*="lucide"]:only-child),
+.light-preview span:has(> svg[class*="lucide"]:only-child) {
+  background-color: transparent !important;
 }
 
 button div:has(> svg.lucide:only-child),
@@ -237,5 +259,68 @@ button span:has(> svg.lucide:only-child) {
   h1, h2, h3 {
     break-after: avoid !important;
     page-break-after: avoid !important;
+  }
+}
+
+/* ==========================================================================
+   AShieldER Enterprise Background Motion
+   - Calm, subtle security infrastructure scan line and faint node pulsing
+   - Respects prefers-reduced-motion
+   ========================================================================== */
+@keyframes data-scan-sweep {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.28;
+  }
+  85% {
+    opacity: 0.28;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes node-pulse-slow {
+  0%, 100% {
+    opacity: 0.18;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.38;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes line-pulse-slow {
+  0%, 100% {
+    opacity: 0.07;
+  }
+  50% {
+    opacity: 0.16;
+  }
+}
+
+.animate-data-scan {
+  animation: data-scan-sweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-node-faint {
+  animation: node-pulse-slow 7s ease-in-out infinite;
+}
+
+.animate-line-faint {
+  animation: line-pulse-slow 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-data-scan,
+  .animate-node-faint,
+  .animate-line-faint {
+    animation: none !important;
+    opacity: 0.12 !important;
   }
 }

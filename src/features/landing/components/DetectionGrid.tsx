@@ -1,37 +1,62 @@
 import React from 'react';
 import {
   Mail,
-  ShieldAlert,
-  Shield,
+  ShieldCheck,
   Link2,
-  Paperclip,
-  CheckCircle2,
-  Server,
-  Globe,
-  MapPin,
   Radio,
-  UserX,
-  Target,
-  ArrowRight,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
 
-const CAPABILITIES = [
-  { icon: Mail, label: 'Phishing Detection', color: 'text-rose-400', border: 'border-rose-500/25', bg: 'bg-rose-500/5' },
-  { icon: UserX, label: 'BEC Detection', color: 'text-orange-400', border: 'border-orange-500/25', bg: 'bg-orange-500/5' },
-  { icon: ShieldAlert, label: 'Spoofing Detection', color: 'text-amber-400', border: 'border-amber-500/25', bg: 'bg-amber-500/5' },
-  { icon: Link2, label: 'Malicious URL Analysis', color: 'text-rose-400', border: 'border-rose-500/25', bg: 'bg-rose-500/5' },
-  { icon: Paperclip, label: 'Attachment Analysis', color: 'text-orange-400', border: 'border-orange-500/25', bg: 'bg-orange-500/5' },
-  { icon: CheckCircle2, label: 'SPF / DKIM / DMARC', color: 'text-emerald-400', border: 'border-emerald-500/25', bg: 'bg-emerald-500/5' },
-  { icon: Server, label: 'IP Intelligence', color: 'text-purple-400', border: 'border-purple-500/25', bg: 'bg-purple-500/5' },
-  { icon: Globe, label: 'Domain Intelligence', color: 'text-purple-400', border: 'border-purple-500/25', bg: 'bg-purple-500/5' },
-  { icon: MapPin, label: 'Geolocation', color: 'text-purple-400', border: 'border-purple-500/25', bg: 'bg-purple-500/5' },
-  { icon: Radio, label: 'Threat Intelligence', color: 'text-sky-400', border: 'border-sky-500/25', bg: 'bg-sky-500/5' },
-  { icon: Shield, label: 'Credential Harvesting', color: 'text-rose-400', border: 'border-rose-500/25', bg: 'bg-rose-500/5' },
-  { icon: Target, label: 'Threat Actor Intel', color: 'text-amber-400', border: 'border-amber-500/25', bg: 'bg-amber-500/5' },
+interface CapabilityGroup {
+  id: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+}
+
+const CAPABILITIES: CapabilityGroup[] = [
+  {
+    id: 'capability-email-threat-detection',
+    icon: Mail,
+    title: 'Email Threat Detection',
+    description: 'Phishing · BEC · Spoofing',
+  },
+  {
+    id: 'capability-email-authentication',
+    icon: ShieldCheck,
+    title: 'Email Authentication',
+    description: 'SPF · DKIM · DMARC',
+  },
+  {
+    id: 'capability-url-attachment-analysis',
+    icon: Link2,
+    title: 'URL & Attachment Analysis',
+    description: 'Malicious URLs · Attachments · Credential Theft',
+  },
+  {
+    id: 'capability-threat-intelligence',
+    icon: Radio,
+    title: 'Threat Intelligence',
+    description: 'IP · Domain · IOC · Threat Actors',
+  },
+  {
+    id: 'capability-geolocation-intelligence',
+    icon: MapPin,
+    title: 'Geolocation Intelligence',
+    description: 'GeoIP · ASN · Origin',
+  },
+  {
+    id: 'capability-ai-investigation',
+    icon: Sparkles,
+    title: 'AI Investigation',
+    description: 'Correlation · Risk Scoring · Forensics',
+  },
 ];
 
 export const DetectionGrid: React.FC = () => (
   <section
+    id="detection-capabilities-section"
     className="py-20 px-4 sm:px-6 border-t border-slate-800/60"
     aria-labelledby="detection-heading"
   >
@@ -45,29 +70,30 @@ export const DetectionGrid: React.FC = () => (
       >
         Comprehensive Threat Coverage.
       </h2>
-      <p className="text-slate-400 text-base max-w-xl mb-10 leading-relaxed">
+      <p className="text-slate-400 text-base max-w-xl mb-8 sm:mb-10 leading-relaxed">
         AShieldER detects and investigates the full spectrum of email-based threats — from credential phishing
         to business email compromise, domain spoofing, and threat actor infrastructure.
       </p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3">
-        {CAPABILITIES.map(({ icon: Icon, label, color, border, bg }) => (
-          <button
-            key={label}
-            type="button"
-            className={`flex flex-col items-start gap-3 p-4 rounded-lg border ${border} ${bg} hover:brightness-110 transition-all duration-200 group cursor-pointer text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-400`}
-            aria-label={`Learn more about ${label}`}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+        {CAPABILITIES.map(({ id, icon: Icon, title, description }) => (
+          <div
+            key={id}
+            id={id}
+            className="group flex items-start gap-3.5 p-4 rounded-xl bg-[#0c1322] border border-slate-800/80 hover:border-slate-700 hover:bg-[#0f172a] transition-colors duration-150 cursor-default"
           >
-            <div className="flex w-full items-start justify-between">
-              <div
-                className={`w-7 h-7 rounded-lg border ${border} flex items-center justify-center bg-[#070b14] shrink-0`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${color}`} />
-              </div>
-              <ArrowRight className={`w-3.5 h-3.5 ${color} opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all`} />
+            <div className="w-9 h-9 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center text-[#08B4ED] shrink-0 mt-0.5 group-hover:border-[#08B4ED]/40 group-hover:text-sky-300 transition-colors">
+              <Icon className="w-4.5 h-4.5" />
             </div>
-            <span className={`text-xs font-mono font-semibold ${color} leading-snug mt-1`}>{label}</span>
-          </button>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-semibold text-slate-100 group-hover:text-white transition-colors">
+                {title}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1 font-sans leading-normal">
+                {description}
+              </p>
+            </div>
+          </div>
         ))}
       </div>
     </div>
