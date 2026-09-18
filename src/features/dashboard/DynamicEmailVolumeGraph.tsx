@@ -590,9 +590,9 @@ export const DynamicEmailVolumeGraph: React.FC<{ timeRange: '24h' | '7d' | '30d'
           </span>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className={`font-bold text-slate-900 dark:text-white ${isLarge ? 'text-base' : 'text-sm'}`}>
+              <h2 className={`font-bold text-slate-900 dark:text-white ${isLarge ? 'text-base' : 'text-sm'}`}>
                 Inbound Flow & Threat Telemetry
-              </h3>
+              </h2>
               <span className="px-1.5 py-0.2 text-xs font-semibold rounded uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">
                 MDO/SOC
               </span>
@@ -619,29 +619,10 @@ export const DynamicEmailVolumeGraph: React.FC<{ timeRange: '24h' | '7d' | '30d'
           </span>
         </div>
 
-        {/* Fullscreen Expand / Exit Button (Icon only) */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsExpanded(!isExpanded);
-          }}
-          title={isExpanded ? 'Close expanded view (Esc)' : 'Expand telemetry to full screen'}
-          aria-label={isExpanded ? 'Exit full screen' : 'Expand full screen'}
-          className="p-1.5 rounded-md text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700/80"
-        >
-          {isExpanded ? (
-            <Minimize2 className={isLarge ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
-          ) : (
-            <Maximize2 className={isLarge ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
-          )}
-        </button>
-      </div>
-
-      {/* Controls Row: Traffic Filter, View Mode Switcher and Timeframe Switcher */}
-      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
-        {/* Series Filter: All Traffic vs Threats Only with High-Contrast Active State */}
-        <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold">
+        {/* Controls Row: Traffic Filter, View Mode Switcher and Timeframe Switcher */}
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
+          {/* Series Filter: All Traffic vs Threats Only with High-Contrast Active State */}
+          <div className="flex items-center bg-slate-100 dark:bg-[#090e1a] p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold">
           <button
             type="button"
             onClick={(e) => {
@@ -708,7 +689,25 @@ export const DynamicEmailVolumeGraph: React.FC<{ timeRange: '24h' | '7d' | '30d'
           </button>
         </div>
 
-
+        </div>
+        
+        {/* Fullscreen Expand / Exit Button (Icon only) */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsExpanded(!isExpanded);
+          }}
+          title={isExpanded ? 'Close expanded view (Esc)' : 'Expand telemetry to full screen'}
+          aria-label={isExpanded ? 'Exit full screen' : 'Expand full screen'}
+          className="p-1.5 rounded-md text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700/80"
+        >
+          {isExpanded ? (
+            <Minimize2 className={isLarge ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+          ) : (
+            <Maximize2 className={isLarge ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+          )}
+        </button>
       </div>
     </div>
   );

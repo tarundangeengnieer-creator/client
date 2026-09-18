@@ -157,7 +157,7 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
               <Shield className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Threat Distribution</h3>
+              <h2 className="font-bold text-slate-900 dark:text-white text-sm">Threat Distribution</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">Verdicts by classification</p>
             </div>
           </div>
@@ -326,23 +326,7 @@ export const ThreatDistributionPieChart: React.FC<ThreatDistributionPieChartProp
         </div>
       </div>
 
-      {/* Dynamic Risk Posture Banner */}
-      <div
-        className={`mt-4 p-3 rounded-xl border flex items-start gap-2.5 transition-colors duration-200 ${activeThreats.postureBg} ${activeThreats.postureBorder} dark:bg-slate-900/60 dark:border-slate-800`}
-      >
-        <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${activeThreats.postureColor}`} />
-        <div className="min-w-0">
-          <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-            <span>Risk posture:</span>
-            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${activeThreats.postureColor}`}>
-              {activeThreats.posture}
-            </span>
-          </div>
-          <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5 leading-snug">
-            {activeThreats.note}
-          </p>
-        </div>
-      </div>
+
     </div>
   );
 };

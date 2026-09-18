@@ -20,6 +20,7 @@ import { GraphInvestigationPage } from './features/investigator/components/Threa
 import { EvidencePage } from './features/investigation/components/evidence/EvidencePage.tsx';
 import { TimelinePage } from './features/investigation/components/timeline/TimelinePage.tsx';
 import { SOCWorkspace } from './features/soc/SOCWorkspace.tsx';
+import { LandingPage } from './features/landing/LandingPage.tsx';
 import { Role } from './features/auth/authConfig.ts';
 
 // Using HealthPlaceholder for missing admin routes since they share the same structure
@@ -58,11 +59,13 @@ export default function App() {
     if (pathname && pathname !== '/') {
       uiStore.navigate(pathname);
     } else {
-      uiStore.navigate(auth.isAuthenticated ? '/overview' : '/login');
+      // '/' is the public landing page — always show it on initial load.
+      // Authenticated users can navigate to the app via the landing page CTAs.
+      uiStore.navigate('/');
     }
 
     const handlePopState = () => {
-      uiStore.navigate(window.location.pathname || (auth.isAuthenticated ? '/overview' : '/login'));
+      uiStore.navigate(window.location.pathname || (auth.isAuthenticated ? '/overview' : '/'));
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -74,14 +77,15 @@ export default function App() {
     }
   }, [ui.currentPath]);
 
-  // Auth Guard
+  // Auth Guard — '/' is the public landing page; always accessible regardless of auth state
   useEffect(() => {
-    if (!auth.isAuthenticated && ui.currentPath !== '/login') {
+    if (!auth.isAuthenticated && ui.currentPath !== '/login' && ui.currentPath !== '/') {
       uiStore.navigate('/login');
     }
     if (auth.isAuthenticated && ui.currentPath === '/login') {
       uiStore.navigate('/overview');
     }
+    // Note: '/' is intentionally NOT redirected — landing page is public for all users
   }, [auth.isAuthenticated, ui.currentPath, auth.currentRole]);
 
   const checkAccess = (basePath: string) => {
@@ -92,6 +96,11 @@ export default function App() {
 
   // Route Dispatcher
   const renderRoute = () => {
+    // Public landing page — served at '/' for all users (auth-aware CTAs handle routing to dashboard)
+    if (ui.currentPath === '/') {
+      return <LandingPage />;
+    }
+
     if (ui.currentPath === '/login') {
       return <LoginPage />;
     }
@@ -178,7 +187,7 @@ export default function App() {
     return <NotFoundPage />;
   };
 
-  if (ui.currentPath === '/login' || !auth.isAuthenticated) {
+  if (ui.currentPath === '/' || ui.currentPath === '/login' || !auth.isAuthenticated) {
     return (
       <ErrorBoundary>
         {renderRoute()}

@@ -71,7 +71,7 @@ const initialTheme = getInitialTheme();
 applyTheme(initialTheme);
 
 const initialUIState: UIState = {
-  currentPath: '/overview',
+  currentPath: typeof window !== 'undefined' ? (window.location.pathname || '/') : '/',
   activeCaseId: 'A2291',
   activeCaseVerdict: null,
   activeCaseRisk: null,

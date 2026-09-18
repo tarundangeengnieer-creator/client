@@ -275,10 +275,7 @@ export const AppTopBar: React.FC = () => {
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-normal sm:whitespace-nowrap">Threat evaluation & operational triage queue</p>
           </div>
         ) : isOverview ? (
-          <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate block">Security Overview</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">Email threat detection & forensic intelligence</p>
-          </div>
+          null
         ) : ui.currentPath.startsWith('/soc') ? (
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate block">SOC Dashboard</h1>

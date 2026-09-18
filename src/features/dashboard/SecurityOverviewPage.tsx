@@ -444,7 +444,7 @@ export const SecurityOverviewPage: React.FC = () => {
                 <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                   <Globe className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                 </span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Geolocation of Malicious Senders</h3>
+                <h2 className="font-bold text-slate-900 dark:text-white text-sm">Geolocation of Malicious Senders</h2>
               </div>
             </div>
 
@@ -523,7 +523,7 @@ export const SecurityOverviewPage: React.FC = () => {
                 <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                   <FileText className="w-4 h-4" />
                 </span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Recent Cases</h3>
+                <h2 className="font-bold text-slate-900 dark:text-white text-sm">Recent Cases</h2>
               </div>
               <button
                 type="button"
@@ -712,7 +712,7 @@ export const SecurityOverviewPage: React.FC = () => {
               <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                 <ShieldAlert className="w-4 h-4" />
               </span>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Top Threat Types</h3>
+              <h2 className="font-bold text-slate-900 dark:text-white text-sm">Top Threat Types</h2>
             </div>
           </div>
 
@@ -766,7 +766,7 @@ export const SecurityOverviewPage: React.FC = () => {
               <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                 <Shield className="w-4 h-4" />
               </span>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Top Targeted Brands</h3>
+              <h2 className="font-bold text-slate-900 dark:text-white text-sm">Top Targeted Brands</h2>
             </div>
           </div>
 
