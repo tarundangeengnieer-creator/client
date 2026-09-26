@@ -45,11 +45,11 @@ export const GeospatialMap: React.FC<GeospatialMapProps> = ({
     if (mapInstance.current) return; // initialize map only once
 
     const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
-    const baseUrl = import.meta.env.VITE_MAP_STYLE_URL || 'https://demotiles.maplibre.org/style.json';
+    const baseUrl = import.meta.env.VITE_MAP_STYLE_URL || 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
     
-    // Safely append key without duplicating, only if we have a key and it's not the demo tiles
+    // Safely append key without duplicating, only if we have a key and it's not the demo tiles or carto
     const styleUrl = new URL(baseUrl);
-    if (apiKey && !styleUrl.searchParams.has('key') && !baseUrl.includes('demotiles')) {
+    if (apiKey && !styleUrl.searchParams.has('key') && !baseUrl.includes('demotiles') && !baseUrl.includes('cartocdn')) {
       styleUrl.searchParams.append('key', apiKey);
     }
 
