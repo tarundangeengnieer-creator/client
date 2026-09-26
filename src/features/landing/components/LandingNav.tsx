@@ -96,14 +96,6 @@ export const LandingNav: React.FC = () => {
           >
             Analyze Email
           </Button>
-          <Button
-            variant="ghost"
-            size="md"
-            onClick={handleSignIn}
-            className="text-xs text-slate-300 hover:text-white cursor-pointer"
-          >
-            {auth.isAuthenticated ? 'Dashboard' : 'Sign In'}
-          </Button>
         </div>
 
         {/* Mobile Toggle */}
