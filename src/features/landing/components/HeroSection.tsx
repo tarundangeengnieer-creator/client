@@ -52,9 +52,11 @@ export const HeroSection: React.FC = () => {
     }
     uiStore.openWorkflowModal('eml');
   };
-  const handleExplore = () => {
-    const el = document.querySelector('#product');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleGoToDashboard = () => {
+    if (!auth.isAuthenticated) {
+      authStore.login('investigator@ashielder.io', 'demo');
+    }
+    uiStore.navigate('/overview');
   };
 
   return (
@@ -208,10 +210,11 @@ export const HeroSection: React.FC = () => {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={handleExplore}
+                onClick={handleGoToDashboard}
                 className="sm:w-auto justify-center border-slate-700 text-slate-200 hover:text-white hover:border-slate-500 bg-[#070c18]/60 cursor-pointer"
+                aria-label="Go to Dashboard"
               >
-                Explore the Platform
+                Go to Dashboard
               </Button>
             </div>
 
