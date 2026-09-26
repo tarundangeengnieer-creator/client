@@ -44,7 +44,7 @@ export const FinalCTA: React.FC = () => {
             className="font-semibold justify-center"
             rightIcon={<ArrowRight className="w-4 h-4" />}
           >
-            {auth.isAuthenticated ? 'Go to Dashboard' : 'Analyze an Email'}
+            {auth.isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
           </Button>
           <Button
             variant="outline"
@@ -52,7 +52,7 @@ export const FinalCTA: React.FC = () => {
             onClick={handleExplore}
             className="justify-center border-slate-700 text-slate-300 hover:text-white hover:border-slate-500"
           >
-            Explore Platform
+            Explore the Platform
           </Button>
         </div>
 
@@ -63,17 +63,20 @@ export const FinalCTA: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="max-w-7xl mx-auto mt-20 pt-6 border-t border-slate-800/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <AshielderLogo size="sm" variant="full" theme="dark" tagline="" />
-        <p className="text-xs font-mono text-slate-600">
-          © 2026 AShieldER · AI-Powered Email Threat Detection & Forensic Intelligence
-        </p>
-        <div className="flex items-center gap-4">
+      <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-slate-800/40 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left">
+          <AshielderLogo size="sm" variant="full" theme="dark" tagline="" />
+          <span className="hidden sm:inline-block w-px h-4 bg-slate-800" />
+          <p className="text-xs font-mono text-slate-500">
+            © 2026 AShieldER · AI-Powered Threat Forensics
+          </p>
+        </div>
+        <div className="flex items-center gap-6">
           {['Privacy', 'Security', 'Contact'].map((link) => (
             <button
               key={link}
               type="button"
-              className="text-xs font-mono text-slate-600 hover:text-slate-400 transition-colors"
+              className="text-xs font-mono text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
             >
               {link}
             </button>

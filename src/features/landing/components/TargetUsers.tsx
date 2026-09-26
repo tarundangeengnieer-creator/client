@@ -56,7 +56,7 @@ export const TargetUsers: React.FC = () => (
     aria-labelledby="users-heading"
   >
     <div className="max-w-7xl mx-auto">
-      <p className="text-xs font-mono font-bold text-sky-400/70 tracking-widest uppercase mb-4">
+      <p className="text-xs font-mono font-bold text-sky-400 tracking-wider mb-4">
         Built For
       </p>
       <h2

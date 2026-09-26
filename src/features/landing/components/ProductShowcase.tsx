@@ -39,18 +39,18 @@ const GraphTab: React.FC = () => (
           <stop offset="0%" stopColor="#08b4ed" stopOpacity="0.06" />
           <stop offset="100%" stopColor="transparent" />
         </radialGradient>
-        <marker id="pg-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-          <path d="M0,0 L0,7 L7,3.5 z" fill="#1e293b" />
+        <marker id="pg-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L0,8 L8,4 z" fill="#38bdf8" fillOpacity="0.75" />
         </marker>
       </defs>
       <rect width="700" height="360" fill="url(#pg-glow)" />
 
       {/* Grid lines */}
       {[0, 100, 200, 300, 400, 500, 600, 700].map(x => (
-        <line key={`vg-${x}`} x1={x} y1={0} x2={x} y2={360} stroke="rgba(30,41,59,0.5)" strokeWidth="1" />
+        <line key={`vg-${x}`} x1={x} y1={0} x2={x} y2={360} stroke="rgba(30,41,59,0.35)" strokeWidth="1" />
       ))}
       {[0, 90, 180, 270, 360].map(y => (
-        <line key={`hg-${y}`} x1={0} y1={y} x2={700} y2={y} stroke="rgba(30,41,59,0.5)" strokeWidth="1" />
+        <line key={`hg-${y}`} x1={0} y1={y} x2={700} y2={y} stroke="rgba(30,41,59,0.35)" strokeWidth="1" />
       ))}
 
       {/* Edges */}
@@ -59,7 +59,7 @@ const GraphTab: React.FC = () => (
         [350, 180, 560, 280], [350, 180, 350, 310], [160, 80, 60, 40],
         [540, 80, 640, 40], [140, 280, 60, 310],
       ] as [number,number,number,number][]).map(([x1,y1,x2,y2],i) => (
-        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1e293b" strokeWidth="1.5"
+        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#38bdf8" strokeOpacity="0.45" strokeWidth="2"
           markerEnd="url(#pg-arrow)" />
       ))}
 
@@ -113,6 +113,7 @@ const GraphTab: React.FC = () => (
         { color: 'bg-amber-400', label: 'Suspicious' },
         { color: 'bg-purple-500', label: 'Enriched' },
         { color: 'bg-sky-400', label: 'Primary' },
+        { color: 'bg-slate-500', label: 'Context / Entity' },
       ].map(({ color, label }) => (
         <div key={label} className="flex items-center gap-1.5">
           <span className={`w-2 h-2 rounded-full ${color}`} />
@@ -271,7 +272,7 @@ export const ProductShowcase: React.FC = () => {
       aria-labelledby="showcase-heading"
     >
       <div className="max-w-7xl mx-auto">
-        <p className="text-xs font-mono font-bold text-sky-400/70 tracking-widest uppercase mb-4">
+        <p className="text-xs font-mono font-bold text-sky-400 tracking-wider mb-4">
           Investigator Workspace
         </p>
         <h2
@@ -301,18 +302,24 @@ export const ProductShowcase: React.FC = () => {
           </div>
 
           {/* Tab bar */}
-          <div className="flex border-b border-slate-800 bg-[#070b14]/60">
+          <div
+            className="flex border-b border-slate-800 bg-[#070b14]/60"
+            role="tablist"
+            aria-label="Forensic investigator views"
+          >
             {TABS.map((tab) => (
               <button
                 key={tab.id}
+                id={`tab-${tab.id}`}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-mono font-medium transition-colors border-b-2 -mb-px cursor-pointer ${
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-mono font-medium transition-colors border-b-2 -mb-px cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-400 ${
                   activeTab === tab.id
                     ? 'text-sky-400 border-sky-400 bg-sky-500/5'
-                    : 'text-slate-500 border-transparent hover:text-slate-300'
+                    : 'text-slate-400 border-transparent hover:text-slate-200'
                 }`}
                 aria-selected={activeTab === tab.id}
+                aria-controls={`panel-${tab.id}`}
                 role="tab"
               >
                 {tab.icon}
@@ -322,7 +329,13 @@ export const ProductShowcase: React.FC = () => {
           </div>
 
           {/* Tab content */}
-          <div role="tabpanel">
+          <div
+            id={`panel-${activeTab}`}
+            role="tabpanel"
+            aria-labelledby={`tab-${activeTab}`}
+            tabIndex={0}
+            className="focus-visible:outline-none"
+          >
             {tabContent[activeTab]}
           </div>
 

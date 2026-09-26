@@ -46,7 +46,7 @@ export const LandingNav: React.FC = () => {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
         scrolled
           ? 'bg-[#060a14]/95 backdrop-blur-md border-b border-slate-800/80 shadow-lg shadow-black/20'
-          : 'bg-transparent'
+          : 'bg-[#060a14]/90 backdrop-blur-md border-b border-slate-800/40'
       }`}
     >
       <nav
@@ -58,20 +58,22 @@ export const LandingNav: React.FC = () => {
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex items-center gap-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-400 rounded cursor-pointer"
+          className="flex items-center gap-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a14] rounded cursor-pointer"
           aria-label="AShieldER Home"
         >
-          <AshielderLogo size="sm" variant="full" theme="dark" tagline="" />
+          <span aria-hidden="true" className="flex items-center">
+            <AshielderLogo size="sm" variant="full" theme="dark" tagline="" />
+          </span>
         </button>
 
         {/* Desktop Nav Links */}
-        <ul className="hidden md:flex items-center gap-0.5" role="list">
+        <ul className="hidden md:flex items-center gap-2" role="list">
           {NAV_LINKS.map((link) => (
             <li key={link.label}>
               <button
                 type="button"
                 onClick={() => scrollToSection(link.href)}
-                className="flex items-center gap-0.5 px-3 py-1.5 text-sm text-slate-400 hover:text-slate-100 transition-colors duration-150 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-400 cursor-pointer"
+                className="flex items-center px-3.5 py-1.5 text-sm text-slate-300 hover:text-white transition-colors duration-150 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a14] cursor-pointer"
               >
                 {link.label}
               </button>
@@ -80,17 +82,17 @@ export const LandingNav: React.FC = () => {
         </ul>
 
         {/* Desktop CTAs */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2.5">
           {auth.isAuthenticated ? (
-            <Button variant="primary" size="sm" onClick={handleSignIn} className="font-semibold">
+            <Button variant="primary" size="md" onClick={handleSignIn} className="font-semibold text-xs">
               Go to Dashboard
             </Button>
           ) : (
             <>
-              <Button variant="ghost" size="sm" onClick={handleSignIn}>
+              <Button variant="ghost" size="md" onClick={handleSignIn} className="text-xs">
                 Sign In
               </Button>
-              <Button variant="primary" size="sm" onClick={handleAnalyze} className="font-semibold">
+              <Button variant="primary" size="md" onClick={handleAnalyze} className="font-semibold text-xs">
                 Analyze an Email
               </Button>
             </>

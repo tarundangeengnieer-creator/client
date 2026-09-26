@@ -6,10 +6,10 @@ const PROVENANCE_TIERS = [
   {
     type: 'OBSERVED EVIDENCE' as const,
     icon: FileCheck,
-    color: 'text-[#08B4ED]',
-    borderColor: 'border-[#08B4ED]/40',
-    bgColor: 'bg-[#08B4ED]/5',
-    glowColor: 'shadow-[0_0_20px_rgba(8,180,237,0.08)]',
+    color: 'text-sky-400',
+    borderColor: 'border-sky-500/40',
+    bgColor: 'bg-sky-500/5',
+    glowColor: 'shadow-[0_0_20px_rgba(14,165,233,0.08)]',
     title: 'Observed Evidence',
     description:
       'Directly extracted or verified from the email message itself. Authoritative forensic artifacts from RFC 5322 headers, MIME body, relay network sockets, and raw bytes.',
@@ -21,7 +21,7 @@ const PROVENANCE_TIERS = [
       'MIME structure and encoding',
     ],
     trust: 'Highest trust — primary forensic evidence',
-    trustColor: 'text-[#08B4ED]',
+    trustColor: 'text-sky-400',
   },
   {
     type: 'THREAT INTELLIGENCE' as const,
@@ -44,6 +44,26 @@ const PROVENANCE_TIERS = [
     trustColor: 'text-purple-400',
   },
   {
+    type: 'ML DETECTION' as const,
+    icon: Cpu,
+    color: 'text-amber-400',
+    borderColor: 'border-amber-500/40',
+    bgColor: 'bg-amber-500/5',
+    glowColor: 'shadow-[0_0_20px_rgba(245,158,11,0.08)]',
+    title: 'ML Detection',
+    description:
+      'Predictive statistical inference models evaluated against extracted forensic features, identifying anomalies and classification patterns.',
+    examples: [
+      'Trained classifier inference scores',
+      'Feature anomaly probability vectors',
+      'Content & lexical threat scoring',
+      'Model confidence calibration',
+      'Multi-vector risk weights',
+    ],
+    trust: 'Predictive — supplementary signal, not sole verdict',
+    trustColor: 'text-amber-400',
+  },
+  {
     type: 'AI ANALYSIS' as const,
     icon: Sparkles,
     color: 'text-sky-300',
@@ -61,7 +81,7 @@ const PROVENANCE_TIERS = [
       'Evidence synthesis and summary',
     ],
     trust: 'Interpretive — supports investigation, not final verdict',
-    trustColor: 'text-amber-400',
+    trustColor: 'text-sky-300',
   },
 ];
 
@@ -72,7 +92,7 @@ export const EvidenceProvenance: React.FC = () => (
     aria-labelledby="provenance-heading"
   >
     <div className="max-w-7xl mx-auto">
-      <p className="text-xs font-mono font-bold text-sky-400/70 tracking-widest uppercase mb-4">
+      <p className="text-xs font-mono font-bold text-sky-400 tracking-wider mb-4">
         Evidence Integrity
       </p>
       <h2
@@ -88,7 +108,7 @@ export const EvidenceProvenance: React.FC = () => (
         or an AI-generated interpretation.
       </p>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {PROVENANCE_TIERS.map(({ type, icon: Icon, color, borderColor, bgColor, glowColor, title, description, examples, trust, trustColor }) => (
           <div
             key={type}
@@ -128,23 +148,6 @@ export const EvidenceProvenance: React.FC = () => (
             </div>
           </div>
         ))}
-      </div>
-
-      {/* ML Detection callout */}
-      <div className="mt-4 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-start gap-4">
-        <div className="w-8 h-8 rounded-lg border border-amber-500/30 flex items-center justify-center bg-[#070b14] shrink-0">
-          <Cpu className="w-4 h-4 text-amber-400" />
-        </div>
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <ProvenanceLabel type="ML DETECTION" size="sm" showIcon={false} />
-          </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            <strong className="text-amber-400 font-mono">ML Detection</strong> signals are predictive statistical
-            inference outputs from trained models. These are evaluated against extracted forensic features and are
-            treated as supplementary signals — not authoritative verdicts.
-          </p>
-        </div>
       </div>
     </div>
   </section>

@@ -42,7 +42,7 @@ export const IntelligenceSection: React.FC = () => (
     aria-labelledby="intel-heading"
   >
     <div className="max-w-7xl mx-auto">
-      <p className="text-xs font-mono font-bold text-sky-400/70 tracking-widest uppercase mb-4">
+      <p className="text-xs font-mono font-bold text-sky-400 tracking-wider mb-4">
         Geolocation & Threat Intelligence
       </p>
       <h2

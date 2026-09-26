@@ -35,7 +35,7 @@ export const ForensicReportSection: React.FC = () => (
     aria-labelledby="report-heading"
   >
     <div className="max-w-7xl mx-auto">
-      <p className="text-xs font-mono font-bold text-sky-400/70 tracking-widest uppercase mb-4">
+      <p className="text-xs font-mono font-bold text-sky-400 tracking-wider mb-4">
         Forensic Reporting
       </p>
       <h2
@@ -51,24 +51,31 @@ export const ForensicReportSection: React.FC = () => (
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Report table of contents */}
-        <div className="lg:col-span-1 bg-[#0c1322] border border-slate-800 rounded-xl overflow-hidden">
+        <div className="lg:col-span-1 bg-[#0c1322] border border-slate-800 rounded-xl overflow-hidden self-start">
           <div className="px-4 py-3 bg-[#070b14] border-b border-slate-800 flex items-center gap-2">
             <FileText className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">Report Sections</span>
+            <span className="text-xs font-mono font-bold text-slate-400 tracking-wider">Report Sections</span>
           </div>
           <ol className="divide-y divide-slate-800/60">
-            {REPORT_SECTIONS.map((section, i) => (
-              <li key={section} className="flex items-center gap-3 px-4 py-2.5">
-                <span className="text-xs font-mono text-slate-700 w-4 shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                <span className="text-xs font-mono text-slate-400">{section}</span>
-              </li>
-            ))}
+            {REPORT_SECTIONS.map((section, i) => {
+              const isActive = i === 0;
+              return (
+                <li
+                  key={section}
+                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
+                    isActive
+                      ? 'bg-sky-500/10 border-l-2 border-sky-400 text-sky-300 font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span className={`text-xs font-mono w-4 shrink-0 ${isActive ? 'text-sky-400' : 'text-slate-600'}`}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-xs font-mono">{section}</span>
+                </li>
+              );
+            })}
           </ol>
-          <div className="px-4 py-3 bg-[#070b14]/60 border-t border-slate-800/60 flex gap-2">
-            <Badge variant="info" size="sm">PDF Export</Badge>
-            <Badge variant="outline" size="sm">JSON</Badge>
-            <Badge variant="outline" size="sm">HTML</Badge>
-          </div>
         </div>
 
         {/* Report preview */}
@@ -77,9 +84,9 @@ export const ForensicReportSection: React.FC = () => (
           <div className="px-5 py-4 bg-[#070b14] border-b border-slate-800">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-mono text-slate-500 uppercase tracking-wider">Forensic Investigation Report</p>
+                <p className="text-xs font-mono text-slate-500 tracking-wider">Forensic Investigation Report</p>
                 <h3 className="text-sm font-mono font-bold text-slate-200 mt-0.5">Case #A2291 — PayPal Brand Impersonation</h3>
-                <p className="text-xs font-mono text-slate-500 mt-1">Generated: 2026-09-18 · Investigator: Bob Chen · ASHIELDER v2.1</p>
+                <p className="text-xs font-mono text-slate-500 mt-1">Generated: 2026-09-18 · Investigator: Bob Chen · AShieldER v2.1</p>
               </div>
               <SeverityBadge severity="MALICIOUS" size="sm" showDot />
             </div>
@@ -87,7 +94,7 @@ export const ForensicReportSection: React.FC = () => (
 
           {/* Case summary block */}
           <div className="px-5 py-4 border-b border-slate-800/60">
-            <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-2">01 · Case Summary</p>
+            <p className="text-xs font-mono font-bold text-slate-400 tracking-wider mb-2">01 · Case Summary</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {[
                 { k: 'Verdict', v: 'MALICIOUS', color: 'text-rose-400' },
@@ -107,7 +114,7 @@ export const ForensicReportSection: React.FC = () => (
 
           {/* Auth results */}
           <div className="px-5 py-4 border-b border-slate-800/60">
-            <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-2">02 · Authentication Results</p>
+            <p className="text-xs font-mono font-bold text-slate-400 tracking-wider mb-2">02 · Authentication Results</p>
             <div className="flex gap-2 flex-wrap">
               {[
                 { label: 'SPF', icon: XCircle, color: 'text-rose-400', result: 'FAIL' },
@@ -123,10 +130,22 @@ export const ForensicReportSection: React.FC = () => (
             </div>
           </div>
 
+          {/* Sections 03–06 summary banner */}
+          <div className="px-5 py-3 border-b border-slate-800/60 bg-[#070b14]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <span className="text-slate-500 font-semibold">03–06</span>
+              <span className="text-slate-600">·</span>
+              <span>IOCs, URL & Attachment Analysis, Intel</span>
+            </div>
+            <span className="text-xs font-mono text-sky-400/90 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20 self-start sm:self-auto">
+              14 findings documented in dossier
+            </span>
+          </div>
+
           {/* Evidence timeline preview */}
           <div className="px-5 py-4 border-b border-slate-800/60">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">07 · Evidence Timeline</p>
+            <div className="flex items-center gap-2.5 mb-2">
+              <p className="text-xs font-mono font-bold text-slate-400 tracking-wider">07 · Evidence Timeline</p>
               <ProvenanceLabel type="OBSERVED EVIDENCE" size="xs" showIcon={false} />
             </div>
             <div className="space-y-1.5">
@@ -146,10 +165,10 @@ export const ForensicReportSection: React.FC = () => (
             </div>
           </div>
 
-          {/* Export bar */}
+          {/* Unified export bar */}
           <div className="px-5 py-3 bg-[#070b14]/40 border-t border-slate-800/60 flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono text-slate-500">Export as:</span>
-            <Badge variant="info" size="sm">PDF Report</Badge>
+            <Badge variant="info" size="sm">PDF Dossier</Badge>
             <Badge variant="outline" size="sm">HTML Dossier</Badge>
             <Badge variant="outline" size="sm">JSON Evidence</Badge>
             <Badge variant="outline" size="sm">STIX 2.1</Badge>

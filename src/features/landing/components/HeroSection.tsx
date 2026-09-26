@@ -20,7 +20,7 @@ const ProductMockup: React.FC = () => {
       <div className="light-preview relative rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-[#f4f7fb] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),0_0_30px_rgba(24,191,255,0.12)] overflow-hidden flex flex-col font-sans">
         <img
           src={currentSrc}
-          alt="ASHIELDER Threat Forensic Investigator case-A2291"
+          alt="AShieldER Threat Forensic Investigator case-A2291"
           className="w-full h-auto block select-none object-contain"
           referrerPolicy="no-referrer"
           onError={() => {
@@ -54,12 +54,12 @@ export const HeroSection: React.FC = () => {
 
   return (
     <section
-      className="relative min-h-screen flex flex-col justify-center pt-20 pb-16 px-4 sm:px-6 overflow-hidden"
+      className="relative min-h-screen flex flex-col justify-center pt-20 pb-16 overflow-hidden"
       aria-label="Hero"
     >
       {/* 1. SUBTLE SECURITY GRID: Significantly reduced opacity, secondary to content */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-25"
+        className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-25 z-0"
         aria-hidden="true"
         style={{
           backgroundImage: `
@@ -74,7 +74,7 @@ export const HeroSection: React.FC = () => {
 
       {/* 4. OCCASIONAL DATA SCAN: Faint horizontal scan line (every 6s sweep, non-intrusive) */}
       <div
-        className="absolute inset-x-0 top-0 h-[1px] pointer-events-none animate-data-scan"
+        className="absolute inset-x-0 top-0 h-[1px] pointer-events-none animate-data-scan z-0"
         aria-hidden="true"
         style={{
           background: 'linear-gradient(90deg, transparent 0%, rgba(8,180,237,0.08) 25%, rgba(24,191,255,0.2) 50%, rgba(8,180,237,0.08) 75%, transparent 100%)',
@@ -83,7 +83,7 @@ export const HeroSection: React.FC = () => {
       />
 
       {/* 2. ABSTRACT INVESTIGATION NETWORK: 7 faint peripheral nodes & connecting lines */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
         <svg
           className="w-full h-full opacity-60"
           viewBox="0 0 1440 900"
@@ -159,31 +159,30 @@ export const HeroSection: React.FC = () => {
 
       {/* 3. SOFT PRODUCT GLOW: Subtle cyan/blue radial glow centered behind right-side Investigator Workspace */}
       <div
-        className="absolute top-1/2 right-[5%] -translate-y-1/2 w-[720px] h-[580px] pointer-events-none hidden lg:block"
+        className="absolute top-1/2 right-[5%] -translate-y-1/2 w-[720px] h-[580px] pointer-events-none hidden lg:block z-0"
         aria-hidden="true"
         style={{
           background: 'radial-gradient(ellipse 65% 55% at 50% 50%, rgba(8,180,237,0.075) 0%, rgba(8,180,237,0.02) 45%, transparent 75%)',
         }}
       />
 
-      <div className="relative max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-10">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10 xl:gap-12 min-w-0">
           {/* Left: Copy */}
-          <div className="flex flex-col gap-6 w-full lg:w-[43%] xl:w-[42%] shrink-0 min-w-0 max-w-xl">
+          <div className="flex flex-col gap-6 w-full lg:w-[45%] xl:w-[44%] shrink-0 min-w-0 max-w-xl">
             {/* Status pill */}
             <div className="inline-flex items-center gap-2 self-start">
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-xs font-mono text-sky-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0a1526] border border-sky-500/30 text-xs font-mono text-sky-400 font-medium shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" aria-hidden="true" />
                 AI-Powered Investigation Platform
               </span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-black text-white tracking-tight leading-[1.05]">
-              Turn Suspicious Email Into{' '}
-              <span className="text-sky-400">Actionable Intelligence.</span>
+              Turn Suspicious Email Into Actionable Intelligence.
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-400 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
               AShieldER analyzes email evidence, correlates threat intelligence, and gives security teams a
               complete investigation path — from detection to forensic reporting.
             </p>
@@ -197,24 +196,24 @@ export const HeroSection: React.FC = () => {
                 className="font-semibold sm:w-auto justify-center"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
-                {auth.isAuthenticated ? 'Go to Dashboard' : 'Analyze an Email'}
+                Get Started
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={handleExplore}
-                className="sm:w-auto justify-center border-slate-700 text-slate-300 hover:text-white hover:border-slate-500"
+                className="sm:w-auto justify-center border-slate-700 text-slate-200 hover:text-white hover:border-slate-500 bg-[#070c18]/60"
               >
-                Explore Platform
+                Explore the Platform
               </Button>
             </div>
 
             {/* Capability strip */}
             <div className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
               {CAPABILITY_STRIP.map((cap, i) => (
-                <span key={cap} className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
-                  {i > 0 && <span className="w-1 h-1 rounded-full bg-slate-700" />}
-                  <CheckCircle2 className="w-3 h-3 text-sky-500/70" />
+                <span key={cap} className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
+                  {i > 0 && <span className="w-1 h-1 rounded-full bg-slate-600" aria-hidden="true" />}
+                  <CheckCircle2 className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
                   {cap}
                 </span>
               ))}
