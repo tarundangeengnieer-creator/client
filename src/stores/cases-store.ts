@@ -916,7 +916,33 @@ function loadPersistedState(): {
       const parsedCases = JSON.parse(rawCases);
       const parsedInvs = JSON.parse(rawInvs);
       if (Array.isArray(parsedCases) && parsedCases.length > 0) {
-        return { cases: parsedCases, investigations: parsedInvs };
+        
+        // Ensure all loaded investigation results are normalized
+        // to prevent `TypeError: Cannot read properties of undefined (reading 'map')`
+        const normalizedInvs: Record<string, InvestigationResult> = {};
+        
+        // Dynamically import mapInvestigationResult to avoid circular dependency
+        // or just apply basic fallback defaults manually here.
+        for (const [key, rawInv] of Object.entries(parsedInvs)) {
+          const r = rawInv as Partial<InvestigationResult>;
+          normalizedInvs[key] = {
+            ...r,
+            risk_reasons: r.risk_reasons ?? [],
+            missing_evidence: r.missing_evidence ?? [],
+            tools_used: r.tools_used ?? [],
+            tools_failed: r.tools_failed ?? [],
+            attack_hypotheses: r.attack_hypotheses ?? [],
+            threat_intelligence: r.threat_intelligence ?? [],
+            geolocation: r.geolocation ?? [],
+            ml_signals: r.ml_signals ?? [],
+            heuristic_findings: r.heuristic_findings ?? [],
+            observed_facts: r.observed_facts ?? [],
+            unresolved_questions: r.unresolved_questions ?? [],
+            pending_conflicts: r.pending_conflicts ?? [],
+          } as InvestigationResult;
+        }
+
+        return { cases: parsedCases, investigations: normalizedInvs };
       }
     }
   } catch (e) {

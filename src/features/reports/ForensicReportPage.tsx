@@ -1549,7 +1549,7 @@ export const ForensicReportPage: React.FC<ForensicReportPageProps> = ({
                   <span className="font-semibold text-slate-700 dark:text-slate-300">
                     Corroborating Evidence:
                   </span>
-                  {f.corroboratingEvidence.map((ev) => (
+                  {(f.corroboratingEvidence ?? []).map((ev) => (
                     <button
                       key={ev}
                       type="button"

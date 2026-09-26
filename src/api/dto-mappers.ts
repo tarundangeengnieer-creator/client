@@ -14,6 +14,7 @@ import type {
   GeographicActivityHop,
   ThreatIntelEnrichment,
 } from '../domain/investigator.ts';
+import type { InvestigationResult } from '../contracts/backend.ts';
 
 interface BackendCase {
   case_id?: string;
@@ -342,4 +343,37 @@ export function mapThreatIntel(raw: unknown): ThreatIntelEnrichment {
     summary: b.note ?? '',
     tags: b.tags ?? [],
   };
+}
+
+export function mapInvestigationResult(raw: unknown): InvestigationResult {
+  const r = raw as Partial<InvestigationResult>;
+  return {
+    ...r,
+    investigation_id: r.investigation_id ?? `case_${Date.now()}`,
+    created_at: r.created_at ?? new Date().toISOString(),
+    completed_at: r.completed_at ?? new Date().toISOString(),
+    status: r.status ?? 'completed',
+    investigation_level_reached: r.investigation_level_reached ?? 'L0_STATIC',
+    verdict: r.verdict ?? 'benign',
+    risk_score: r.risk_score ?? 0,
+    confidence: r.confidence ?? 0,
+    risk_reasons: r.risk_reasons ?? [],
+    unresolved_questions: r.unresolved_questions ?? [],
+    observed_facts: r.observed_facts ?? [],
+    heuristic_findings: r.heuristic_findings ?? [],
+    ml_signals: r.ml_signals ?? [],
+    threat_intelligence: r.threat_intelligence ?? [],
+    historical_matches: r.historical_matches ?? [],
+    geolocation: r.geolocation ?? [],
+    attack_hypotheses: r.attack_hypotheses ?? [],
+    budget: r.budget ?? { max_tool_calls: 10, max_external_calls: 5, latency_budget_ms: 10000 },
+    budget_spent: r.budget_spent ?? { latency_ms: 0, tool_calls: 0, external_calls: 0, llm_tokens: 0 },
+    budget_remaining: r.budget_remaining ?? { max_tool_calls: 10, max_external_calls: 5, latency_budget_ms: 10000 },
+    missing_evidence: r.missing_evidence ?? [],
+    pending_conflicts: r.pending_conflicts ?? [],
+    tools_used: r.tools_used ?? [],
+    tools_failed: r.tools_failed ?? [],
+    iteration_count: r.iteration_count ?? 1,
+    audit_chain_last_hash: r.audit_chain_last_hash ?? 'none',
+  } as InvestigationResult;
 }

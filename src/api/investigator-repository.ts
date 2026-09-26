@@ -1250,9 +1250,167 @@ class MockInvestigatorRepository implements InvestigatorRepository {
 import { RestInvestigatorRepository } from './rest-investigator-repository.ts';
 
 const _isLiveMode = Boolean(import.meta.env.VITE_API_BASE_URL?.trim());
-export const investigatorRepo: InvestigatorRepository = _isLiveMode
-  ? new RestInvestigatorRepository()
-  : new MockInvestigatorRepository();
+
+
+/**
+ * Hybrid repository that bridges the gap between local demo data and live REST data.
+ * Routes demo cases (ASH-2026-*) to the mock layer, and real cases to the REST backend.
+ */
+class HybridInvestigatorRepository implements InvestigatorRepository {
+  private rest = new RestInvestigatorRepository();
+  private mock = new MockInvestigatorRepository();
+
+  private isDemoCase(caseId: string): boolean {
+    return caseId.startsWith('ASH-2026-') || caseId.startsWith('CASE-2026-');
+  }
+
+  async getCases(tenantId: string) {
+    if (!_isLiveMode) return this.mock.getCases(tenantId);
+    return this.rest.getCases(tenantId);
+  }
+
+  async getCase(caseId: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.getCase(caseId, tenantId);
+    try {
+      const result = await this.rest.getCase(caseId, tenantId);
+      if (result === null) return this.mock.getCase(caseId, tenantId);
+      return result;
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getCase(caseId, tenantId);
+      throw e;
+    }
+  }
+
+  async getTimeline(caseId: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.getTimeline(caseId, tenantId);
+    try {
+      return await this.rest.getTimeline(caseId, tenantId);
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getTimeline(caseId, tenantId);
+      throw e;
+    }
+  }
+
+  async getGraph(caseId: string, tenantId: string, maxDepth?: number, centerNodeId?: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.getGraph(caseId, tenantId, maxDepth, centerNodeId);
+    try {
+      return await this.rest.getGraph(caseId, tenantId, maxDepth, centerNodeId);
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getGraph(caseId, tenantId, maxDepth, centerNodeId);
+      throw e;
+    }
+  }
+
+  async expandGraphNode(caseId: string, nodeId: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.expandGraphNode(caseId, nodeId, tenantId);
+    try {
+      return await this.rest.expandGraphNode(caseId, nodeId, tenantId);
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.expandGraphNode(caseId, nodeId, tenantId);
+      throw e;
+    }
+  }
+
+  async getRelatedCases(caseId: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.getRelatedCases(caseId, tenantId);
+    try {
+      return await this.rest.getRelatedCases(caseId, tenantId);
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getRelatedCases(caseId, tenantId);
+      throw e;
+    }
+  }
+
+  async linkCase(caseId: string, targetCaseId: string, justification: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.linkCase(caseId, targetCaseId, justification, tenantId);
+    return this.rest.linkCase(caseId, targetCaseId, justification, tenantId);
+  }
+
+  async mergeCases(caseId: string, targetCaseId: string, campaignName: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.mergeCases(caseId, targetCaseId, campaignName, tenantId);
+    return this.rest.mergeCases(caseId, targetCaseId, campaignName, tenantId);
+  }
+
+  async getCaseEvidence(caseId: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.getCaseEvidence(caseId, tenantId);
+    try {
+      return await this.rest.getCaseEvidence(caseId, tenantId);
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getCaseEvidence(caseId, tenantId);
+      throw e;
+    }
+  }
+
+  async getEvidence(evidenceId: string, tenantId: string) {
+    if (!_isLiveMode) return this.mock.getEvidence(evidenceId, tenantId);
+    try {
+      const result = await this.rest.getEvidence(evidenceId, tenantId);
+      if (result === null) return this.mock.getEvidence(evidenceId, tenantId);
+      return result;
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getEvidence(evidenceId, tenantId);
+      throw e;
+    }
+  }
+
+  async annotateEvidence(evidenceId: string, note: string, author: string, tenantId: string) {
+    if (!_isLiveMode) return this.mock.annotateEvidence(evidenceId, note, author, tenantId);
+    return this.rest.annotateEvidence(evidenceId, note, author, tenantId);
+  }
+
+  async verifyEvidence(evidenceId: string, state: 'VERIFIED' | 'DISPUTED', author: string, tenantId: string) {
+    if (!_isLiveMode) return this.mock.verifyEvidence(evidenceId, state, author, tenantId);
+    return this.rest.verifyEvidence(evidenceId, state, author, tenantId);
+  }
+
+  async getEmailEntity(emailId: string, tenantId: string) {
+    // Note: emailId is often passed as caseId in some UI components
+    if (this.isDemoCase(emailId) || !_isLiveMode) return this.mock.getEmailEntity(emailId, tenantId);
+    try {
+      const result = await this.rest.getEmailEntity(emailId, tenantId);
+      if (result === null) return this.mock.getEmailEntity(emailId, tenantId);
+      return result;
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getEmailEntity(emailId, tenantId);
+      throw e;
+    }
+  }
+
+  async getGeographicActivity(caseId: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.getGeographicActivity(caseId, tenantId);
+    try {
+      return await this.rest.getGeographicActivity(caseId, tenantId);
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getGeographicActivity(caseId, tenantId);
+      throw e;
+    }
+  }
+
+  async getThreatIntel(indicator: string, tenantId: string) {
+    if (!_isLiveMode) return this.mock.getThreatIntel(indicator, tenantId);
+    try {
+      const result = await this.rest.getThreatIntel(indicator, tenantId);
+      if (result === null) return this.mock.getThreatIntel(indicator, tenantId);
+      return result;
+    } catch (e: any) {
+      if (e?.code === 'NOT_FOUND_ERROR') return this.mock.getThreatIntel(indicator, tenantId);
+      throw e;
+    }
+  }
+
+  async escalateToFraudIR(caseId: string, rationale: string, urgency: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.escalateToFraudIR(caseId, rationale, urgency, tenantId);
+    return this.rest.escalateToFraudIR(caseId, rationale, urgency, tenantId);
+  }
+
+  async exportForensicReport(caseId: string, tenantId: string) {
+    if (this.isDemoCase(caseId) || !_isLiveMode) return this.mock.exportForensicReport(caseId, tenantId);
+    return this.rest.exportForensicReport(caseId, tenantId);
+  }
+}
+
+
+export const investigatorRepo: InvestigatorRepository = new HybridInvestigatorRepository();
 
 // Expose mode for debugging
 export const IS_LIVE_MODE = _isLiveMode;

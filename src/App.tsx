@@ -56,8 +56,12 @@ export default function App() {
     authStore.checkHealth();
 
     const pathname = window.location.pathname;
+    const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
     if (pathname && pathname !== '/') {
       uiStore.navigate(pathname);
+    } else if (isDemoMode && auth.isAuthenticated) {
+      // DEMO MODE: Skip landing page — go directly to the app
+      uiStore.navigate('/overview');
     } else {
       // '/' is the public landing page — always show it on initial load.
       // Authenticated users can navigate to the app via the landing page CTAs.

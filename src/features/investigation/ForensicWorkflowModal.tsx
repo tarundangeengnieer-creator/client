@@ -36,7 +36,7 @@ import {
   Search,
 } from 'lucide-react';
 
-export type IngestionSource = 'gmail' | 'microsoft' | 'eml' | 'server';
+export type IngestionSource = 'gmail' | 'microsoft' | 'eml' | 'server' | 'paste';
 export type WorkflowStage = 'INGEST' | 'PLAN' | 'INVESTIGATE' | 'RESULTS';
 
 export interface IngestedSpecimen {
@@ -55,6 +55,7 @@ export interface IngestedSpecimen {
   confidence: number;
   originIp: string;
   findings: string[];
+  rawFile?: File;
 }
 
 export interface PipelineExecutionStage {
@@ -290,7 +291,11 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
   // File Upload State
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [pasteContent, setPasteContent] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 3.1 — Backend health state: null = unknown, true = online, false = offline
+  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
 
   // Reset or initialize on open
   useEffect(() => {
@@ -313,6 +318,13 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
       } else {
         setSelectedSpecimen(null);
       }
+
+      // Probe backend health
+      setBackendOnline(null);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      fetch(`${baseUrl}/health`, { method: 'GET', signal: AbortSignal.timeout(4000) })
+        .then(r => setBackendOnline(r.ok))
+        .catch(() => setBackendOnline(false));
     }
   }, [isOpen, initialSource]);
 
@@ -363,6 +375,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
           'RFC 822 MIME structure parsed with full boundary separation',
           'Heuristic signals flagged for dynamic execution pipeline',
         ],
+        rawFile: file,
       };
 
       setSelectedSpecimen(customSpecimen);
@@ -370,6 +383,36 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
     } catch {
       uiStore.addToast('error', 'Failed to read .eml file. Please ensure it is a valid RFC 822 email format.');
     }
+  };
+
+  const finalizeDemoResult = (specimen: IngestedSpecimen, startTime: number) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const finalElapsed = Date.now() - startTime;
+    setElapsedMs(finalElapsed);
+
+    setPipelineStages((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
+
+    const generatedId = `ASH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    setAssignedCaseId(generatedId);
+
+    const mockInvestigation = makeInvestigation({
+      investigation_id: generatedId,
+      verdict: specimen.verdict,
+      risk_score: specimen.riskScore,
+      confidence: specimen.confidence,
+      risk_reasons: specimen.findings,
+      status: InvestigationStatus.COMPLETED,
+    });
+
+    const viewModel = mapInvestigationToCaseViewModel(mockInvestigation);
+    viewModel.subject = specimen.subject;
+    viewModel.sender = specimen.sender;
+    viewModel.recipient = specimen.recipient;
+    casesStore.addCase(viewModel, mockInvestigation);
+
+    setCompletedResult(mockInvestigation);
+    setActiveStage('RESULTS');
+    uiStore.addToast('success', `Forensic investigation completed for ${specimen.subject}`);
   };
 
   // Execution runner for INVESTIGATE stage
@@ -386,6 +429,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
     const totalStages = DEFAULT_PIPELINE_STAGES.length;
     let step = 0;
 
+    // Animate pipeline stages progressively
     const executeNextStep = () => {
       if (step < totalStages) {
         setCurrentStageIdx(step);
@@ -397,43 +441,72 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
           })
         );
         step++;
-        // Natural step latency between 250ms and 450ms
         setTimeout(executeNextStep, 320);
-      } else {
-        // Complete execution!
-        if (timerRef.current) clearInterval(timerRef.current);
-        const finalElapsed = Date.now() - startTime;
-        setElapsedMs(finalElapsed);
-
-        setPipelineStages((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
-
-        // Generate synthetic case data matching backend contracts
-        const generatedId = `ASH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-        setAssignedCaseId(generatedId);
-
-        const mockInvestigation = makeInvestigation({
-          investigation_id: generatedId,
-          verdict: specimen.verdict,
-          risk_score: specimen.riskScore,
-          confidence: specimen.confidence,
-          risk_reasons: specimen.findings,
-          status: InvestigationStatus.COMPLETED,
-        });
-
-        // Store into global case repository
-        const viewModel = mapInvestigationToCaseViewModel(mockInvestigation);
-        viewModel.subject = specimen.subject;
-        viewModel.sender = specimen.sender;
-        viewModel.recipient = specimen.recipient;
-        casesStore.addCase(viewModel, mockInvestigation);
-
-        setCompletedResult(mockInvestigation);
-        setActiveStage('RESULTS');
-        uiStore.addToast('success', `Forensic investigation completed for ${specimen.subject}`);
       }
+      // Note: don't finalize here - wait for the backend response or demo timeout
     };
 
+    // Start animation
     setTimeout(executeNextStep, 200);
+
+    // Check if this is a REAL file upload (has rawFile) vs demo specimen
+    if (specimen.rawFile) {
+      // REAL BACKEND CALL
+      const formData = new FormData();
+      formData.append('file', specimen.rawFile);
+
+      import('../../api/client.ts').then(({ apiClient }) => {
+        import('../../api/endpoints.ts').then(({ ENDPOINTS }) => {
+          import('../../api/dto-mappers.ts').then(({ mapInvestigationResult }) => {
+            apiClient
+              .postForm<InvestigationResult>(ENDPOINTS.INVESTIGATIONS_ANALYZE, formData, { timeoutMs: 30000 })
+              .then((rawResult) => {
+                const result = mapInvestigationResult(rawResult);
+                
+                // Stop timer
+                if (timerRef.current) clearInterval(timerRef.current);
+                const finalElapsed = Date.now() - startTime;
+                setElapsedMs(finalElapsed);
+  
+                // Mark all stages complete
+                setPipelineStages((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
+  
+                // Use real investigation ID
+                const realCaseId = result.investigation_id;
+                setAssignedCaseId(realCaseId);
+  
+                // Store REAL result into global case repository
+                const viewModel = mapInvestigationToCaseViewModel(result, {
+                  subject: specimen.subject,
+                  sender: specimen.sender,
+                  recipient: specimen.recipient,
+                });
+                casesStore.addCase(viewModel, result);
+  
+                setCompletedResult(result);
+                setActiveStage('RESULTS');
+              uiStore.addToast('success', `Live forensic investigation completed for ${specimen.subject}`);
+            })
+            .catch((err) => {
+              // Stop timer
+              if (timerRef.current) clearInterval(timerRef.current);
+              setElapsedMs(Date.now() - startTime);
+
+              console.error('Backend investigation failed:', err);
+              uiStore.addToast('error', `Backend analysis failed: ${err.message || 'Unknown error'}. Falling back to demo mode.`);
+
+              // FALLBACK: Run the demo mock flow so the demo doesn't break
+              finalizeDemoResult(specimen, startTime);
+            });
+          });
+        });
+      });
+    } else {
+      // DEMO SPECIMEN: Use existing mock behavior with timeout
+      setTimeout(() => {
+        finalizeDemoResult(specimen, startTime);
+      }, totalStages * 320 + 400);
+    }
   };
 
   return (
@@ -518,12 +591,39 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
           {/* STAGE 1: INGEST */}
           {activeStage === 'INGEST' && (
             <div className="space-y-4 animate-in fade-in duration-150">
+              {/* 3.1 — Backend Health Banner */}
+              {backendOnline === false && (
+                <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-500/5 border border-amber-400/30 text-xs">
+                  <span className="text-amber-500 text-sm shrink-0">⚠</span>
+                  <div>
+                    <p className="font-bold text-amber-700 dark:text-amber-400">Backend Offline</p>
+                    <p className="text-amber-600/80 dark:text-amber-500/80 mt-0.5">
+                      Cannot reach <code className="font-mono bg-amber-100 dark:bg-amber-500/10 px-1 rounded">localhost:8000</code>. Upload and Paste modes will fall back to demo analysis. Gmail and Microsoft specimens work offline.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {backendOnline === true && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-400/20 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">Backend Online</span>
+                  <span className="text-emerald-600/70 dark:text-emerald-500/70">— Live forensic analysis active at <code className="font-mono">localhost:8000</code></span>
+                </div>
+              )}
+              {backendOnline === null && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs text-slate-500">
+                  <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
+                  <span>Checking backend status…</span>
+                </div>
+              )}
+
               {/* Source Selector Tabs */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {[
                   { id: 'gmail' as IngestionSource, label: 'Gmail', icon: <OfficialGmailLogo className="w-4 h-4" /> },
                   { id: 'microsoft' as IngestionSource, label: 'Microsoft', icon: <OfficialMicrosoftLogo className="w-3.5 h-3.5" /> },
                   { id: 'eml' as IngestionSource, label: 'Upload .EML', icon: <FileText className="w-4 h-4" /> },
+                  { id: 'paste' as IngestionSource, label: 'Paste Email', icon: <FileCode className="w-4 h-4" /> },
                   { id: 'server' as IngestionSource, label: 'Send to Server', icon: <Mail className="w-4 h-4" /> },
                 ].map((s) => (
                   <button
@@ -716,6 +816,41 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                       </div>
                     </div>
                   ))}
+
+                  {/* 3.2 — Live Backend Fixture Files */}
+                  <div className="pt-2 space-y-2">
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${backendOnline ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                      Live Demo Fixtures
+                      {backendOnline && <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/20">LIVE</span>}
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                      Upload one of these validated files from <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">backend/tests/fixtures/</code> for{' '}
+                      {backendOnline ? <strong className="text-emerald-600 dark:text-emerald-400">real AI analysis</strong> : <span>demo analysis</span>}.
+                    </p>
+                    {[
+                      { file: 'bec_wire_transfer.eml', label: 'BEC Wire Transfer', verdict: 'MALICIOUS', color: 'rose', desc: 'CEO impersonation requesting urgent wire transfer — BEC attack' },
+                      { file: 'golden_google_zendesk.eml', label: 'Google / Zendesk Legit', verdict: 'BENIGN', color: 'emerald', desc: 'Legitimate Zendesk notification — clean baseline for comparison' },
+                      { file: 'scenario_a_benign.eml', label: 'Scenario A (Benign)', verdict: 'BENIGN', color: 'emerald', desc: 'Normal internal corporate email with full SPF/DKIM/DMARC pass' },
+                      { file: 'scenario_c_bec_valid_auth.eml', label: 'Scenario C (BEC)', verdict: 'SUSPICIOUS', color: 'amber', desc: 'BEC with valid authentication — tests heuristic engine depth' },
+                    ].map(({ file, label, verdict, color, desc }) => (
+                      <div key={file} className={`p-3 rounded-xl border text-xs ${
+                        color === 'rose' ? 'border-rose-500/20 bg-rose-50/40 dark:bg-rose-500/5' :
+                        color === 'amber' ? 'border-amber-500/20 bg-amber-50/40 dark:bg-amber-500/5' :
+                        'border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-500/5'
+                      }`}>
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="font-bold font-mono text-slate-800 dark:text-white">{file}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${
+                            color === 'rose' ? 'border-rose-500/30 text-rose-600 dark:text-rose-400' :
+                            color === 'amber' ? 'border-amber-500/30 text-amber-600 dark:text-amber-400' :
+                            'border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                          }`}>{verdict}</span>
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400">{desc}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -766,6 +901,43 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                     >
                       <Zap className="w-3.5 h-3.5" />
                       <span>Simulate Inbound SMTP Test Handshake</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedSource === 'paste' && (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-blue-500/20 text-xs flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                    <FileCode className="w-4 h-4 text-blue-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                    <span>Paste the full raw email source below (including headers like <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">From:</code>, <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">Subject:</code>, <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">Received:</code> and body). The system will parse headers, extract IPs, and run the full investigation pipeline.</span>
+                  </div>
+
+                  <textarea
+                    value={pasteContent}
+                    onChange={(e) => setPasteContent(e.target.value)}
+                    placeholder={"Delivered-To: user@company.com\nReceived: from mail.sender.com ([185.220.101.5])\nFrom: PayPal Support <no-reply@paypal1-secure.com>\nTo: user@company.com\nSubject: Action Required: Verify Your Account\nDate: Mon, 12 Aug 2025 10:24:00 +0000\nMIME-Version: 1.0\nContent-Type: text/html; charset=UTF-8\n\n<html>...</html>"}
+                    className="w-full h-48 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none outline-none focus:border-blue-400 dark:focus:border-sky-500 transition-colors"
+                    spellCheck={false}
+                  />
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] text-slate-400">
+                      {pasteContent.length > 0 ? `${pasteContent.length} characters pasted` : 'Paste email content above'}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={pasteContent.trim().length < 20}
+                      onClick={() => {
+                        // Convert pasted text to a File blob and process via existing pipeline
+                        const blob = new Blob([pasteContent], { type: 'message/rfc822' });
+                        const file = new File([blob], 'pasted-email.eml', { type: 'message/rfc822', lastModified: Date.now() });
+                        processUploadedFile(file);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-40 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      <span>Analyze Pasted Email</span>
                     </button>
                   </div>
                 </div>
@@ -969,7 +1141,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                     PRIMARY FORENSIC SIGNALS
                   </span>
                   <ul className="space-y-1.5 pl-4 list-disc marker:text-blue-500 text-slate-700 dark:text-slate-300 text-xs">
-                    {selectedSpecimen.findings.map((f, i) => (
+                    {(completedResult.risk_reasons && completedResult.risk_reasons.length > 0 ? completedResult.risk_reasons : selectedSpecimen.findings).map((f, i) => (
                       <li key={i} className="leading-snug">
                         {f}
                       </li>
@@ -977,6 +1149,42 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   </ul>
                 </div>
               </div>
+
+              {/* Authentication Matrix (SPF / DKIM / DMARC) derived from rawContent headers */}
+              {(() => {
+                type AV = 'PASS' | 'FAIL' | 'NONE' | 'UNKNOWN';
+                const parseHeaderAuth = (): { spf: AV; dkim: AV; dmarc: AV } => {
+                  const raw = (selectedSpecimen.rawContent || '').toLowerCase();
+                  const match = (key: string): AV => {
+                    const m = raw.match(new RegExp(key + '[=\\s]*(pass|fail|none|neutral|softfail|hardfail)', 'i'));
+                    if (!m) return 'UNKNOWN';
+                    return m[1].toLowerCase() === 'pass' ? 'PASS' : m[1].toLowerCase() === 'none' ? 'NONE' : 'FAIL';
+                  };
+                  return { spf: match('spf'), dkim: match('dkim'), dmarc: match('dmarc') };
+                };
+                const auth = parseHeaderAuth();
+                const col = (v: AV) =>
+                  v === 'PASS' ? 'border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-500/5 text-emerald-600 dark:text-emerald-400' :
+                  v === 'FAIL' ? 'border-rose-500/30 bg-rose-50/50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400' :
+                  v === 'NONE' ? 'border-slate-300/30 bg-slate-50/30 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400' :
+                  'border-slate-200/40 bg-slate-50/20 dark:bg-slate-800/20 text-slate-400 dark:text-slate-500';
+                return (
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 shadow-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">AUTHENTICATION MATRIX</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['SPF', 'DKIM', 'DMARC'] as const).map(k => {
+                        const v = auth[k.toLowerCase() as keyof typeof auth];
+                        return (
+                          <div key={k} className={`p-2.5 rounded-lg border flex flex-col gap-0.5 ${col(v)}`}>
+                            <span className="font-black text-xs">{k}</span>
+                            <span className="text-[11px] font-bold uppercase">{v}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -1015,8 +1223,9 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
               </button>
               <button
                 type="button"
+                disabled={activeStage !== 'PLAN'}
                 onClick={() => runInvestigationExecution(selectedSpecimen)}
-                className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>Execute Investigation Pipeline</span>
@@ -1039,8 +1248,17 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  // GAP 2+4 FIX: Set active case then navigate to inbox
+                  uiStore.setActiveCase(
+                    assignedCaseId,
+                    selectedSpecimen?.subject,
+                    completedResult.verdict,
+                    completedResult.risk_score,
+                    completedResult.confidence
+                  );
                   onClose();
                   if (onCompletedCase) onCompletedCase(assignedCaseId);
+                  uiStore.navigate('/inbox');
                 }}
                 className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
@@ -1049,6 +1267,14 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  // GAP 2 FIX: Set active case before navigating to workspace
+                  uiStore.setActiveCase(
+                    assignedCaseId,
+                    selectedSpecimen?.subject,
+                    completedResult.verdict,
+                    completedResult.risk_score,
+                    completedResult.confidence
+                  );
                   onClose();
                   uiStore.navigate(`/case/${assignedCaseId}`);
                 }}

@@ -197,6 +197,23 @@ export const investigatorStore = {
     await investigatorStore.loadCaseDetails(caseId, tenantId);
   },
 
+  /**
+   * seedGraph — inject synthetic graph nodes/edges derived from investigation data.
+   * Called by CaseDetailPage when the backend graph is unavailable or returns nothing.
+   * Nodes are only injected if the store is currently empty (graphNodes.length === 0).
+   */
+  seedGraph(nodes: GraphNode[], edges: GraphEdge[]): void {
+    if (currentState.graphNodes.length > 0) return; // don't overwrite real backend graph
+    currentState = {
+      ...currentState,
+      graphNodes: nodes,
+      graphEdges: edges,
+      isLoadingGraph: false,
+      errorGraph: null,
+    };
+    notify();
+  },
+
   async loadCaseDetails(caseId: string, tenantId: string): Promise<void> {
     currentState = {
       ...currentState,

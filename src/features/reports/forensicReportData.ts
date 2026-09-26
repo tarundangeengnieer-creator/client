@@ -758,6 +758,66 @@ export function getReportDataForCase(
 
   report.footer.caseString = `Case ${formattedCaseId}`;
 
+  // ─── Investigation-derived enrichment ───
+  if (investigation) {
+    // Use 'any' cast for dynamic fields that extend the base report schema
+    const r = report as any;
+
+    // Risk reasons → flaggedReasons in executive
+    if (investigation.risk_reasons?.length) {
+      report.executive.flaggedReasons = investigation.risk_reasons;
+    }
+
+    // Attack hypotheses → corroborating evidence
+    if (investigation.attack_hypotheses?.length) {
+      report.executive.corroboratingEvidence = investigation.attack_hypotheses
+        .map((h: any) => `${h.name || h} (${Math.round((h.probability ?? 0.8) * 100)}% confidence)`)
+        .slice(0, 5);
+
+      // Update threatType with primary hypothesis
+      const topHypothesis = investigation.attack_hypotheses[0];
+      if (topHypothesis?.name) {
+        report.executive.threatType = topHypothesis.name;
+        report.executive.threatSub = `Primary attack vector identified by forensic analysis`;
+      }
+    }
+
+    // Risk reasons → findings (if findings exist in the base)
+    if (investigation.risk_reasons?.length && report.findings) {
+      report.findings = investigation.risk_reasons.map((reason: string, i: number) => ({
+        id: `F-${String(i + 1).padStart(3, '0')}`,
+        title: reason,
+        severity: i === 0 ? 'CRITICAL' : i < 3 ? 'HIGH' : 'MEDIUM',
+        description: reason,
+        corroboratingEvidence: [],  // required by HTML template — prevents .map() crash
+      }));
+    }
+
+    // Geolocation → store as extended field for HTML template
+    if (investigation.geolocation?.length) {
+      r.geolocationHops = investigation.geolocation
+        .map((g: any) => `${g.ip} → ${g.country || 'Unknown'} (${g.provider || 'N/A'})`)
+        .join(' | ');
+    }
+
+    // Evidence counts → extended metadata
+    r.evidenceSummary = {
+      observedFacts: investigation.observed_facts?.length ?? 0,
+      heuristic: investigation.heuristic_findings?.length ?? 0,
+      mlSignals: investigation.ml_signals?.length ?? 0,
+      threatIntel: investigation.threat_intelligence?.length ?? 0,
+      toolsUsed: investigation.tools_used ?? [],
+      toolsFailed: investigation.tools_failed ?? [],
+      iterations: investigation.iteration_count ?? 0,
+      stopReason: investigation.stop_reason ?? '',
+    };
+
+    // Content analysis AI summary
+    if (investigation.content_analysis?.executive_summary) {
+      r.aiSummary = investigation.content_analysis.executive_summary;
+    }
+  }
+
   return report;
 }
 
@@ -1333,7 +1393,7 @@ export function generateStandaloneReportHtml(customData?: typeof EXACT_REPORT_DA
             </div>
             <p style="font-size: 12px; color: #334155; line-height: 1.5; margin-bottom: 8px;">${f.summary}</p>
             <div style="font-size: 11px; color: #64748b;">
-              <strong>Corroborating Evidence:</strong> ${f.corroboratingEvidence.map(e => `<span class="badge-status badge-neutral font-mono" style="margin-left: 4px;">${e}</span>`).join('')}
+              <strong>Corroborating Evidence:</strong> ${(f.corroboratingEvidence ?? []).map(e => `<span class="badge-status badge-neutral font-mono" style="margin-left: 4px;">${e}</span>`).join('')}
             </div>
           </div>
         `).join('')}

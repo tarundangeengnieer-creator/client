@@ -168,11 +168,10 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
     return (
       <div className={`flex flex-col items-center justify-center text-center select-none ${className}`}>
         {ShieldEmblemSvg}
-        <div className="mt-2 flex items-center">
-          <span className="text-xl font-black text-sky-500 tracking-tight">A</span>
-          <span className={`text-xl font-black tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-            SHIELDER
-          </span>
+        <div className="mt-2 flex items-center leading-none">
+          <span className="text-xl font-black font-serif tracking-tight" style={{ color: 'var(--primary)' }}>A</span>
+          <span className="text-xl font-black font-serif tracking-tight" style={{ color: 'var(--text-primary)' }}>Shield</span>
+          <span className="text-xl font-black font-serif tracking-tight" style={{ color: 'var(--primary)' }}>ER</span>
         </div>
         {/* Tricolor Bar */}
         <div className="flex items-center h-1 w-14 rounded-full overflow-hidden mt-1 shadow-xs">
@@ -201,14 +200,9 @@ export const AshielderLogo: React.FC<AshielderLogoProps> = ({
       {ShieldEmblemSvg}
       <div className="flex flex-col justify-center">
         <div className="flex items-center leading-none">
-          <span className={`${textClass} font-black ${theme === 'dark' ? 'text-sky-400' : 'text-sky-700'} tracking-tight`}>A</span>
-          <span
-            className={`${textClass} font-black tracking-tight ${
-              theme === 'dark' ? 'text-white' : 'text-slate-950'
-            }`}
-          >
-            SHIELDER
-          </span>
+          <span className={`${textClass} font-black font-serif tracking-tight`} style={{ color: 'var(--primary)' }}>A</span>
+          <span className={`${textClass} font-black font-serif tracking-tight`} style={{ color: 'var(--text-primary)' }}>Shield</span>
+          <span className={`${textClass} font-black font-serif tracking-tight`} style={{ color: 'var(--primary)' }}>ER</span>
         </div>
 
         {/* Official Saffron-White-Green Tricolor Bar */}
