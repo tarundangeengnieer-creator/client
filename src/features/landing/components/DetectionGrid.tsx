@@ -61,7 +61,7 @@ export const DetectionGrid: React.FC = () => (
     aria-labelledby="detection-heading"
   >
     <div className="max-w-7xl mx-auto">
-      <p className="text-xs font-mono font-bold text-sky-400/70 tracking-widest uppercase mb-4">
+      <p className="text-xs font-mono font-bold text-sky-400 tracking-wider mb-4">
         Detection Capabilities
       </p>
       <h2
@@ -82,7 +82,7 @@ export const DetectionGrid: React.FC = () => (
             id={id}
             className="group flex items-start gap-3.5 p-4 rounded-xl bg-[#0c1322] border border-slate-800/80 hover:border-slate-700 hover:bg-[#0f172a] transition-colors duration-150 cursor-default"
           >
-            <div className="w-9 h-9 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center text-[#08B4ED] shrink-0 mt-0.5 group-hover:border-[#08B4ED]/40 group-hover:text-sky-300 transition-colors">
+            <div className="w-9 h-9 rounded-lg bg-[#070b14] border border-slate-800 flex items-center justify-center text-sky-400 shrink-0 mt-0.5 group-hover:border-sky-500/40 group-hover:text-sky-300 transition-colors">
               <Icon className="w-4.5 h-4.5" />
             </div>
             <div className="min-w-0 flex-1">

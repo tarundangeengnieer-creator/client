@@ -167,7 +167,7 @@ export const WorkflowSection: React.FC = () => (
     />
 
     <div className="max-w-7xl mx-auto relative z-10">
-      <p className="text-xs font-mono font-bold text-sky-400/70 tracking-widest uppercase mb-4">
+      <p className="text-xs font-mono font-bold text-sky-400 tracking-wider mb-4">
         Investigation Pipeline
       </p>
       <h2
@@ -182,7 +182,12 @@ export const WorkflowSection: React.FC = () => (
       </p>
 
       {/* Pipeline Sequence Row - Exact layout & styling matching design */}
-      <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pb-6 pt-6 px-1 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent xl:justify-between">
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Investigation pipeline sequence stages"
+        className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pb-6 pt-6 px-1 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent xl:justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070b14] rounded-xl"
+      >
         {PIPELINE_STEPS.map((step, i) => {
           const Icon = step.icon;
           const isLast = i === PIPELINE_STEPS.length - 1;
@@ -206,7 +211,7 @@ export const WorkflowSection: React.FC = () => (
 
                 {/* Numbered Circular Badge Perched on Top Border */}
                 <div
-                  className={`absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#070c18] border-[1.5px] ${step.borderColor} flex items-center justify-center font-mono text-[11px] font-bold text-slate-100 z-10`}
+                  className={`absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#070c18] border-[1.5px] ${step.borderColor} flex items-center justify-center font-mono text-xs font-bold text-slate-100 z-10`}
                   style={{
                     boxShadow: step.badgeGlow,
                   }}
@@ -214,17 +219,19 @@ export const WorkflowSection: React.FC = () => (
                   {step.step}
                 </div>
 
-                {/* Centered Outline Icon */}
-                <div className="mt-2.5 flex items-center justify-center text-slate-100">
-                  <Icon className="w-7 h-7 stroke-[1.5]" />
-                </div>
-
-                {/* Title & Subtitles */}
-                <div className="w-full flex flex-col items-center text-center mt-auto">
-                  <p className={`text-[13px] sm:text-[14px] font-bold tracking-tight ${step.textColor}`}>
+                {/* Icon and Title Grouped with balanced spacing */}
+                <div className="w-full flex flex-col items-center text-center mt-2.5 gap-2.5">
+                  <div className="flex items-center justify-center text-slate-100">
+                    <Icon className="w-7 h-7 stroke-[1.75]" />
+                  </div>
+                  <p className={`text-sm font-bold tracking-tight ${step.textColor}`}>
                     {step.label}
                   </p>
-                  <p className="text-[10px] sm:text-[10.5px] text-slate-400 font-sans leading-tight mt-1 px-0.5">
+                </div>
+
+                {/* Subtitle descriptions */}
+                <div className="w-full flex flex-col items-center text-center px-0.5">
+                  <p className="text-xs text-slate-400 font-sans leading-tight">
                     <span className="block truncate">{step.sub1}</span>
                     <span className="block truncate">{step.sub2}</span>
                   </p>
@@ -233,8 +240,8 @@ export const WorkflowSection: React.FC = () => (
 
               {/* Connecting Arrow Between Cards */}
               {!isLast && (
-                <div className="shrink-0 flex items-center justify-center text-slate-600 px-0.5" aria-hidden="true">
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 stroke-[1.75]" />
+                <div className="shrink-0 flex items-center justify-center px-0.5 text-sky-400/80" aria-hidden="true">
+                  <ArrowRight className="w-5 h-5 stroke-[2.25]" />
                 </div>
               )}
             </React.Fragment>
