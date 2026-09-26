@@ -34,6 +34,8 @@ export interface UIState {
   // Search & Modals
   isSearchOpen: boolean;
   searchQuery: string;
+  isWorkflowModalOpen: boolean;
+  workflowModalSource: 'gmail' | 'microsoft' | 'eml' | 'server' | 'paste';
 
   // Workstation controls
   piiMaskingEnabled: boolean;
@@ -87,6 +89,8 @@ const initialUIState: UIState = {
   isSidebarCollapsed: false,
   isSearchOpen: false,
   searchQuery: '',
+  isWorkflowModalOpen: false,
+  workflowModalSource: 'eml',
   piiMaskingEnabled: true,
   theme: initialTheme,
   toasts: [],
@@ -198,6 +202,23 @@ export const uiStore = {
 
   closeQuickPeek(): void {
     this.openQuickPeek(null);
+  },
+
+  openWorkflowModal(source: 'gmail' | 'microsoft' | 'eml' | 'server' | 'paste' = 'eml'): void {
+    currentUIState = {
+      ...currentUIState,
+      isWorkflowModalOpen: true,
+      workflowModalSource: source,
+    };
+    notifyUI();
+  },
+
+  closeWorkflowModal(): void {
+    currentUIState = {
+      ...currentUIState,
+      isWorkflowModalOpen: false,
+    };
+    notifyUI();
   },
 
   setSearchOpen(open: boolean): void {

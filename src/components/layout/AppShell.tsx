@@ -6,6 +6,7 @@ import { ToastContainer } from './ToastContainer.tsx';
 import { Modal } from '../ui/Modal.tsx';
 import { useUI, uiStore } from '../../stores/ui-store.ts';
 import { AIAssistantDrawer } from '../../features/ai-assistant/index.ts';
+import { ForensicWorkflowModal } from '../../features/investigation/ForensicWorkflowModal.tsx';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -59,6 +60,14 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <div className="print:hidden">
         <GlobalSearchModal />
         <ToastContainer />
+        <ForensicWorkflowModal
+          isOpen={ui.isWorkflowModalOpen}
+          initialSource={ui.workflowModalSource}
+          onClose={() => uiStore.closeWorkflowModal()}
+          onCompletedCase={(caseId) => {
+            uiStore.navigate(`/case/${caseId}`);
+          }}
+        />
       </div>
 
       {/* Keyboard Shortcuts Help Modal */}

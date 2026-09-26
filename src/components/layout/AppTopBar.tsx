@@ -310,6 +310,19 @@ export const AppTopBar: React.FC = () => {
           />
         </div>
 
+        {/* Analyze Email Action */}
+        <button
+          id="header-analyze-email-btn"
+          type="button"
+          onClick={() => uiStore.openWorkflowModal('eml')}
+          className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-all cursor-pointer font-semibold text-xs shadow-xs"
+          title="Analyze Email & Launch Forensic Pipeline"
+          aria-label="Analyze Email"
+        >
+          <Search className="w-3.5 h-3.5 text-sky-200 shrink-0" />
+          <span className="hidden sm:inline">Analyze Email</span>
+        </button>
+
         {/* AI Copilot Button */}
         <button
           type="button"
