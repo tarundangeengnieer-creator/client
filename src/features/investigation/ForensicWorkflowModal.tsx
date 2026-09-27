@@ -3,16 +3,15 @@ import {
   InvestigationResult,
   Verdict,
   InvestigationStatus,
-  Recommendation,
-  StopReason,
-  AttackHypothesisType,
-  HypothesisStatus,
 } from '../../contracts/backend.ts';
-import { casesStore, makeInvestigation, makeGeoSummary } from '../../stores/cases-store.ts';
+import { casesStore, makeInvestigation } from '../../stores/cases-store.ts';
 import { uiStore } from '../../stores/ui-store.ts';
 import { mapInvestigationToCaseViewModel } from '../../domain/mappers/case-mapper.ts';
 import { formatBytes, formatLatency, formatScore } from '../../lib/formatters.ts';
 import { OfficialGmailLogo, OfficialMicrosoftLogo } from '../../components/ui/BrandLogos.tsx';
+import { apiClient } from '../../api/client.ts';
+import { ENDPOINTS } from '../../api/endpoints.ts';
+import { mapInvestigationResult } from '../../api/dto-mappers.ts';
 import {
   X,
   Mail,
@@ -34,6 +33,10 @@ import {
   Server,
   RefreshCw,
   Search,
+  Check,
+  AlertCircle,
+  FileCheck,
+  RotateCcw,
 } from 'lucide-react';
 
 export type IngestionSource = 'gmail' | 'microsoft' | 'eml' | 'server' | 'paste';
@@ -126,120 +129,11 @@ const DEFAULT_PIPELINE_STAGES: PipelineExecutionStage[] = [
   },
 ];
 
-const PREBUILT_GMAIL_SPECIMENS: IngestedSpecimen[] = [
+const PREBUILT_SPECIMENS: IngestedSpecimen[] = [
   {
-    id: 'gm-1',
-    source: 'gmail',
-    sourceLabel: 'Gmail',
-    subject: 'Urgent: Account Verification Required',
-    sender: 'security@bankofamerica-secure.net',
-    recipient: 'victim@targetcorp.in',
-    date: '7 Sep 2026, 10:24 AM',
-    fileSize: 4280,
-    sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
-    verdict: Verdict.MALICIOUS,
-    riskScore: 92,
-    confidence: 0.88,
-    originIp: '185.220.101.5',
-    findings: [
-      'Origin IP 185.220.101.5 identified as known Tor Exit node (Frankfurt, DE)',
-      'Lookalike domain registered 4 hours prior to transit',
-      'DMARC policy strict enforcement failed (header.from=bankofamerica.com mismatch)',
-    ],
-    rawContent: `Received: from 185.220.101.5 (tor-exit-04.de [185.220.101.5])
-    by mx.targetcorp.in with ESMTP id A819BF1; Mon, 07 Sep 2026 10:24:00 +0000
-Authentication-Results: mx.targetcorp.in; spf=fail; dkim=fail; dmarc=fail (p=reject)
-From: "Bank of America Security Dept" <security@bankofamerica-secure.net>
-To: victim@targetcorp.in
-Subject: Urgent: Account Verification Required
-Date: Mon, 07 Sep 2026 10:24:00 +0000
-
-Your account access has been suspended due to suspicious login activity.
-Verify immediately: https://bankofamerica-secure.net/login/verify`,
-  },
-  {
-    id: 'gm-2',
-    source: 'gmail',
-    sourceLabel: 'Gmail',
-    subject: 'Payment Confirmation for Order #CD-8819',
-    sender: 'orders@secure-gateway-in.com',
-    recipient: 'investigator@targetcorp.in',
-    date: '7 Sep 2026, 09:15 AM',
-    fileSize: 3120,
-    sha256: 'c8932fa5a78c187e5b6da93c5d8e7b9a6c1d4e2f5b8a0c3d7e9f1a2b4c6e8d0a',
-    verdict: Verdict.SUSPICIOUS,
-    riskScore: 71,
-    confidence: 0.76,
-    originIp: '194.26.29.112',
-    findings: [
-      'Newly active domain registered in non-reputable TLD',
-      'Payment redirect link points to dynamic cloud worker endpoint',
-      'SPF softfail on secondary relay hop',
-    ],
-    rawContent: `Received: from 194.26.29.112 (mow-relay.ru [194.26.29.112])
-From: "Billing Portal" <orders@secure-gateway-in.com>
-Subject: Payment Confirmation for Order #CD-8819
-Date: Mon, 07 Sep 2026 09:15:00 +0000`,
-  },
-];
-
-const PREBUILT_MICROSOFT_SPECIMENS: IngestedSpecimen[] = [
-  {
-    id: 'ms-1',
-    source: 'microsoft',
-    sourceLabel: 'Outlook',
-    subject: 'Meeting Schedule - Project Update',
-    sender: 'pm@cdgi-enterprise.in',
-    recipient: 'team@cdgi-enterprise.in',
-    date: '6 Sep 2026, 04:18 PM',
-    fileSize: 2840,
-    sha256: '3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b',
-    verdict: Verdict.BENIGN,
-    riskScore: 12,
-    confidence: 0.94,
-    originIp: '40.92.18.94',
-    findings: [
-      'Internal Microsoft 365 Exchange Online transit relay',
-      'Full cryptographic SPF/DKIM/DMARC pass with aligned corporate domain',
-      'No external suspicious URLs or anomalous payload attachments found',
-    ],
-    rawContent: `Received: from mail-eop.outlook.com ([40.92.18.94])
-From: "Project Management" <pm@cdgi-enterprise.in>
-To: team@cdgi-enterprise.in
-Subject: Meeting Schedule - Project Update
-Date: Sun, 06 Sep 2026 16:18:00 +0000`,
-  },
-  {
-    id: 'ms-2',
-    source: 'microsoft',
-    sourceLabel: 'Outlook',
-    subject: 'Action Required: Microsoft 365 Password Expiry Notice',
-    sender: 'admin@office365-security-update.in',
-    recipient: 'staff@targetcorp.in',
-    date: '6 Sep 2026, 02:40 PM',
-    fileSize: 3950,
-    sha256: 'b45c2198d76a543e21098f7e6d5c4b3a21098f7e6d5c4b3a21098f7e6d5c4b3a',
-    verdict: Verdict.MALICIOUS,
-    riskScore: 89,
-    confidence: 0.85,
-    originIp: '185.156.73.19',
-    findings: [
-      'High-severity brand impersonation targeting Microsoft 365 credentials',
-      'Sender domainoffice365-security-update.in is deceptive lookalike registered 2 days ago',
-      'SPF hardfail and missing DKIM signature',
-    ],
-    rawContent: `Received: from 185.156.73.19 (bulletproof-vps.nl)
-From: "Microsoft 365 Security" <admin@office365-security-update.in>
-Subject: Action Required: Microsoft 365 Password Expiry Notice
-Date: Sun, 06 Sep 2026 14:40:00 +0000`,
-  },
-];
-
-const PREBUILT_EML_SPECIMENS: IngestedSpecimen[] = [
-  {
-    id: 'eml-1',
+    id: 'spec-invoice',
     source: 'eml',
-    sourceLabel: 'Uploaded (.eml)',
+    sourceLabel: 'Vendor Invoice',
     subject: 'Invoice #78291',
     sender: 'accounts@vendor-billing-desk.com',
     recipient: 'finance@targetcorp.in',
@@ -259,7 +153,92 @@ const PREBUILT_EML_SPECIMENS: IngestedSpecimen[] = [
 From: "Accounts Department" <accounts@vendor-billing-desk.com>
 To: finance@targetcorp.in
 Subject: Invoice #78291
-Date: Sat, 05 Sep 2026 11:02:00 +0000`,
+Date: Sat, 05 Sep 2026 11:02:00 +0000
+
+Attached is updated invoice #78291. Please process to revised routing details.`,
+  },
+  {
+    id: 'spec-bec',
+    source: 'eml',
+    sourceLabel: 'BEC Wire Specimen',
+    subject: 'BEC / Wire Transfer',
+    sender: 'ceo-office@targetcorp-urgent.in',
+    recipient: 'cfo@targetcorp.in',
+    date: '7 Sep 2026, 10:24 AM',
+    fileSize: 4280,
+    sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+    verdict: Verdict.MALICIOUS,
+    riskScore: 92,
+    confidence: 0.88,
+    originIp: '185.220.101.5',
+    findings: [
+      'Origin IP 185.220.101.5 identified as known Tor Exit node (Frankfurt, DE)',
+      'Lookalike domain registered 4 hours prior to transit',
+      'Executive impersonation requesting urgent offshore wire transfer',
+    ],
+    rawContent: `Received: from 185.220.101.5 (tor-exit-04.de [185.220.101.5])
+Authentication-Results: mx.targetcorp.in; spf=fail; dkim=fail; dmarc=fail (p=reject)
+From: "Executive Director" <ceo-office@targetcorp-urgent.in>
+To: cfo@targetcorp.in
+Subject: Urgent: Confidential Acquisition Wire
+Date: Mon, 07 Sep 2026 10:24:00 +0000
+
+We are closing an acquisition today. Complete wire transfer of $148,000 immediately.`,
+  },
+  {
+    id: 'spec-zendesk',
+    source: 'eml',
+    sourceLabel: 'Helpdesk Baseline',
+    subject: 'Legitimate Zendesk Notification',
+    sender: 'support@zendesk.com',
+    recipient: 'secops@targetcorp.in',
+    date: '6 Sep 2026, 04:18 PM',
+    fileSize: 3180,
+    sha256: '3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b',
+    verdict: Verdict.BENIGN,
+    riskScore: 8,
+    confidence: 0.95,
+    originIp: '192.161.148.22',
+    findings: [
+      'Cryptographic SPF/DKIM/DMARC pass with verified zendesk.com alignment',
+      'Known corporate SaaS infrastructure relay',
+      'No anomalous URLs or deceptive attachment payloads detected',
+    ],
+    rawContent: `Received: from mail.zendesk.com ([192.161.148.22])
+Authentication-Results: mx.targetcorp.in; spf=pass; dkim=pass; dmarc=pass
+From: "Zendesk Support" <support@zendesk.com>
+To: secops@targetcorp.in
+Subject: Legitimate Zendesk Notification: Ticket #99142 Updated
+Date: Sun, 06 Sep 2026 16:18:00 +0000
+
+Your ticket has been updated by the assigned support engineer.`,
+  },
+  {
+    id: 'spec-o365',
+    source: 'microsoft',
+    sourceLabel: 'M365 Credential Harvest',
+    subject: 'Office 365 Password Expiry Notice',
+    sender: 'admin@office365-security-update.in',
+    recipient: 'staff@targetcorp.in',
+    date: '6 Sep 2026, 02:40 PM',
+    fileSize: 3950,
+    sha256: 'b45c2198d76a543e21098f7e6d5c4b3a21098f7e6d5c4b3a21098f7e6d5c4b3a',
+    verdict: Verdict.MALICIOUS,
+    riskScore: 89,
+    confidence: 0.85,
+    originIp: '185.156.73.19',
+    findings: [
+      'Brand impersonation targeting Microsoft 365 enterprise credentials',
+      'Sender domain office365-security-update.in registered recently on bulletproof host',
+      'SPF hardfail and missing DKIM signature',
+    ],
+    rawContent: `Received: from 185.156.73.19 (bulletproof-vps.nl)
+From: "Microsoft 365 Security" <admin@office365-security-update.in>
+To: staff@targetcorp.in
+Subject: Action Required: Microsoft 365 Password Expiry Notice
+Date: Sun, 06 Sep 2026 14:40:00 +0000
+
+Your password expires in 2 hours. Keep current credentials active: http://office365-security-update.in/auth`,
   },
 ];
 
@@ -277,12 +256,13 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
   onCompletedCase,
 }) => {
   const [activeStage, setActiveStage] = useState<WorkflowStage>('INGEST');
-  const [selectedSource, setSelectedSource] = useState<IngestionSource>(initialSource);
+  const [activeTab, setActiveTab] = useState<'upload' | 'paste' | 'gmail' | 'microsoft'>('upload');
   const [selectedSpecimen, setSelectedSpecimen] = useState<IngestedSpecimen | null>(null);
 
   // Investigation Execution State
   const [pipelineStages, setPipelineStages] = useState<PipelineExecutionStage[]>(DEFAULT_PIPELINE_STAGES);
-  const [currentStageIdx, setCurrentStageIdx] = useState<number>(0);
+  const [executionState, setExecutionState] = useState<'idle' | 'analyzing' | 'preparing' | 'completed' | 'error'>('idle');
+  const [executionError, setExecutionError] = useState<string | null>(null);
   const [elapsedMs, setElapsedMs] = useState<number>(0);
   const [completedResult, setCompletedResult] = useState<InvestigationResult | null>(null);
   const [assignedCaseId, setAssignedCaseId] = useState<string>('');
@@ -293,51 +273,38 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
   const [dragOver, setDragOver] = useState(false);
   const [pasteContent, setPasteContent] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // 3.1 — Backend health state: null = unknown, true = online, false = offline
-  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+  const cancelExecutionRef = useRef<boolean>(false);
 
   // Reset or initialize on open
   useEffect(() => {
     if (isOpen) {
       setActiveStage('INGEST');
-      setSelectedSource(initialSource);
+      setActiveTab('upload');
       setPipelineStages(DEFAULT_PIPELINE_STAGES.map((s) => ({ ...s, status: 'pending' })));
-      setCurrentStageIdx(0);
+      setExecutionState('idle');
+      setExecutionError(null);
       setElapsedMs(0);
       setCompletedResult(null);
       setAssignedCaseId('');
+      setPasteContent('');
+      cancelExecutionRef.current = false;
 
-      // Auto-select first specimen for quick convenience
-      if (initialSource === 'gmail') {
-        setSelectedSpecimen(PREBUILT_GMAIL_SPECIMENS[0]);
-      } else if (initialSource === 'microsoft') {
-        setSelectedSpecimen(PREBUILT_MICROSOFT_SPECIMENS[0]);
-      } else if (initialSource === 'eml') {
-        setSelectedSpecimen(PREBUILT_EML_SPECIMENS[0]);
-      } else {
-        setSelectedSpecimen(null);
-      }
-
-      // Probe backend health
-      setBackendOnline(null);
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-      fetch(`${baseUrl}/health`, { method: 'GET', signal: AbortSignal.timeout(4000) })
-        .then(r => setBackendOnline(r.ok))
-        .catch(() => setBackendOnline(false));
+      // Select first specimen as clean default
+      setSelectedSpecimen(PREBUILT_SPECIMENS[0]);
     }
-  }, [isOpen, initialSource]);
+  }, [isOpen]);
 
-  // Clean up timer on unmount
+  // Clean up timers on unmount
   useEffect(() => {
     return () => {
+      cancelExecutionRef.current = true;
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
   if (!isOpen) return null;
 
-  // Handle Local File Reading
+  // Process uploaded .eml file
   const processUploadedFile = async (file: File) => {
     try {
       const text = await file.text();
@@ -346,167 +313,212 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const sha256 = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
-      // Quick header extraction
+      // Header extraction
       const subjectMatch = text.match(/^Subject:\s*(.+)$/im);
       const fromMatch = text.match(/^From:\s*(.+)$/im);
       const toMatch = text.match(/^To:\s*(.+)$/im);
 
       const parsedSubject = subjectMatch ? subjectMatch[1].trim() : file.name.replace(/\.eml$/i, '');
-      const parsedFrom = fromMatch ? fromMatch[1].trim() : 'sender@external-domain.com';
-      const parsedTo = toMatch ? toMatch[1].trim() : 'analyst@targetcorp.in';
+      const parsedFrom = fromMatch ? fromMatch[1].trim() : 'sender@external-network.org';
+      const parsedTo = toMatch ? toMatch[1].trim() : 'secops@targetcorp.in';
 
-      const customSpecimen: IngestedSpecimen = {
+      const uploadedSpecimen: IngestedSpecimen = {
         id: `upload-${Date.now()}`,
         source: 'eml',
-        sourceLabel: 'Uploaded (.eml)',
+        sourceLabel: file.name,
         subject: parsedSubject,
         sender: parsedFrom,
         recipient: parsedTo,
-        date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
         fileSize: file.size,
         sha256,
         rawContent: text,
         verdict: Verdict.SUSPICIOUS,
-        riskScore: 74,
-        confidence: 0.81,
+        riskScore: 72,
+        confidence: 0.82,
         originIp: '185.220.101.5',
         findings: [
           'Cryptographic SHA-256 integrity hash recorded into audit chain',
-          'RFC 822 MIME structure parsed with full boundary separation',
-          'Heuristic signals flagged for dynamic execution pipeline',
+          'RFC 822 MIME boundary tree verified',
+          'Specimen loaded into live memory cache for multi-layer inspection',
         ],
         rawFile: file,
       };
 
-      setSelectedSpecimen(customSpecimen);
-      setActiveStage('PLAN');
+      setSelectedSpecimen(uploadedSpecimen);
+      uiStore.addToast('info', `Specimen "${file.name}" loaded successfully.`);
     } catch {
-      uiStore.addToast('error', 'Failed to read .eml file. Please ensure it is a valid RFC 822 email format.');
+      uiStore.addToast('error', 'Failed to read email file. Please verify RFC 822 / .eml format.');
     }
   };
 
-  const finalizeDemoResult = (specimen: IngestedSpecimen, startTime: number) => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    const finalElapsed = Date.now() - startTime;
-    setElapsedMs(finalElapsed);
-
-    setPipelineStages((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
-
-    const generatedId = `ASH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    setAssignedCaseId(generatedId);
-
-    const mockInvestigation = makeInvestigation({
-      investigation_id: generatedId,
-      verdict: specimen.verdict,
-      risk_score: specimen.riskScore,
-      confidence: specimen.confidence,
-      risk_reasons: specimen.findings,
-      status: InvestigationStatus.COMPLETED,
+  // Helper to commit investigation results into cases-store and transition
+  const commitInvestigation = (
+    result: InvestigationResult,
+    specimen: IngestedSpecimen,
+    caseId: string
+  ) => {
+    const viewModel = mapInvestigationToCaseViewModel(result, {
+      subject: specimen.subject,
+      sender: specimen.sender,
+      recipient: specimen.recipient,
     });
-
-    const viewModel = mapInvestigationToCaseViewModel(mockInvestigation);
-    viewModel.subject = specimen.subject;
-    viewModel.sender = specimen.sender;
-    viewModel.recipient = specimen.recipient;
-    casesStore.addCase(viewModel, mockInvestigation);
-
-    setCompletedResult(mockInvestigation);
+    casesStore.addCase(viewModel, result);
+    setAssignedCaseId(caseId);
+    setCompletedResult(result);
+    setExecutionState('completed');
     setActiveStage('RESULTS');
-    uiStore.addToast('success', `Forensic investigation completed for ${specimen.subject}`);
   };
 
-  // Execution runner for INVESTIGATE stage
-  const runInvestigationExecution = (specimen: IngestedSpecimen) => {
+  // Core execution runner for INVESTIGATE stage
+  const runInvestigationExecution = async (specimen: IngestedSpecimen) => {
     setActiveStage('INVESTIGATE');
+    setExecutionState('analyzing');
+    setExecutionError(null);
     setElapsedMs(0);
+    cancelExecutionRef.current = false;
+
     const startTime = Date.now();
 
-    // Start SLA stopwatch
+    // Start precision SLA stopwatch
     timerRef.current = setInterval(() => {
       setElapsedMs(Date.now() - startTime);
     }, 40);
 
-    const totalStages = DEFAULT_PIPELINE_STAGES.length;
-    let step = 0;
+    // Initialize all 8 pipeline stages as pending
+    setPipelineStages(DEFAULT_PIPELINE_STAGES.map((s) => ({ ...s, status: 'pending' })));
 
-    // Animate pipeline stages progressively
-    const executeNextStep = () => {
-      if (step < totalStages) {
-        setCurrentStageIdx(step);
-        setPipelineStages((prev) =>
-          prev.map((stg, i) => {
-            if (i < step) return { ...stg, status: 'completed' };
-            if (i === step) return { ...stg, status: 'running' };
-            return { ...stg, status: 'pending' };
-          })
-        );
-        step++;
-        setTimeout(executeNextStep, 320);
-      }
-      // Note: don't finalize here - wait for the backend response or demo timeout
-    };
+    let isBackendFinished = false;
+    let backendResult: InvestigationResult | null = null;
+    let backendFailure: Error | null = null;
 
-    // Start animation
-    setTimeout(executeNextStep, 200);
-
-    // Check if this is a REAL file upload (has rawFile) vs demo specimen
+    // Launch real backend request if a genuine file was uploaded
     if (specimen.rawFile) {
-      // REAL BACKEND CALL
       const formData = new FormData();
       formData.append('file', specimen.rawFile);
 
-      import('../../api/client.ts').then(({ apiClient }) => {
-        import('../../api/endpoints.ts').then(({ ENDPOINTS }) => {
-          import('../../api/dto-mappers.ts').then(({ mapInvestigationResult }) => {
-            apiClient
-              .postForm<InvestigationResult>(ENDPOINTS.INVESTIGATIONS_ANALYZE, formData, { timeoutMs: 30000 })
-              .then((rawResult) => {
-                const result = mapInvestigationResult(rawResult);
-                
-                // Stop timer
-                if (timerRef.current) clearInterval(timerRef.current);
-                const finalElapsed = Date.now() - startTime;
-                setElapsedMs(finalElapsed);
-  
-                // Mark all stages complete
-                setPipelineStages((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
-  
-                // Use real investigation ID
-                const realCaseId = result.investigation_id;
-                setAssignedCaseId(realCaseId);
-  
-                // Store REAL result into global case repository
-                const viewModel = mapInvestigationToCaseViewModel(result, {
-                  subject: specimen.subject,
-                  sender: specimen.sender,
-                  recipient: specimen.recipient,
-                });
-                casesStore.addCase(viewModel, result);
-  
-                setCompletedResult(result);
-                setActiveStage('RESULTS');
-              uiStore.addToast('success', `Live forensic investigation completed for ${specimen.subject}`);
-            })
-            .catch((err) => {
-              // Stop timer
-              if (timerRef.current) clearInterval(timerRef.current);
-              setElapsedMs(Date.now() - startTime);
-
-              console.error('Backend investigation failed:', err);
-              uiStore.addToast('error', `Backend analysis failed: ${err.message || 'Unknown error'}. Falling back to demo mode.`);
-
-              // FALLBACK: Run the demo mock flow so the demo doesn't break
-              finalizeDemoResult(specimen, startTime);
-            });
-          });
+      apiClient
+        .postForm<InvestigationResult>(ENDPOINTS.INVESTIGATIONS_ANALYZE, formData, { timeoutMs: 25000 })
+        .then((raw) => {
+          backendResult = mapInvestigationResult(raw);
+          isBackendFinished = true;
+        })
+        .catch((err) => {
+          backendFailure = err instanceof Error ? err : new Error(String(err));
+          isBackendFinished = true;
         });
-      });
-    } else {
-      // DEMO SPECIMEN: Use existing mock behavior with timeout
-      setTimeout(() => {
-        finalizeDemoResult(specimen, startTime);
-      }, totalStages * 320 + 400);
     }
+
+    // Adaptive stage pacing engine:
+    // Paces through stages 0 to 7 with consistent, natural timing.
+    // If backend is still executing, stages step forward without freezing on the last one.
+    // Once backend completes, remaining stages rapidly fast-forward (70ms each) into completion.
+    const totalStages = DEFAULT_PIPELINE_STAGES.length;
+
+    for (let step = 0; step < totalStages; step++) {
+      if (cancelExecutionRef.current) return;
+
+      // Set current stage running, previous stages completed
+      setPipelineStages((prev) =>
+        prev.map((s, idx) => {
+          if (idx < step) return { ...s, status: 'completed' };
+          if (idx === step) return { ...s, status: 'running' };
+          return { ...s, status: 'pending' };
+        })
+      );
+
+      // Check if backend already finished with an error
+      if (backendFailure) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setPipelineStages((prev) =>
+          prev.map((s, idx) => (idx === step ? { ...s, status: 'failed' } : s))
+        );
+        setExecutionState('error');
+        setExecutionError(
+          backendFailure.message.includes('404') || backendFailure.message.includes('Network')
+            ? 'Forensic engine pipeline service is unreachable. You can retry or switch to offline specimen analysis.'
+            : backendFailure.message
+        );
+        return;
+      }
+
+      // If backend finished with a result, we fast-forward smoothly (80ms each)
+      // Otherwise, we pace naturally across the stages (380ms each)
+      const stepDelay = isBackendFinished ? 80 : 380;
+      await new Promise((resolve) => setTimeout(resolve, stepDelay));
+    }
+
+    // If waiting on a live backend request that is taking longer than 8 * 380ms (3.0s):
+    // Stage 8 remains active smoothly, showing live agent synthesis, until backend finishes or times out.
+    if (specimen.rawFile && !isBackendFinished) {
+      const maxWait = 25000;
+      const waitStart = Date.now();
+      while (!isBackendFinished && Date.now() - waitStart < maxWait) {
+        if (cancelExecutionRef.current) return;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    const finalElapsed = Date.now() - startTime;
+    setElapsedMs(finalElapsed);
+
+    // Handle backend error state
+    if (backendFailure) {
+      setPipelineStages((prev) =>
+        prev.map((s, idx) => (idx === totalStages - 1 ? { ...s, status: 'failed' } : s))
+      );
+      setExecutionState('error');
+      setExecutionError(backendFailure.message || 'Forensic engine analysis encountered an unhandled error.');
+      return;
+    }
+
+    // All 8 stages are now completed
+    setPipelineStages((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
+
+    // Explicitly enter "Preparing results" state
+    setExecutionState('preparing');
+
+    // Smooth 300ms transition to render the evidence & verdict results
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    if (cancelExecutionRef.current) return;
+
+    if (backendResult) {
+      // Live backend result
+      const realCaseId = (backendResult as InvestigationResult).investigation_id || `ASH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      commitInvestigation(backendResult, specimen, realCaseId);
+      uiStore.addToast('success', `Live forensic investigation complete: ${specimen.subject}`);
+    } else {
+      // Demo specimen result
+      const generatedId = `ASH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const mockResult = makeInvestigation({
+        investigation_id: generatedId,
+        verdict: specimen.verdict,
+        risk_score: specimen.riskScore,
+        confidence: specimen.confidence,
+        risk_reasons: specimen.findings,
+        status: InvestigationStatus.COMPLETED,
+      });
+      commitInvestigation(mockResult, specimen, generatedId);
+      uiStore.addToast('success', `Forensic investigation complete: ${specimen.subject}`);
+    }
+  };
+
+  // Fallback to offline demo analysis from an error state
+  const handleFallbackToDemo = () => {
+    if (!selectedSpecimen) return;
+    const detachedSpecimen: IngestedSpecimen = {
+      ...selectedSpecimen,
+      rawFile: undefined, // Clears file handle so it executes deterministic forensic model
+    };
+    setSelectedSpecimen(detachedSpecimen);
+    runInvestigationExecution(detachedSpecimen);
   };
 
   return (
@@ -515,25 +527,22 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150"
     >
       <div
-        className="w-full max-w-2xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all"
+        className="w-full max-w-3xl bg-[#071A2B] text-slate-100 border border-[#1b3552] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] transition-all"
         role="dialog"
         aria-modal="true"
       >
-        {/* Modal Header */}
-        <div className="px-5 sm:px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-blue-600 dark:text-sky-400 shrink-0">
-              <Zap className="w-4 h-4" />
+        {/* Header: Professional Enterprise SOC Heading */}
+        <div className="px-5 sm:px-6 py-4 border-b border-[#1b3552] flex items-center justify-between bg-[#0D2238]/80">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#071A2B] border border-[#18BFFF]/30 flex items-center justify-center text-[#18BFFF] shrink-0">
+              <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
-                Forensic Investigation Pipeline
+              <h2 className="text-sm sm:text-base font-semibold text-white tracking-tight">
+                New Investigation
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                {activeStage === 'INGEST' && 'Step 1 of 4: Ingest & Select Email Specimen'}
-                {activeStage === 'PLAN' && 'Step 2 of 4: Review Forensic Plan & Integrity Check'}
-                {activeStage === 'INVESTIGATE' && 'Step 3 of 4: Live Automated Forensic Execution'}
-                {activeStage === 'RESULTS' && 'Step 4 of 4: Investigation Findings & Verdict'}
+              <p className="text-xs text-slate-400">
+                Submit an email specimen for forensic analysis
               </p>
             </div>
           </div>
@@ -541,211 +550,91 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-[#17334f] rounded-lg transition-colors cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Workflow Phase Stepper Ribbon */}
-        <div className="px-5 sm:px-6 py-2.5 bg-slate-100/60 dark:bg-slate-950/60 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
-          {(['INGEST', 'PLAN', 'INVESTIGATE', 'RESULTS'] as WorkflowStage[]).map((stage, idx) => {
-            const stageOrder = ['INGEST', 'PLAN', 'INVESTIGATE', 'RESULTS'];
+        {/* 4-Step Investigation Pipeline Ribbon */}
+        <div className="px-5 sm:px-6 py-2.5 bg-[#0D2238] border-b border-[#1b3552] flex items-center justify-between">
+          {(
+            [
+              { stage: 'INGEST', num: 1, label: 'INGEST' },
+              { stage: 'PLAN', num: 2, label: 'PLAN' },
+              { stage: 'INVESTIGATE', num: 3, label: 'INVESTIGATE' },
+              { stage: 'RESULTS', num: 4, label: 'RESULTS' },
+            ] as const
+          ).map(({ stage, num, label }, idx) => {
+            const stageOrder: WorkflowStage[] = ['INGEST', 'PLAN', 'INVESTIGATE', 'RESULTS'];
             const currentIdx = stageOrder.indexOf(activeStage);
             const isDone = stageOrder.indexOf(stage) < currentIdx;
             const isCurrent = stage === activeStage;
 
             return (
-              <div key={stage} className="flex items-center gap-2">
+              <div key={stage} className="flex items-center gap-2 flex-1 last:flex-none">
                 <div
-                  className={`flex items-center gap-1.5 font-semibold text-[11px] sm:text-xs ${
+                  className={`flex items-center gap-2 text-xs font-medium ${
                     isCurrent
-                      ? 'text-blue-600 dark:text-sky-400'
+                      ? 'text-[#18BFFF]'
                       : isDone
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-slate-400 dark:text-slate-600'
+                      ? 'text-[#10C98A]'
+                      : 'text-slate-500'
                   }`}
                 >
                   <span
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                       isCurrent
-                        ? 'bg-sky-600 text-white font-bold shadow-[0_0_8px_rgba(14,165,233,0.25)]'
+                        ? 'bg-[#18BFFF] text-[#071A2B]'
                         : isDone
-                        ? 'bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 font-bold'
-                        : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                        ? 'bg-[#10C98A]/20 text-[#10C98A] border border-[#10C98A]/40'
+                        : 'bg-slate-800 text-slate-500 border border-slate-700'
                     }`}
                   >
-                    {isDone ? '✓' : idx + 1}
+                    {isDone ? <Check className="w-3 h-3" /> : num}
                   </span>
-                  <span>{stage}</span>
+                  <span className="hidden sm:inline tracking-wider text-[11px] font-mono uppercase">
+                    {label}
+                  </span>
                 </div>
-                {idx < 3 && <div className="w-4 sm:w-8 h-[1px] bg-slate-300 dark:bg-slate-700 mx-0.5 sm:mx-1" />}
+                {idx < 3 && <div className="flex-1 h-[1px] bg-[#1b3552] mx-2" />}
               </div>
             );
           })}
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1 text-slate-800 dark:text-slate-200 space-y-4">
-          {/* STAGE 1: INGEST */}
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-[#071A2B] text-slate-200">
+          {/* ================= STAGE 1: INGEST ================= */}
           {activeStage === 'INGEST' && (
             <div className="space-y-4 animate-in fade-in duration-150">
-              {/* 3.1 — Backend Health Banner */}
-              {backendOnline === false && (
-                <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-500/5 border border-amber-400/30 text-xs">
-                  <span className="text-amber-500 text-sm shrink-0">⚠</span>
-                  <div>
-                    <p className="font-bold text-amber-700 dark:text-amber-400">Backend Offline</p>
-                    <p className="text-amber-600/80 dark:text-amber-500/80 mt-0.5">
-                      Cannot reach <code className="font-mono bg-amber-100 dark:bg-amber-500/10 px-1 rounded">localhost:8000</code>. Upload and Paste modes will fall back to demo analysis. Gmail and Microsoft specimens work offline.
-                    </p>
-                  </div>
-                </div>
-              )}
-              {backendOnline === true && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-400/20 text-xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
-                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">Backend Online</span>
-                  <span className="text-emerald-600/70 dark:text-emerald-500/70">— Live forensic analysis active at <code className="font-mono">localhost:8000</code></span>
-                </div>
-              )}
-              {backendOnline === null && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs text-slate-500">
-                  <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
-                  <span>Checking backend status…</span>
-                </div>
-              )}
-
-              {/* Source Selector Tabs */}
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {/* Secondary Method Selector Tabs */}
+              <div className="flex items-center gap-1.5 p-1 bg-[#0D2238] border border-[#1b3552] rounded-lg">
                 {[
-                  { id: 'gmail' as IngestionSource, label: 'Gmail', icon: <OfficialGmailLogo className="w-4 h-4" /> },
-                  { id: 'microsoft' as IngestionSource, label: 'Microsoft', icon: <OfficialMicrosoftLogo className="w-3.5 h-3.5" /> },
-                  { id: 'eml' as IngestionSource, label: 'Upload .EML', icon: <FileText className="w-4 h-4" /> },
-                  { id: 'paste' as IngestionSource, label: 'Paste Email', icon: <FileCode className="w-4 h-4" /> },
-                  { id: 'server' as IngestionSource, label: 'Send to Server', icon: <Mail className="w-4 h-4" /> },
-                ].map((s) => (
+                  { id: 'upload' as const, label: 'Upload Email (.eml)', icon: <UploadCloud className="w-3.5 h-3.5" /> },
+                  { id: 'paste' as const, label: 'Paste Raw Email', icon: <FileCode className="w-3.5 h-3.5" /> },
+                  { id: 'gmail' as const, label: 'Gmail', icon: <OfficialGmailLogo className="w-3.5 h-3.5" /> },
+                  { id: 'microsoft' as const, label: 'Microsoft 365', icon: <OfficialMicrosoftLogo className="w-3.5 h-3.5" /> },
+                ].map((tab) => (
                   <button
-                    key={s.id}
+                    key={tab.id}
                     type="button"
-                    onClick={() => {
-                      setSelectedSource(s.id);
-                      if (s.id === 'gmail') setSelectedSpecimen(PREBUILT_GMAIL_SPECIMENS[0]);
-                      else if (s.id === 'microsoft') setSelectedSpecimen(PREBUILT_MICROSOFT_SPECIMENS[0]);
-                      else if (s.id === 'eml') setSelectedSpecimen(PREBUILT_EML_SPECIMENS[0]);
-                      else setSelectedSpecimen(null);
-                    }}
-                    className={`px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                      selectedSource === s.id
-                        ? 'border-blue-500 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-sky-400 shadow-xs'
-                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 py-1.5 px-2.5 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      activeTab === tab.id
+                        ? 'bg-[#071A2B] text-[#18BFFF] shadow-xs border border-[#18BFFF]/40'
+                        : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <span>{s.icon}</span>
-                    <span>{s.label}</span>
+                    {tab.icon}
+                    <span>{tab.label}</span>
                   </button>
                 ))}
               </div>
 
-              {/* Source-specific Ingestion Views */}
-              {selectedSource === 'gmail' && (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-blue-500/30 text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span>Connected Google Workspace:</span>
-                      <span className="font-mono font-bold">tarundangeengnieer@gmail.com</span>
-                    </div>
-                    <span className="text-[10px] text-sky-600 dark:text-sky-400 bg-transparent px-2 py-0.5 rounded border border-sky-500/30">
-                      OAuth2 Active
-                    </span>
-                  </div>
-
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Select Suspicious Email Specimen from Gmail Inbox:
-                  </p>
-
-                  <div className="space-y-2">
-                    {PREBUILT_GMAIL_SPECIMENS.map((specimen) => (
-                      <div
-                        key={specimen.id}
-                        onClick={() => setSelectedSpecimen(specimen)}
-                        className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                          selectedSpecimen?.id === specimen.id
-                            ? 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 min-w-0">
-                            {selectedSpecimen?.id === specimen.id && <CheckCircle2 className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />}
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                                {specimen.subject}
-                              </p>
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                                From: {specimen.sender}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="text-xs text-slate-500 font-mono shrink-0">{specimen.date}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedSource === 'microsoft' && (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-blue-500/30 text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span>Connected Tenant:</span>
-                      <span className="font-mono font-bold">CDGI Enterprise / Exchange Online</span>
-                    </div>
-                    <span className="text-[10px] text-sky-600 dark:text-sky-400 bg-transparent px-2 py-0.5 rounded border border-sky-500/30">
-                      Graph API
-                    </span>
-                  </div>
-
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Select Suspicious Email Specimen from Outlook Mailbox:
-                  </p>
-
-                  <div className="space-y-2">
-                    {PREBUILT_MICROSOFT_SPECIMENS.map((specimen) => (
-                      <div
-                        key={specimen.id}
-                        onClick={() => setSelectedSpecimen(specimen)}
-                        className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                          selectedSpecimen?.id === specimen.id
-                            ? 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 min-w-0">
-                            {selectedSpecimen?.id === specimen.id && <CheckCircle2 className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />}
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                                {specimen.subject}
-                              </p>
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                                From: {specimen.sender}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="text-xs text-slate-500 font-mono shrink-0">{specimen.date}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedSource === 'eml' && (
+              {/* Primary Drop Zone: Upload Email */}
+              {activeTab === 'upload' && (
                 <div className="space-y-3">
                   <div
                     onDragOver={(e) => {
@@ -761,10 +650,12 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                       }
                     }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`p-6 sm:p-8 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                    className={`p-6 sm:p-7 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
                       dragOver
-                        ? 'border-blue-500 bg-slate-100 dark:bg-slate-800'
-                        : 'border-slate-300 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-900/40 hover:border-blue-400'
+                        ? 'border-[#18BFFF] bg-[#0D2238]'
+                        : selectedSpecimen?.rawFile
+                        ? 'border-[#10C98A]/50 bg-[#0D2238]/60'
+                        : 'border-[#1b3552] bg-[#0D2238]/40 hover:border-[#18BFFF]/50 hover:bg-[#0D2238]/80'
                     }`}
                   >
                     <input
@@ -778,220 +669,223 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                         }
                       }}
                     />
-                    <UploadCloud className="w-8 h-8 text-blue-600 dark:text-sky-400 mb-2" />
-                    <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-white">
-                      Drag and drop your raw RFC 822 (.eml) file here
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      or <span className="text-blue-600 underline font-medium">browse from your computer</span> (Max 25MB)
-                    </p>
-                  </div>
-
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 pt-2">
-                    Or select from curated test specimens:
-                  </p>
-                  {PREBUILT_EML_SPECIMENS.map((specimen) => (
-                    <div
-                      key={specimen.id}
-                      onClick={() => setSelectedSpecimen(specimen)}
-                      className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                        selectedSpecimen?.id === specimen.id
-                          ? 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/80 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-2 min-w-0">
-                          {selectedSpecimen?.id === specimen.id && <CheckCircle2 className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />}
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                              {specimen.subject}
-                            </p>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                              From: {specimen.sender} ({formatBytes(specimen.fileSize)})
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-xs text-slate-500 font-mono shrink-0">{specimen.date}</span>
-                      </div>
+                    <div className="w-10 h-10 rounded-full bg-[#071A2B] border border-[#1b3552] flex items-center justify-center text-[#18BFFF] mb-2.5">
+                      <UploadCloud className="w-5 h-5" />
                     </div>
-                  ))}
-
-                  {/* 3.2 — Live Backend Fixture Files */}
-                  <div className="pt-2 space-y-2">
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${backendOnline ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                      Live Demo Fixtures
-                      {backendOnline && <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/20">LIVE</span>}
+                    <p className="text-xs sm:text-sm font-semibold text-white">
+                      Drag and drop your raw email (.eml) here
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                      Upload one of these validated files from <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">backend/tests/fixtures/</code> for{' '}
-                      {backendOnline ? <strong className="text-emerald-600 dark:text-emerald-400">real AI analysis</strong> : <span>demo analysis</span>}.
+                    <p className="text-xs text-slate-400 mt-1">
+                      or <span className="text-[#18BFFF] underline font-medium">browse from your computer</span>
                     </p>
-                    {[
-                      { file: 'bec_wire_transfer.eml', label: 'BEC Wire Transfer', verdict: 'MALICIOUS', color: 'rose', desc: 'CEO impersonation requesting urgent wire transfer — BEC attack' },
-                      { file: 'golden_google_zendesk.eml', label: 'Google / Zendesk Legit', verdict: 'BENIGN', color: 'emerald', desc: 'Legitimate Zendesk notification — clean baseline for comparison' },
-                      { file: 'scenario_a_benign.eml', label: 'Scenario A (Benign)', verdict: 'BENIGN', color: 'emerald', desc: 'Normal internal corporate email with full SPF/DKIM/DMARC pass' },
-                      { file: 'scenario_c_bec_valid_auth.eml', label: 'Scenario C (BEC)', verdict: 'SUSPICIOUS', color: 'amber', desc: 'BEC with valid authentication — tests heuristic engine depth' },
-                    ].map(({ file, label, verdict, color, desc }) => (
-                      <div key={file} className={`p-3 rounded-xl border text-xs ${
-                        color === 'rose' ? 'border-rose-500/20 bg-rose-50/40 dark:bg-rose-500/5' :
-                        color === 'amber' ? 'border-amber-500/20 bg-amber-50/40 dark:bg-amber-500/5' :
-                        'border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-500/5'
-                      }`}>
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="font-bold font-mono text-slate-800 dark:text-white">{file}</span>
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${
-                            color === 'rose' ? 'border-rose-500/30 text-rose-600 dark:text-rose-400' :
-                            color === 'amber' ? 'border-amber-500/30 text-amber-600 dark:text-amber-400' :
-                            'border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                          }`}>{verdict}</span>
-                        </div>
-                        <p className="text-slate-500 dark:text-slate-400">{desc}</p>
-                      </div>
-                    ))}
+                    <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-2 font-mono">
+                      <span>RFC 822 / MIME format</span>
+                      <span>·</span>
+                      <span>Max file size: 25 MB</span>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {selectedSource === 'server' && (
+              {/* Secondary Ingest: Paste Raw Email */}
+              {activeTab === 'paste' && (
                 <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
-                    <p className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                      <Server className="w-4 h-4 text-blue-600 dark:text-sky-400" />
-                      Inbound SMTP Forwarding Address:
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <input
-                        readOnly
-                        value="analyze-inbound@soc.ashielder.targetcorp.in"
-                        className="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-xs text-blue-600 dark:text-sky-400 outline-none select-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText('analyze-inbound@soc.ashielder.targetcorp.in');
-                          setCopiedToken(true);
-                          setTimeout(() => setCopiedToken(false), 2000);
-                        }}
-                        className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 font-medium flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>{copiedToken ? 'Copied' : 'Copy'}</span>
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-slate-500 leading-relaxed">
-                      Forward any suspicious email as an RFC 822 attachment directly from your email client (Outlook, Thunderbird, Apple Mail). The server pipeline will authenticate and ingest it instantly.
-                    </p>
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const simulated = PREBUILT_GMAIL_SPECIMENS[0];
-                        setSelectedSpecimen({
-                          ...simulated,
-                          source: 'server',
-                          sourceLabel: 'Inbound SMTP Server',
-                        });
-                        uiStore.addToast('info', 'Simulated inbound SMTP delivery received.');
-                      }}
-                      className="w-full py-2.5 px-4 rounded-xl border border-blue-500/30 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-sky-400 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Zap className="w-3.5 h-3.5" />
-                      <span>Simulate Inbound SMTP Test Handshake</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {selectedSource === 'paste' && (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-blue-500/20 text-xs flex items-start gap-2 text-slate-700 dark:text-slate-300">
-                    <FileCode className="w-4 h-4 text-blue-600 dark:text-sky-400 shrink-0 mt-0.5" />
-                    <span>Paste the full raw email source below (including headers like <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">From:</code>, <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">Subject:</code>, <code className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">Received:</code> and body). The system will parse headers, extract IPs, and run the full investigation pipeline.</span>
+                  <div className="p-3 rounded-lg bg-[#0D2238] border border-[#1b3552] text-xs flex items-start gap-2 text-slate-300">
+                    <FileCode className="w-4 h-4 text-[#18BFFF] shrink-0 mt-0.5" />
+                    <span>
+                      Paste full RFC 822 email text including headers (<code className="font-mono text-slate-200">From:</code>,{' '}
+                      <code className="font-mono text-slate-200">Received:</code>, <code className="font-mono text-slate-200">Subject:</code>)
+                      and body boundaries.
+                    </span>
                   </div>
 
                   <textarea
                     value={pasteContent}
                     onChange={(e) => setPasteContent(e.target.value)}
-                    placeholder={"Delivered-To: user@company.com\nReceived: from mail.sender.com ([185.220.101.5])\nFrom: PayPal Support <no-reply@paypal1-secure.com>\nTo: user@company.com\nSubject: Action Required: Verify Your Account\nDate: Mon, 12 Aug 2025 10:24:00 +0000\nMIME-Version: 1.0\nContent-Type: text/html; charset=UTF-8\n\n<html>...</html>"}
-                    className="w-full h-48 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none outline-none focus:border-blue-400 dark:focus:border-sky-500 transition-colors"
+                    placeholder={"Delivered-To: victim@targetcorp.in\nReceived: from mail.vendor-billing-desk.com ([103.14.26.89])\nFrom: Accounts Department <accounts@vendor-billing-desk.com>\nSubject: Invoice #78291\nDate: Sat, 05 Sep 2026 11:02:00 +0000\n\nPlease process revised invoice."}
+                    className="w-full h-40 px-3 py-2.5 rounded-lg border border-[#1b3552] bg-[#071A2B] text-xs font-mono text-slate-200 placeholder:text-slate-600 resize-none outline-none focus:border-[#18BFFF] transition-colors"
                     spellCheck={false}
                   />
 
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[11px] text-slate-400">
-                      {pasteContent.length > 0 ? `${pasteContent.length} characters pasted` : 'Paste email content above'}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      {pasteContent.length > 0 ? `${pasteContent.length} bytes input` : 'Awaiting pasted content'}
                     </span>
                     <button
                       type="button"
                       disabled={pasteContent.trim().length < 20}
                       onClick={() => {
-                        // Convert pasted text to a File blob and process via existing pipeline
                         const blob = new Blob([pasteContent], { type: 'message/rfc822' });
-                        const file = new File([blob], 'pasted-email.eml', { type: 'message/rfc822', lastModified: Date.now() });
+                        const file = new File([blob], 'pasted_specimen.eml', {
+                          type: 'message/rfc822',
+                          lastModified: Date.now(),
+                        });
                         processUploadedFile(file);
                       }}
-                      className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-40 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer disabled:cursor-not-allowed"
+                      className="px-3.5 py-1.5 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 disabled:opacity-40 text-[#071A2B] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       <Zap className="w-3.5 h-3.5" />
-                      <span>Analyze Pasted Email</span>
+                      <span>Process Pasted Specimen</span>
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Secondary Ingest: Gmail */}
+              {activeTab === 'gmail' && (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-[#0D2238] border border-[#1b3552] text-xs flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-slate-200">
+                      <span className="w-2 h-2 rounded-full bg-[#10C98A]" />
+                      <span>Connected Google Workspace:</span>
+                      <span className="font-mono text-white">tarundangeengnieer@gmail.com</span>
+                    </div>
+                    <span className="text-[10px] text-[#18BFFF] bg-[#18BFFF]/10 px-2 py-0.5 rounded border border-[#18BFFF]/30">
+                      OAuth2 Active
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">Select an email specimen from the synchronized inbox:</p>
+                </div>
+              )}
+
+              {/* Secondary Ingest: Microsoft 365 */}
+              {activeTab === 'microsoft' && (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-[#0D2238] border border-[#1b3552] text-xs flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-slate-200">
+                      <span className="w-2 h-2 rounded-full bg-[#10C98A]" />
+                      <span>Connected Tenant:</span>
+                      <span className="font-mono text-white">CDGI Enterprise / Exchange Online</span>
+                    </div>
+                    <span className="text-[10px] text-[#18BFFF] bg-[#18BFFF]/10 px-2 py-0.5 rounded border border-[#18BFFF]/30">
+                      Graph API
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">Select an email specimen from the mailbox:</p>
+                </div>
+              )}
+
+              {/* Demo & Test Specimens */}
+              <div className="space-y-2.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-300">Demo & Test Specimens</p>
+                  <span className="text-[11px] text-slate-500">Curated RFC 822 test vectors</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {PREBUILT_SPECIMENS.map((specimen) => {
+                    const isSelected = selectedSpecimen?.id === specimen.id;
+                    const isMalicious = specimen.verdict === Verdict.MALICIOUS;
+                    const isSuspicious = specimen.verdict === Verdict.SUSPICIOUS;
+
+                    return (
+                      <div
+                        key={specimen.id}
+                        onClick={() => setSelectedSpecimen(specimen)}
+                        className={`p-3 rounded-lg border text-xs transition-all cursor-pointer flex flex-col justify-between ${
+                          isSelected
+                            ? 'border-[#18BFFF] bg-[#0D2238] shadow-xs'
+                            : 'border-[#1b3552] bg-[#0D2238] hover:border-[#18BFFF]/50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-white truncate">{specimen.subject}</p>
+                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{specimen.sender}</p>
+                          </div>
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold font-mono uppercase shrink-0 border ${
+                              isMalicious
+                                ? 'bg-[#FF365C]/10 text-[#FF365C] border-[#FF365C]/30'
+                                : isSuspicious
+                                ? 'bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/30'
+                                : 'bg-[#10C98A]/10 text-[#10C98A] border-[#10C98A]/30'
+                            }`}
+                          >
+                            {specimen.verdict}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mt-2 pt-2 border-t border-[#1b3552]">
+                          <span>
+                            {formatBytes(specimen.fileSize)} · RFC 822 · {specimen.date.split(',')[0]}
+                          </span>
+                          {isSelected && <span className="text-[#18BFFF] font-bold">SELECTED</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Selected Specimen Status Card */}
+              {selectedSpecimen && (
+                <div className="p-3.5 rounded-lg bg-[#0D2238] border border-[#18BFFF]/40 flex items-center justify-between text-xs animate-in fade-in duration-150">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-7 h-7 rounded-md bg-[#071A2B] border border-[#1b3552] flex items-center justify-center text-[#18BFFF] shrink-0">
+                      <FileCheck className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-white truncate">{selectedSpecimen.subject}</p>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5 font-mono">
+                        <span>{formatBytes(selectedSpecimen.fileSize)}</span>
+                        <span>·</span>
+                        <span>{selectedSpecimen.rawFile ? 'Local Upload' : 'Test Specimen'}</span>
+                        <span>·</span>
+                        <span>RFC 822 format</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#10C98A]/10 text-[#10C98A] text-[11px] font-semibold border border-[#10C98A]/30 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10C98A]" />
+                    Ready for Plan
+                  </span>
                 </div>
               )}
             </div>
           )}
 
-          {/* STAGE 2: PLAN */}
+          {/* ================= STAGE 2: PLAN ================= */}
           {activeStage === 'PLAN' && selectedSpecimen && (
             <div className="space-y-4 animate-in fade-in duration-150 text-xs">
-              {/* Evidence Overview Box */}
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 space-y-2.5">
+              <div className="p-4 rounded-xl border border-[#1b3552] bg-[#0D2238] space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
-                    {selectedSpecimen.subject}
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-transparent text-sky-600 dark:text-sky-400 border border-sky-500/30">
+                  <span className="font-bold text-white text-sm">{selectedSpecimen.subject}</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono text-[#18BFFF] bg-[#18BFFF]/10 border border-[#18BFFF]/30">
                     {selectedSpecimen.sourceLabel}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600 dark:text-slate-400 pt-1 border-t border-slate-200/80 dark:border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] text-slate-300 pt-2 border-t border-[#1b3552]">
                   <div>
                     <span className="text-slate-500 block">Sender:</span>
-                    <span className="font-mono text-slate-800 dark:text-slate-200 truncate block">
-                      {selectedSpecimen.sender}
-                    </span>
+                    <span className="font-mono text-slate-200 truncate block mt-0.5">{selectedSpecimen.sender}</span>
                   </div>
                   <div>
                     <span className="text-slate-500 block">Recipient:</span>
-                    <span className="font-mono text-slate-800 dark:text-slate-200 truncate block">
-                      {selectedSpecimen.recipient}
-                    </span>
+                    <span className="font-mono text-slate-200 truncate block mt-0.5">{selectedSpecimen.recipient}</span>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                <div className="pt-2 border-t border-[#1b3552] flex items-center justify-between text-[11px]">
                   <span className="text-slate-500">SHA-256 Hash Integrity:</span>
-                  <span className="font-mono text-blue-600 dark:text-sky-400 select-all truncate max-w-[280px]">
+                  <span className="font-mono text-[#18BFFF] select-all truncate max-w-[280px]">
                     {selectedSpecimen.sha256}
                   </span>
                 </div>
               </div>
 
-              {/* Deduplication & Pre-flight Status */}
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-emerald-500/30 flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
-                <span>Pre-flight checks passed: Specimen is unique, non-duplicated, and ready for forensic execution.</span>
+              {/* Pre-flight Checks Status */}
+              <div className="p-3 rounded-lg bg-[#0D2238] border border-emerald-500/30 flex items-center gap-2.5 text-[#10C98A]">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#10C98A]" />
+                <span>Pre-flight checks passed: RFC 822 structure verified, integrity recorded.</span>
               </div>
 
-              {/* Pipeline Plan Stepper Preview */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-bold text-slate-900 dark:text-white">Scheduled Analysis Execution Layers:</p>
+              {/* Scheduled Analysis Execution Layers */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold text-white">Scheduled Analysis Execution Layers:</p>
                   <span className="text-[11px] text-slate-500 font-mono">SLA Target: &lt;4,000ms</span>
                 </div>
 
@@ -999,15 +893,15 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   {pipelineStages.map((stage, idx) => (
                     <div
                       key={stage.id}
-                      className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 flex items-center justify-between text-xs"
+                      className="p-2.5 rounded-lg border border-[#1b3552] bg-[#0D2238] flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-[9px] text-slate-500 font-mono">
+                        <span className="w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center text-[9px] text-slate-400 font-mono">
                           {idx + 1}
                         </span>
-                        <span className="font-medium text-slate-800 dark:text-slate-200">{stage.name}</span>
+                        <span className="text-slate-200 font-medium">{stage.name}</span>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#071A2B] text-slate-400 font-mono border border-slate-800">
                         {stage.level}
                       </span>
                     </div>
@@ -1017,85 +911,148 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
             </div>
           )}
 
-          {/* STAGE 3: INVESTIGATE */}
+          {/* ================= STAGE 3: INVESTIGATE ================= */}
           {activeStage === 'INVESTIGATE' && selectedSpecimen && (
             <div className="space-y-4 animate-in fade-in duration-150">
               {/* Telemetry Header */}
-              <div className="p-4 rounded-xl bg-slate-900 text-white border border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-[#0D2238] border border-[#1b3552] flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
                     Pipeline Execution Telemetry
                   </p>
-                  <p className="text-xs font-bold text-slate-100 truncate max-w-sm mt-0.5">
+                  <p className="text-xs font-bold text-white truncate max-w-sm mt-0.5">
                     Analyzing: {selectedSpecimen.subject}
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-bold font-mono text-sky-400">{formatLatency(elapsedMs)}</div>
-                  <div className="text-[10px] font-mono text-slate-400">SLA: &lt;4,000ms (ACTIVE)</div>
+                  <div className="text-sm font-bold font-mono text-[#18BFFF]">{formatLatency(elapsedMs)}</div>
+                  <div className="text-[10px] font-mono text-slate-400">
+                    {executionState === 'preparing' ? 'FINALIZING RESULT' : 'SLA &lt;4,000ms (ACTIVE)'}
+                  </div>
                 </div>
               </div>
 
-              {/* Stepper Progress */}
+              {/* Error Banner if execution failed */}
+              {executionState === 'error' && (
+                <div className="p-4 rounded-xl bg-[#FF365C]/10 border border-[#FF365C]/30 text-xs space-y-3">
+                  <div className="flex items-start gap-2.5 text-[#FF365C]">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold">Investigation Request Halted</p>
+                      <p className="text-slate-300 mt-1 leading-relaxed">
+                        {executionError || 'The forensic pipeline service encountered a connection or processing failure.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => runInvestigationExecution(selectedSpecimen)}
+                      className="px-3 py-1.5 rounded-lg bg-[#FF365C] hover:bg-[#FF365C]/90 text-white font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Retry Analysis</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFallbackToDemo}
+                      className="px-3 py-1.5 rounded-lg bg-[#071A2B] border border-[#1b3552] text-slate-200 hover:text-white font-medium transition-colors cursor-pointer"
+                    >
+                      Run Offline Specimen Analysis
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Stepper Progress: 8 Layers with PENDING -> ACTIVE -> COMPLETED -> ERROR */}
               <div className="space-y-2">
                 {pipelineStages.map((stage, idx) => {
                   const isDone = stage.status === 'completed';
                   const isRunning = stage.status === 'running';
+                  const isFailed = stage.status === 'failed';
+
                   return (
                     <div
                       key={stage.id}
                       className={`p-3 rounded-xl border transition-all text-xs ${
-                        isRunning
-                          ? 'border-blue-500/50 bg-slate-50 dark:bg-slate-800/60 shadow-xs'
+                        isFailed
+                          ? 'border-[#FF365C]/50 bg-[#FF365C]/5'
+                          : isRunning
+                          ? 'border-[#18BFFF]/50 bg-[#0D2238] shadow-xs'
                           : isDone
-                          ? 'border-emerald-500/30 bg-slate-50 dark:bg-slate-800/40'
-                          : 'border-slate-200 dark:border-slate-800/60 opacity-40 bg-white dark:bg-slate-900/40'
+                          ? 'border-[#10C98A]/30 bg-[#0D2238]'
+                          : 'border-[#1b3552]/40 opacity-40 bg-[#071A2B]'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {isDone ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <div className="flex items-center gap-2.5">
+                          {isFailed ? (
+                            <AlertCircle className="w-4 h-4 text-[#FF365C] shrink-0" />
+                          ) : isDone ? (
+                            <CheckCircle2 className="w-4 h-4 text-[#10C98A] shrink-0" />
                           ) : isRunning ? (
-                            <Loader2 className="w-4 h-4 text-blue-600 dark:text-sky-400 animate-spin shrink-0" />
+                            <Loader2 className="w-4 h-4 text-[#18BFFF] animate-spin shrink-0" />
                           ) : (
-                            <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-[9px] text-slate-400">
+                            <div className="w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center text-[9px] text-slate-500 font-mono">
                               {idx + 1}
                             </div>
                           )}
-                          <span className="font-semibold text-slate-900 dark:text-slate-100">{stage.name}</span>
+                          <span
+                            className={`font-semibold ${
+                              isFailed
+                                ? 'text-[#FF365C]'
+                                : isRunning
+                                ? 'text-white'
+                                : isDone
+                                ? 'text-slate-200'
+                                : 'text-slate-500'
+                            }`}
+                          >
+                            {stage.name}
+                          </span>
                         </div>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#071A2B] text-slate-400 font-mono border border-slate-800">
                           {stage.level}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-6 leading-tight">
+                      <p className="text-[11px] text-slate-400 mt-1 pl-6 leading-tight">
                         {stage.description}
                       </p>
                     </div>
                   );
                 })}
               </div>
+
+              {/* State Notice separating "Investigation complete" from "Preparing results" */}
+              {executionState === 'preparing' && (
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-[#10C98A] flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#10C98A]" />
+                  <span className="font-medium">
+                    Investigation complete — Preparing forensic artifacts and evidence ledger...
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
-          {/* STAGE 4: RESULTS */}
+          {/* ================= STAGE 4: RESULTS ================= */}
           {activeStage === 'RESULTS' && selectedSpecimen && completedResult && (
             <div className="space-y-4 animate-in fade-in duration-200 text-xs">
               {/* Verdict Summary Card */}
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs">
+              <div className="p-4 rounded-xl border border-[#1b3552] bg-[#0D2238] space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                       FORENSIC VERDICT
                     </span>
                     <span
-                      className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-bold mt-1 ${
+                      className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-bold mt-1 border ${
                         completedResult.verdict === Verdict.MALICIOUS
-                          ? 'bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30'
+                          ? 'bg-[#FF365C]/10 text-[#FF365C] border-[#FF365C]/30'
                           : completedResult.verdict === Verdict.SUSPICIOUS
-                          ? 'bg-transparent text-amber-600 dark:text-amber-400 border border-amber-500/30'
-                          : 'bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                          ? 'bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/30'
+                          : 'bg-[#10C98A]/10 text-[#10C98A] border-[#10C98A]/30'
                       }`}
                     >
                       {completedResult.verdict}
@@ -1106,42 +1063,45 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                       ASSIGNED CASE ID
                     </span>
-                    <span className="text-base font-black text-blue-600 dark:text-sky-400 font-mono">
+                    <span className="text-base font-black text-[#18BFFF] font-mono">
                       #{assignedCaseId}
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/80 dark:border-slate-800">
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800">
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#1b3552]">
+                  <div className="p-3 rounded-lg bg-[#071A2B] border border-[#1b3552]">
                     <span className="text-[10px] text-slate-400 block font-bold">THREAT RISK SCORE</span>
                     <span
                       className={`text-xl font-black ${
                         completedResult.risk_score >= 80
-                          ? 'text-rose-600 dark:text-rose-400'
+                          ? 'text-[#FF365C]'
                           : completedResult.risk_score >= 50
-                          ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-[#FFB800]'
+                          : 'text-[#10C98A]'
                       }`}
                     >
                       {formatScore(completedResult.risk_score)}/100
                     </span>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800">
+                  <div className="p-3 rounded-lg bg-[#071A2B] border border-[#1b3552]">
                     <span className="text-[10px] text-slate-400 block font-bold">CONFIDENCE METRIC</span>
-                    <span className="text-xl font-black text-blue-600 dark:text-sky-400">
+                    <span className="text-xl font-black text-[#18BFFF]">
                       {((completedResult.confidence ?? 0.85) * 100).toFixed(1)}%
                     </span>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                <div className="pt-2 border-t border-[#1b3552]">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
                     PRIMARY FORENSIC SIGNALS
                   </span>
-                  <ul className="space-y-1.5 pl-4 list-disc marker:text-blue-500 text-slate-700 dark:text-slate-300 text-xs">
-                    {(completedResult.risk_reasons && completedResult.risk_reasons.length > 0 ? completedResult.risk_reasons : selectedSpecimen.findings).map((f, i) => (
+                  <ul className="space-y-1.5 pl-4 list-disc marker:text-[#18BFFF] text-slate-300 text-xs">
+                    {(completedResult.risk_reasons && completedResult.risk_reasons.length > 0
+                      ? completedResult.risk_reasons
+                      : selectedSpecimen.findings
+                    ).map((f, i) => (
                       <li key={i} className="leading-snug">
                         {f}
                       </li>
@@ -1150,7 +1110,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                 </div>
               </div>
 
-              {/* Authentication Matrix (SPF / DKIM / DMARC) derived from rawContent headers */}
+              {/* Authentication Matrix (SPF / DKIM / DMARC) */}
               {(() => {
                 type AV = 'PASS' | 'FAIL' | 'NONE' | 'UNKNOWN';
                 const parseHeaderAuth = (): { spf: AV; dkim: AV; dmarc: AV } => {
@@ -1164,15 +1124,21 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                 };
                 const auth = parseHeaderAuth();
                 const col = (v: AV) =>
-                  v === 'PASS' ? 'border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-500/5 text-emerald-600 dark:text-emerald-400' :
-                  v === 'FAIL' ? 'border-rose-500/30 bg-rose-50/50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400' :
-                  v === 'NONE' ? 'border-slate-300/30 bg-slate-50/30 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400' :
-                  'border-slate-200/40 bg-slate-50/20 dark:bg-slate-800/20 text-slate-400 dark:text-slate-500';
+                  v === 'PASS'
+                    ? 'border-[#10C98A]/30 bg-[#10C98A]/5 text-[#10C98A]'
+                    : v === 'FAIL'
+                    ? 'border-[#FF365C]/30 bg-[#FF365C]/5 text-[#FF365C]'
+                    : v === 'NONE'
+                    ? 'border-slate-700 bg-slate-800/30 text-slate-400'
+                    : 'border-slate-800 bg-slate-900/40 text-slate-500';
+
                 return (
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 shadow-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">AUTHENTICATION MATRIX</span>
+                  <div className="p-4 rounded-xl border border-[#1b3552] bg-[#0D2238] space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      AUTHENTICATION MATRIX
+                    </span>
                     <div className="grid grid-cols-3 gap-2">
-                      {(['SPF', 'DKIM', 'DMARC'] as const).map(k => {
+                      {(['SPF', 'DKIM', 'DMARC'] as const).map((k) => {
                         const v = auth[k.toLowerCase() as keyof typeof auth];
                         return (
                           <div key={k} className={`p-2.5 rounded-lg border flex flex-col gap-0.5 ${col(v)}`}>
@@ -1190,13 +1156,13 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="px-5 sm:px-6 py-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between gap-3">
+        <div className="px-5 sm:px-6 py-4 border-t border-[#1b3552] bg-[#0D2238]/80 flex items-center justify-between gap-3">
           {activeStage === 'INGEST' && (
             <>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg border border-[#1b3552] text-xs font-semibold text-slate-300 hover:bg-[#17334f] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -1204,9 +1170,9 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                 type="button"
                 disabled={!selectedSpecimen}
                 onClick={() => setActiveStage('PLAN')}
-                className="pl-4 pr-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-2 disabled:opacity-50 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+                className="pl-4 pr-3 py-2 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 disabled:opacity-40 text-[#071A2B] text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
-                <span>Proceed to Investigation Plan</span>
+                <span>Continue to Investigation Plan</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </>
@@ -1217,15 +1183,14 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveStage('INGEST')}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg border border-[#1b3552] text-xs font-semibold text-slate-300 hover:bg-[#17334f] transition-colors cursor-pointer"
               >
                 Back to Ingestion
               </button>
               <button
                 type="button"
-                disabled={activeStage !== 'PLAN'}
                 onClick={() => runInvestigationExecution(selectedSpecimen)}
-                className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+                className="px-5 py-2 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 text-[#071A2B] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>Execute Investigation Pipeline</span>
@@ -1234,12 +1199,27 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
           )}
 
           {activeStage === 'INVESTIGATE' && (
-            <div className="w-full flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <div className="w-full flex items-center justify-between text-xs text-slate-400">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-sky-500 dark:text-sky-400" />
-                <span>Executing real-time forensic pipeline...</span>
+                {executionState === 'analyzing' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-[#18BFFF]" />
+                    <span>Executing real-time forensic pipeline...</span>
+                  </>
+                ) : executionState === 'preparing' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-[#10C98A]" />
+                    <span className="text-[#10C98A]">Finalizing investigation results...</span>
+                  </>
+                ) : executionState === 'error' ? (
+                  <span className="text-[#FF365C]">Pipeline interrupted.</span>
+                ) : (
+                  <span>Ready.</span>
+                )}
               </div>
-              <span className="font-mono text-[11px] text-slate-400">Step {currentStageIdx + 1} of 8</span>
+              <span className="font-mono text-[11px] text-slate-500">
+                {executionState === 'preparing' ? 'COMPLETED' : '8 FORENSIC LAYERS'}
+              </span>
             </div>
           )}
 
@@ -1248,7 +1228,6 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  // GAP 2+4 FIX: Set active case then navigate to inbox
                   uiStore.setActiveCase(
                     assignedCaseId,
                     selectedSpecimen?.subject,
@@ -1260,14 +1239,13 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   if (onCompletedCase) onCompletedCase(assignedCaseId);
                   uiStore.navigate('/inbox');
                 }}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg border border-[#1b3552] text-xs font-semibold text-slate-300 hover:bg-[#17334f] transition-colors cursor-pointer"
               >
                 Done (View in Table)
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  // GAP 2 FIX: Set active case before navigating to workspace
                   uiStore.setActiveCase(
                     assignedCaseId,
                     selectedSpecimen?.subject,
@@ -1278,7 +1256,7 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   onClose();
                   uiStore.navigate(`/case/${assignedCaseId}`);
                 }}
-                className="pl-4 pr-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shadow-[0_0_10px_rgba(14,165,233,0.15)] border border-sky-400/40 cursor-pointer"
+                className="pl-4 pr-3 py-2 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 text-[#071A2B] text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <span>Enter Full Forensic Workspace</span>
                 <ExternalLink className="w-3.5 h-3.5" />

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AshielderLogo } from '../../../components/ui/AshielderLogo.tsx';
 import { Button } from '../../../components/ui/Button.tsx';
 import { uiStore, useUI } from '../../../stores/ui-store.ts';
-import { useAuth } from '../../../stores/auth-store.ts';
-import { Menu, X } from 'lucide-react';
+import { useAuth, authStore } from '../../../stores/auth-store.ts';
+import { Menu, X, Search } from 'lucide-react';
 
 const NAV_LINKS = [
   { label: 'Product', href: '#product' },
@@ -32,7 +32,10 @@ export const LandingNav: React.FC = () => {
 
   const handleAnalyze = () => {
     setMobileOpen(false);
-    uiStore.navigate(auth.isAuthenticated ? '/overview' : '/login');
+    if (!auth.isAuthenticated) {
+      authStore.login('investigator@ashielder.io', 'demo');
+    }
+    uiStore.openWorkflowModal('eml');
   };
 
   const scrollToSection = (href: string) => {
@@ -83,20 +86,16 @@ export const LandingNav: React.FC = () => {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-2.5">
-          {auth.isAuthenticated ? (
-            <Button variant="primary" size="md" onClick={handleSignIn} className="font-semibold text-xs">
-              Go to Dashboard
-            </Button>
-          ) : (
-            <>
-              <Button variant="ghost" size="md" onClick={handleSignIn} className="text-xs">
-                Sign In
-              </Button>
-              <Button variant="primary" size="md" onClick={handleAnalyze} className="font-semibold text-xs">
-                Analyze an Email
-              </Button>
-            </>
-          )}
+          <Button
+            variant="primary"
+            size="md"
+            onClick={handleAnalyze}
+            className="font-semibold text-xs bg-sky-600 hover:bg-sky-500 text-white shadow-xs cursor-pointer flex items-center gap-1.5"
+            leftIcon={<Search className="w-3.5 h-3.5 text-sky-200" aria-hidden="true" />}
+            aria-label="Analyze Email — Launch Forensic Investigation"
+          >
+            Analyze Email
+          </Button>
         </div>
 
         {/* Mobile Toggle */}
@@ -128,20 +127,23 @@ export const LandingNav: React.FC = () => {
             ))}
           </ul>
           <div className="px-4 py-3 border-t border-slate-800 flex flex-col gap-2">
-            {auth.isAuthenticated ? (
-              <Button variant="primary" size="md" onClick={handleSignIn} className="w-full justify-center font-semibold">
-                Go to Dashboard
-              </Button>
-            ) : (
-              <>
-                <Button variant="secondary" size="md" onClick={handleSignIn} className="w-full justify-center">
-                  Sign In
-                </Button>
-                <Button variant="primary" size="md" onClick={handleAnalyze} className="w-full justify-center font-semibold">
-                  Analyze an Email
-                </Button>
-              </>
-            )}
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleAnalyze}
+              className="w-full justify-center font-semibold text-xs bg-sky-600 hover:bg-sky-500 text-white"
+              leftIcon={<Search className="w-3.5 h-3.5 text-sky-200" aria-hidden="true" />}
+            >
+              Analyze Email
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={handleSignIn}
+              className="w-full justify-center text-xs text-slate-300"
+            >
+              {auth.isAuthenticated ? 'Dashboard' : 'Sign In'}
+            </Button>
           </div>
         </div>
       )}

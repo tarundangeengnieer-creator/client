@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { useUI, uiStore } from '../../stores/ui-store.ts';
+import { ForensicWorkflowModal } from '../investigation/ForensicWorkflowModal.tsx';
 import { LandingNav } from './components/LandingNav.tsx';
 import { HeroSection } from './components/HeroSection.tsx';
 import { ProblemSection } from './components/ProblemSection.tsx';
@@ -20,6 +22,7 @@ import { FinalCTA } from './components/FinalCTA.tsx';
  * Does NOT wrap in AppShell — standalone dark-mode page.
  */
 export const LandingPage: React.FC = () => {
+  const ui = useUI();
   const mainRef = useRef<HTMLDivElement>(null);
 
   // Ensure the document is in dark mode for the landing page
@@ -88,6 +91,16 @@ export const LandingPage: React.FC = () => {
         <TargetUsers />
         <FinalCTA />
       </main>
+
+      {/* Interactive Forensic Pipeline Modal */}
+      <ForensicWorkflowModal
+        isOpen={ui.isWorkflowModalOpen}
+        initialSource={ui.workflowModalSource}
+        onClose={() => uiStore.closeWorkflowModal()}
+        onCompletedCase={(caseId) => {
+          uiStore.navigate(`/case/${caseId}`);
+        }}
+      />
     </div>
   );
 };

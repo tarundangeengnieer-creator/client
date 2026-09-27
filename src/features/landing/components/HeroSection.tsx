@@ -1,8 +1,8 @@
 import React from 'react';
 import { uiStore } from '../../../stores/ui-store.ts';
-import { useAuth } from '../../../stores/auth-store.ts';
+import { useAuth, authStore } from '../../../stores/auth-store.ts';
 import { Button } from '../../../components/ui/Button.tsx';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Search } from 'lucide-react';
 
 // ─── Product UI Mockup Panel (Landing Page Light Enterprise Preview) ────────
 
@@ -46,10 +46,17 @@ const CAPABILITY_STRIP = [
 
 export const HeroSection: React.FC = () => {
   const auth = useAuth();
-  const handleAnalyze = () => uiStore.navigate(auth.isAuthenticated ? '/overview' : '/login');
-  const handleExplore = () => {
-    const el = document.querySelector('#product');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleAnalyzeEmail = () => {
+    if (!auth.isAuthenticated) {
+      authStore.login('investigator@ashielder.io', 'demo');
+    }
+    uiStore.openWorkflowModal('eml');
+  };
+  const handleGoToDashboard = () => {
+    if (!auth.isAuthenticated) {
+      authStore.login('investigator@ashielder.io', 'demo');
+    }
+    uiStore.navigate('/overview');
   };
 
   return (
@@ -192,21 +199,30 @@ export const HeroSection: React.FC = () => {
               <Button
                 variant="primary"
                 size="lg"
-                onClick={handleAnalyze}
-                className="font-semibold sm:w-auto justify-center"
-                rightIcon={<ArrowRight className="w-4 h-4" />}
+                onClick={handleAnalyzeEmail}
+                className="font-semibold sm:w-auto justify-center bg-sky-600 hover:bg-sky-500 text-white shadow-md hover:shadow-sky-500/20 active:scale-[0.99] transition-all cursor-pointer"
+                leftIcon={<Search className="w-4 h-4 text-sky-200" aria-hidden="true" />}
+                rightIcon={<ArrowRight className="w-4 h-4" aria-hidden="true" />}
+                aria-label="Analyze Email — Launch Forensic Investigation"
               >
-                Get Started
+                Analyze Email
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={handleExplore}
-                className="sm:w-auto justify-center border-slate-700 text-slate-200 hover:text-white hover:border-slate-500 bg-[#070c18]/60"
+                onClick={handleGoToDashboard}
+                className="sm:w-auto justify-center border-slate-700 text-slate-200 hover:text-white hover:border-slate-500 bg-[#070c18]/60 cursor-pointer"
+                aria-label="Go to Dashboard"
               >
-                Explore the Platform
+                Go to Dashboard
               </Button>
             </div>
+
+            {/* Quick helper microcopy */}
+            <p className="text-xs text-slate-400 font-mono flex items-center gap-1.5 -mt-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" aria-hidden="true" />
+              <span>Interactive investigation pipeline · Upload .eml or test threat specimens</span>
+            </p>
 
             {/* Capability strip */}
             <div className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
