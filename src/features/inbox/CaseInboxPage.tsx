@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useCases, casesStore, RiskFilter, ConfidenceFilter, SortField } from '../../stores/cases-store.ts';
 import { useUI, uiStore } from '../../stores/ui-store.ts';
+import { useAuth } from '../../stores/auth-store.ts';
 import { CaseViewModel, TableDensityMode } from '../../domain/case.ts';
-import { Verdict } from '../../contracts/backend.ts';
+import { Verdict, InvestigationStatus, Recommendation } from '../../contracts/backend.ts';
 import { useCapabilities } from '../auth/capabilities.ts';
 import { CaseTableRow } from './CaseTableRow.tsx';
 import { QuickPeekDrawer } from './QuickPeekDrawer.tsx';
@@ -31,6 +32,7 @@ import {
 
 export const CaseInboxPage: React.FC = () => {
   const ui = useUI();
+  const auth = useAuth();
   const casesState = useCases();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,6 +43,45 @@ export const CaseInboxPage: React.FC = () => {
   const isAllSelected =
     filteredCases.length > 0 &&
     filteredCases.every((c) => casesState.selectedCaseIds.has(c.id));
+
+  // Load real cases from backend when the inbox mounts
+  useEffect(() => {
+    const tenantId = auth.currentTenant?.id;
+    if (!tenantId) return;
+
+    // Use the investigator repository to fetch live cases and sync to casesStore
+    import('../../api/investigator-repository.ts').then(({ investigatorRepo }) => {
+      investigatorRepo.getCases(tenantId).then((investigatorCases) => {
+        if (!investigatorCases || investigatorCases.length === 0) return;
+        // Convert InvestigatorCase → CaseViewModel and add to casesStore
+        investigatorCases.forEach((ic) => {
+          const caseVm: CaseViewModel = {
+            id: ic.case_id,
+            status: (ic.status as InvestigationStatus) ?? InvestigationStatus.COMPLETED,
+            verdict: (ic.verdict as Verdict) ?? Verdict.INCONCLUSIVE,
+            riskScore: ic.risk_score ?? 0,
+            confidence: (ic.evidence_confidence ?? 50) / 100,
+            recommendation: Recommendation.ESCALATE_TO_ANALYST,
+            subject: ic.subject ?? 'Unknown Subject',
+            sender: ic.sender ?? 'unknown@unknown',
+            recipient: ic.recipient ?? 'unknown@unknown',
+            timestamp: ic.opened_at ?? new Date().toISOString(),
+            toolsUsed: [],
+            toolsFailed: [],
+            iterationCount: 0,
+            stopReason: 'CONFIDENCE_TARGET_REACHED',
+            resourceEnvelope: { wallClockMs: 0, toolCalls: 0, externalCalls: 0, tokensUsed: 0 },
+            evidenceCount: 0,
+            attackHypotheses: [],
+            primaryIoc: ic.primary_ioc,
+          };
+          casesStore.addCase(caseVm);
+        });
+      }).catch((err) => {
+        console.warn('[CaseInboxPage] Backend case loading failed, showing local cache:', err);
+      });
+    });
+  }, [auth.currentTenant?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Open workspace for a case
   const handleOpenWorkspace = useCallback((caseItem: CaseViewModel) => {

@@ -1261,7 +1261,10 @@ class HybridInvestigatorRepository implements InvestigatorRepository {
   private mock = new MockInvestigatorRepository();
 
   private isDemoCase(caseId: string): boolean {
-    return caseId.startsWith('ASH-2026-') || caseId.startsWith('CASE-2026-');
+    // In live mode (API URL configured), ALL cases go to REST. No demo routing.
+    if (_isLiveMode) return false;
+    // In offline mode (no API URL), demo cases come from mock.
+    return caseId.startsWith('CASE-2026-') || caseId.startsWith('A22');
   }
 
   async getCases(tenantId: string) {

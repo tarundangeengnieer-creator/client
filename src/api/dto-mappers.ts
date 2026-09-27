@@ -1,6 +1,7 @@
 /**
  * dto-mappers.ts
  * Maps backend API response DTOs → frontend domain types.
+ * Updated to match actual backend response shapes.
  */
 
 import type {
@@ -77,7 +78,12 @@ interface BackendGraphNode {
   label?: string;
   value?: string;
   risk_score?: number | null;
+  confidence?: number | null;
   depth?: number;
+  reputation?: string;
+  first_seen?: string | null;
+  last_seen?: string | null;
+  has_more_relations?: boolean;
   [key: string]: unknown;
 }
 
@@ -87,6 +93,9 @@ interface BackendGraphEdge {
   target?: string;
   label?: string;
   type?: string;
+  relationship_type?: string;
+  confidence?: number;
+  provenance?: string;
 }
 
 interface BackendRelatedCase {
@@ -110,8 +119,10 @@ interface BackendEmailEntity {
   body_preview?: string | null;
   has_html?: boolean;
   attachments?: unknown[];
+  // auth_results from backend: { spf: "pass"|"fail"|"none"|"neutral"|"softfail"| ..., dkim: ..., dmarc: ... }
   auth_results?: Record<string, unknown>;
   routing_hops?: unknown[];
+  // Legacy boolean fields (may be present in some backend versions)
   spf_pass?: boolean | null;
   dkim_pass?: boolean | null;
   dmarc_pass?: boolean | null;
@@ -123,16 +134,24 @@ interface BackendGeoHop {
   ip?: string;
   country?: string;
   country_code?: string;
+  region?: string;
   city?: string;
   lat?: number;
   lng?: number;
   longitude?: number;
   latitude?: number;
   asn?: string | number;
+  provider?: string;
   org?: string;
   hostname?: string | null;
   is_earliest_reliable?: boolean;
   hop_index?: number;
+  hop_position?: number;  // backend uses hop_position
+  is_tor?: boolean;
+  is_vpn?: boolean;
+  threat_reputation?: string;
+  anomaly_context?: string;
+  timestamp?: string | null;
   [key: string]: unknown;
 }
 
@@ -160,7 +179,7 @@ export function mapCase(raw: unknown): InvestigatorCase {
     status: (b.status as InvestigatorCase['status']) ?? 'Open',
     opened_at: b.created_at ?? new Date().toISOString(),
     opened_by: b.user_id ?? 'System',
-    evidence_confidence: b.confidence ?? 50,
+    evidence_confidence: b.confidence != null ? Math.round(b.confidence * 100) : 50,
     related_case_ids: [],
     subject: b.subject ?? 'Unknown Subject',
     sender: b.sender ?? 'unknown@unknown',
@@ -182,25 +201,32 @@ function _extractPrimaryIoc(b: BackendCase): string | undefined {
 }
 
 export function mapCaseList(raw: unknown): InvestigatorCase[] {
+  // Backend returns { cases: [...], total, limit, offset }
   const list = raw as { cases?: unknown[] };
-  return (list.cases ?? []).map(mapCase);
+  const cases = list.cases ?? (Array.isArray(raw) ? raw : []);
+  return cases.map(mapCase);
 }
 
 export function mapEvidence(raw: unknown): InvestigatorEvidence {
   const b = raw as BackendEvidence;
+  // Get the raw_json nested value if present (backend stores evidence as raw_json)
+  const rawJson = (b.raw_json as Record<string, unknown>) ?? {};
+  const key = b.key ?? (rawJson.key as string) ?? 'Evidence';
+  const value = b.value ?? rawJson.value;
+  const source = b.source ?? (rawJson.source as string) ?? 'System';
   return {
     evidence_id: b.evidence_id ?? `ev_${Date.now()}`,
     case_id: b.case_id ?? '',
     tenant_id: 'unknown_tenant',
     type: (b.type as InvestigatorEvidence['type']) ?? 'RAW EVIDENCE',
     category: (b.category as InvestigatorEvidence['category']) ?? 'CONTENT',
-    title: b.key ?? 'Evidence',
-    description: typeof b.value === 'string' ? b.value : JSON.stringify(b.value ?? {}),
+    title: key,
+    description: typeof value === 'string' ? value : JSON.stringify(value ?? {}),
     hash: b.evidence_id ?? 'unknown_hash',
     collected_at: b.timestamp ?? new Date().toISOString(),
-    collected_by: b.source ?? 'System',
+    collected_by: source,
     verification_state: (b.verification_state as InvestigatorEvidence['verification_state']) ?? 'UNVERIFIED',
-    source_ref: b.source ?? 'System',
+    source_ref: source,
     annotations: (b.annotations ?? []).map((a, i) => ({
       id: `ann_${i}`,
       author: a.author,
@@ -217,15 +243,40 @@ export function mapEvidenceList(raw: unknown): InvestigatorEvidence[] {
   return raw.map(mapEvidence);
 }
 
+/** Map backend event_type string to one of the domain's strict union values. */
+function _mapEventType(raw?: string): TimelineEvent['event_type'] {
+  if (!raw) return 'Analyst action';
+  const upper = raw.toUpperCase();
+  if (upper.includes('EMAIL') || upper.includes('RECEIVED')) return 'Email received';
+  if (upper.includes('HOP') || upper.includes('RELAY') || upper.includes('AUDIT')) return 'Received-chain hop';
+  if (upper.includes('URL') || upper.includes('CLICK')) return 'URL click';
+  if (upper.includes('ATTACHMENT')) return 'Attachment activity';
+  if (upper.includes('EXEC') || upper.includes('EXECUTION')) return 'Execution indicator';
+  if (upper.includes('THREAT') || upper.includes('INTEL') || upper.includes('ENRICHMENT')) return 'Threat-intelligence enrichment';
+  if (upper.includes('ML') || upper.includes('SIGNAL') || upper.includes('HEURISTIC')) return 'Threat-intelligence enrichment';
+  return 'Analyst action';
+}
+
+/** Map backend severity/relevance string to domain relevance values. */
+function _mapRelevance(sev?: string): TimelineEvent['relevance'] {
+  if (!sev) return 'INFO';
+  const up = sev.toUpperCase();
+  if (up === 'CRITICAL') return 'CRITICAL';
+  if (up === 'HIGH') return 'HIGH';
+  if (up === 'MEDIUM' || up === 'MED') return 'MEDIUM';
+  if (up === 'LOW') return 'LOW';
+  return 'INFO';
+}
+
 export function mapTimelineEvent(raw: unknown): TimelineEvent {
   const b = raw as BackendTimelineEvent;
   return {
     event_id: b.event_id ?? `evt_${Date.now()}`,
     case_id: '',
-    event_type: (b.event_type as TimelineEvent['event_type']) ?? 'Analyst action',
+    event_type: _mapEventType(b.event_type),
     timestamp: b.timestamp ?? new Date().toISOString(),
     summary: b.summary ?? 'No summary',
-    relevance: (b.severity as TimelineEvent['relevance']) ?? 'INFO',
+    relevance: _mapRelevance(b.severity),
     source_ref: b.source ?? 'System',
     evidence_hash: b.evidence_hash ?? '',
     mitre_technique: b.mitre_technique ?? undefined,
@@ -235,6 +286,8 @@ export function mapTimelineEvent(raw: unknown): TimelineEvent {
 }
 
 export function mapTimeline(raw: unknown): TimelineEvent[] {
+  // Backend returns { events: [...], total } or flat array
+  if (Array.isArray(raw)) return raw.map(mapTimelineEvent);
   const r = raw as { events?: unknown[] };
   return (r.events ?? []).map(mapTimelineEvent);
 }
@@ -246,8 +299,12 @@ export function mapGraphNode(raw: unknown): GraphNode {
     type: (b.type as GraphNode['type']) ?? 'Email',
     label: b.label ?? 'Unknown Node',
     value: b.value ?? '',
-    confidence: b.risk_score ?? undefined,
+    confidence: b.confidence ?? b.risk_score ?? undefined,
     depth: b.depth ?? 0,
+    reputation: (b.reputation as GraphNode['reputation']) ?? 'unknown',
+    first_seen: b.first_seen ?? undefined,
+    last_seen: b.last_seen ?? undefined,
+    has_more_relations: b.has_more_relations ?? false,
   };
 }
 
@@ -257,8 +314,10 @@ export function mapGraphEdge(raw: unknown): GraphEdge {
     id: b.id ?? `edge_${Date.now()}`,
     source: b.source ?? '',
     target: b.target ?? '',
-    relationship_type: b.type ?? 'RELATION',
+    relationship_type: b.relationship_type ?? b.type ?? 'RELATION',
     label: b.label ?? '',
+    confidence: b.confidence,
+    provenance: (b.provenance as GraphEdge['provenance']) ?? undefined,
   };
 }
 
@@ -289,45 +348,100 @@ export function mapRelatedCases(raw: unknown): RelatedCaseMatch[] {
   return (r.related_cases ?? []).map(mapRelatedCase);
 }
 
+/**
+ * Normalize SPF/DKIM/DMARC from backend auth_results object.
+ * Backend sends: auth_results: { spf: "pass"|"fail"|"none"|"neutral"|"softfail"| ..., dkim: ..., dmarc: ... }
+ * OR legacy boolean fields: spf_pass: true|false|null
+ */
+function _normalizeAuthResult(
+  authResults: Record<string, unknown> | undefined,
+  protocol: string,
+  legacyBool?: boolean | null
+): 'PASS' | 'FAIL' | 'SOFTFAIL' | 'NONE' {
+  // Try string value from auth_results first
+  if (authResults && protocol in authResults) {
+    const val = String(authResults[protocol]).toLowerCase();
+    if (val === 'pass') return 'PASS';
+    if (val === 'fail' || val === 'permerror' || val === 'reject') return 'FAIL';
+    if (val === 'softfail' || val === 'temperror' || val === 'neutral') return 'SOFTFAIL';
+    return 'NONE';
+  }
+  // Fall back to legacy boolean
+  if (legacyBool === true) return 'PASS';
+  if (legacyBool === false) return 'FAIL';
+  return 'NONE';
+}
+
 export function mapEmailEntity(raw: unknown, caseId: string): EmailEntity {
   const b = raw as BackendEmailEntity;
+  const authResults = b.auth_results as Record<string, unknown> | undefined;
   return {
     email_id: b.email_id ?? caseId,
     tenant_id: 'unknown_tenant',
     sender: b.sender ?? 'unknown@unknown',
     recipients: b.recipients ?? [],
     subject: b.subject ?? '(No subject)',
-    received_chain: [],
+    received_chain: _mapRoutingHops(b.routing_hops),
     attachment_ids: [],
     url_ids: [],
     risk_score: 0,
     confidence_score: 50,
-    spf: b.spf_pass === true ? 'PASS' : b.spf_pass === false ? 'FAIL' : 'NONE',
-    dkim: b.dkim_pass === true ? 'PASS' : b.dkim_pass === false ? 'FAIL' : 'NONE',
-    dmarc: b.dmarc_pass === true ? 'PASS' : b.dmarc_pass === false ? 'FAIL' : 'NONE',
+    spf: _normalizeAuthResult(authResults, 'spf', b.spf_pass),
+    dkim: _normalizeAuthResult(authResults, 'dkim', b.dkim_pass) as EmailEntity['dkim'],
+    dmarc: _normalizeAuthResult(authResults, 'dmarc', b.dmarc_pass) as EmailEntity['dmarc'],
     message_id: b.message_id ?? undefined,
+    body_text_sample: b.body_preview ?? undefined,
+    raw_headers_snippet: undefined,
   };
+}
+
+function _mapRoutingHops(hops?: unknown[]): import('../domain/investigator.ts').ReceivedHop[] {
+  if (!hops || !Array.isArray(hops)) return [];
+  return hops.map((hop, i) => {
+    const h = hop as Record<string, unknown>;
+    const authState = h.auth_state ?? h.spf ?? 'NONE';
+    return {
+      hop_number: (h.hop_number as number) ?? (h.position as number) ?? i + 1,
+      from_host: (h.from_host as string) ?? (h.sending_hostname as string) ?? '',
+      by_host: (h.by_host as string) ?? (h.receiving_hostname as string) ?? '',
+      ip: (h.ip as string) ?? (h.sending_ip as string) ?? '',
+      timestamp: (h.timestamp as string) ?? new Date().toISOString(),
+      auth_state: (['PASS', 'FAIL', 'NEUTRAL', 'NONE'].includes(String(authState).toUpperCase())
+        ? String(authState).toUpperCase()
+        : 'NONE') as import('../domain/investigator.ts').ReceivedHop['auth_state'],
+      delay_seconds: h.delay_seconds as number | undefined,
+    };
+  });
 }
 
 export function mapGeoHop(raw: unknown, index: number): GeographicActivityHop {
   const b = raw as BackendGeoHop;
+  // backend uses hop_position (1-indexed); hop_index as fallback
+  const hopNum = b.hop_position ?? b.hop_index ?? (index + 1);
+  const isp = b.provider ?? b.org ?? (b.asn !== undefined ? String(b.asn) : undefined);
   return {
     ip: b.ip ?? '0.0.0.0',
     country: b.country ?? 'Unknown',
     country_code: b.country_code ?? 'XX',
     city: b.city ?? undefined,
     asn: b.asn !== undefined ? String(b.asn) : '0',
-    hop_number: b.hop_index ?? index,
-    timestamp: new Date().toISOString(),
-    anomaly_context: '',
+    hop_number: hopNum,
+    timestamp: b.timestamp ?? new Date().toISOString(),
+    anomaly_context: b.anomaly_context ?? '',
     lat: b.lat ?? b.latitude ?? undefined,
     lng: b.lng ?? b.longitude ?? undefined,
     hostname: b.hostname ?? undefined,
+    isp: isp,
+    is_tor: b.is_tor ?? false,
+    is_vpn: b.is_vpn ?? false,
+    threat_reputation: (b.threat_reputation as GeographicActivityHop['threat_reputation']) ?? undefined,
     is_earliest_reliable: b.is_earliest_reliable ?? index === 0,
   };
 }
 
 export function mapGeoHops(raw: unknown): GeographicActivityHop[] {
+  // Backend returns { hops: [...] } wrapper
+  if (Array.isArray(raw)) return raw.map((h, i) => mapGeoHop(h, i));
   const r = raw as { hops?: unknown[] };
   return (r.hops ?? []).map((h, i) => mapGeoHop(h, i));
 }

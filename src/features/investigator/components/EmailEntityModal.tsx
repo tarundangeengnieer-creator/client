@@ -130,7 +130,7 @@ export const EmailEntityModal: React.FC = () => {
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
             }`}
           >
-            Received Relay Chain ({emailEntity.received_chain.length} Hops)
+            Received Relay Chain ({(emailEntity.received_chain ?? []).length} Hops)
           </button>
           <button
             type="button"
@@ -174,29 +174,33 @@ export const EmailEntityModal: React.FC = () => {
                 Hop-by-hop MTA envelope reconstruction from origin to target quarantine spool:
               </div>
               <div className="divide-y divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
-                {emailEntity.received_chain.map((hop) => (
-                  <div key={hop.hop_number} className="p-3 bg-slate-50/50 dark:bg-[#090e1c] flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0 font-mono">
-                      {hop.hop_number}
-                    </div>
-                    <div className="flex-1 min-w-0 font-mono text-[11px] space-y-1">
-                      <div className="flex items-center justify-between flex-wrap gap-1">
-                        <span className="font-bold text-slate-900 dark:text-slate-100">
-                          IP: {hop.ip}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          {new Date(hop.timestamp).toUTCString()}
-                        </span>
+                {(emailEntity.received_chain ?? []).length === 0 ? (
+                  <div className="p-4 text-center text-slate-500 text-xs">No relay chain data available for this investigation.</div>
+                ) : (
+                  (emailEntity.received_chain ?? []).map((hop) => (
+                    <div key={hop.hop_number} className="p-3 bg-slate-50/50 dark:bg-[#090e1c] flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0 font-mono">
+                        {hop.hop_number}
                       </div>
-                      <p className="text-slate-600 dark:text-slate-400">
-                        From: <span className="text-slate-800 dark:text-slate-200">{hop.from_host}</span>
-                      </p>
-                      <p className="text-slate-600 dark:text-slate-400">
-                        By: <span className="text-slate-800 dark:text-slate-200">{hop.by_host}</span>
-                      </p>
+                      <div className="flex-1 min-w-0 font-mono text-[11px] space-y-1">
+                        <div className="flex items-center justify-between flex-wrap gap-1">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            IP: {hop.ip}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(hop.timestamp).toUTCString()}
+                          </span>
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-400">
+                          From: <span className="text-slate-800 dark:text-slate-200">{hop.from_host}</span>
+                        </p>
+                        <p className="text-slate-600 dark:text-slate-400">
+                          By: <span className="text-slate-800 dark:text-slate-200">{hop.by_host}</span>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}

@@ -79,7 +79,7 @@ export interface InvestigatorState {
 };
 
 const initialState: InvestigatorState = {
-  currentCaseId: 'CASE-2026-8812',
+  currentCaseId: null,
   cases: [],
   currentCase: null,
   timelineEvents: [],

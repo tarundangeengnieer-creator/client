@@ -48,6 +48,7 @@ import { EmailEntityModal } from '../investigator/components/EmailEntityModal.ts
 import { LinkCaseModal } from '../investigator/components/LinkCaseModal.tsx';
 import { MergeCampaignModal } from '../investigator/components/MergeCampaignModal.tsx';
 import { EscalateModal } from '../investigator/components/EscalateModal.tsx';
+import { AIAnalysisPanel } from '../investigator/components/AIAnalysisPanel.tsx';
 
 export const CaseDetailPage: React.FC = () => {
   const ui = useUI();
@@ -128,18 +129,23 @@ export const CaseDetailPage: React.FC = () => {
   const [isReinvestigating, setIsReinvestigating] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
-  // AI Reasoning state — fetched from /reason endpoint
+  // AI Reasoning state — fetched from /reason endpoint on demand
   const [reasoningResult, setReasoningResult] = useState<import('../../contracts/backend.ts').ReasoningResult | null>(null);
   const [reasoningLoading, setReasoningLoading] = useState(false);
   const [reasoningError, setReasoningError] = useState<string | null>(null);
+  const [reasoningFetched, setReasoningFetched] = useState(false);
 
-  // Fetch AI reasoning narrative when we have a real investigation
-  useEffect(() => {
-    // Only fetch when we have an investigation object (works for real + demo cases)
-    if (!caseId || !investigation) return;
+  // currentCase from investigatorStore — populated for real backend cases
+  const { currentCase: liveCase } = useInvestigator();
 
+  // Whether we have enough context to fetch reasoning (real or demo investigation)
+  const hasInvestigationContext = Boolean(investigation || liveCase);
+
+  const fetchReasoning = () => {
+    if (!caseId || reasoningLoading || reasoningFetched) return;
     setReasoningLoading(true);
     setReasoningError(null);
+    setReasoningFetched(true);
 
     import('../../api/client.ts').then(({ apiClient }) => {
       import('../../api/endpoints.ts').then(({ ENDPOINTS }) => {
@@ -148,7 +154,6 @@ export const CaseDetailPage: React.FC = () => {
             ENDPOINTS.INVESTIGATION_REASON(caseId)
           )
           .then(raw => {
-            // Backend returns { reasoning_status, reasoning_result } or { reasoning_status, reason }
             if (raw.reasoning_status === 'available' && raw.reasoning_result) {
               const r = raw.reasoning_result;
               setReasoningResult({
@@ -159,20 +164,25 @@ export const CaseDetailPage: React.FC = () => {
                 recommended_next_actions: r.recommended_next_actions ?? [],
               } as import('../../contracts/backend.ts').ReasoningResult);
             } else {
-              // Reasoning unavailable — show graceful fallback
               const reason = raw.reason ?? 'AI reasoning is currently unavailable.';
               setReasoningError(reason);
             }
           })
           .catch(err => {
-            // Non-fatal — the AI tab will show a graceful message
             setReasoningError(err?.message || 'AI reasoning unavailable');
             console.warn('Reasoning fetch failed:', err);
           })
           .finally(() => setReasoningLoading(false));
       });
     });
-  }, [caseId, investigation]);
+  };
+
+  // Auto-fetch reasoning when user navigates to AI Analysis tab and context is ready
+  useEffect(() => {
+    if (activeTab === 'ai-analysis' && hasInvestigationContext && !reasoningFetched) {
+      fetchReasoning();
+    }
+  }, [activeTab, hasInvestigationContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Seed investigatorStore graph from investigation data when graph is empty (mock mode / backend unavailable)
   const { graphNodes } = useInvestigator();
