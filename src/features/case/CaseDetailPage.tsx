@@ -1484,15 +1484,39 @@ Authentication-Results: mx.company.com;
             </div>
           )}
 
-          {/* Demo case fallback — show when no reasoning is available and not loading */}
-          {!reasoningResult && !reasoningLoading && !reasoningError && (
+          {/* Fallback: context ready but not yet fetched — show "Run AI Analysis" button */}
+          {!reasoningResult && !reasoningLoading && !reasoningError && hasInvestigationContext && !reasoningFetched && (
+            <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-800 dark:text-white">AI Forensic Reasoning Engine</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                    Groq LLM will analyze the persisted evidence for Case <span className="font-mono text-sky-500">#{caseId}</span> and generate a structured forensic narrative — attack hypotheses, confidence assessment, escalation recommendation, and next actions.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={fetchReasoning}
+                    disabled={reasoningLoading}
+                    className="mt-4 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Run AI Analysis
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* No-context fallback — demo case with no backend data */}
+          {!reasoningResult && !reasoningLoading && !reasoningError && !hasInvestigationContext && (
             <div className="bg-white dark:bg-[#0c1322] rounded-xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
               <div className="flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-sky-400 shrink-0" />
                 <div>
                   <p className="text-sm font-bold text-slate-800 dark:text-white">AI Analysis Available for Live Investigations</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                    Upload a real <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">.eml</code> file or paste raw email headers to trigger a live backend investigation. The AI reasoning engine will then generate a detailed forensic narrative, attack hypotheses, and recommended next actions powered by Groq LLM.
+                    Upload a real <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">.eml</code> file to trigger a live backend investigation. The AI reasoning engine will then generate a detailed forensic narrative, attack hypotheses, and recommended next actions powered by Groq LLM.
                   </p>
                   <button
                     type="button"
@@ -1506,8 +1530,12 @@ Authentication-Results: mx.company.com;
               </div>
             </div>
           )}
+
+          {/* Interactive AI Q&A Panel — always shown below reasoning result */}
+          <AIAnalysisPanel />
         </div>
       )}
+
 
       {/* TIMELINE TAB */}
       {activeTab === 'timeline' && (
