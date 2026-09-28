@@ -55,21 +55,23 @@ export default function App() {
   useEffect(() => {
     authStore.checkHealth();
 
-    const pathname = window.location.pathname;
-    const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
-    if (pathname && pathname !== '/') {
+    let pathname = window.location.pathname;
+    if (!pathname || pathname === '/index.html') {
+      pathname = '/';
+    }
+
+    if (pathname !== '/') {
       uiStore.navigate(pathname);
-    } else if (isDemoMode && auth.isAuthenticated) {
-      // DEMO MODE: Skip landing page — go directly to the app
-      uiStore.navigate('/overview');
     } else {
-      // '/' is the public landing page — always show it on initial load.
+      // '/' is the public landing page — always show it when opening root.
       // Authenticated users can navigate to the app via the landing page CTAs.
       uiStore.navigate('/');
     }
 
     const handlePopState = () => {
-      uiStore.navigate(window.location.pathname || (auth.isAuthenticated ? '/overview' : '/'));
+      let p = window.location.pathname;
+      if (!p || p === '/index.html') p = '/';
+      uiStore.navigate(p);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -128,7 +130,7 @@ export default function App() {
       return <InvestigatorWorkspace />;
     }
 
-    if (ui.currentPath === '/' || ui.currentPath === '/overview') {
+    if (ui.currentPath === '/overview') {
       if (!checkAccess('/overview')) return <ForbiddenPage />;
       return <SecurityOverviewPage />;
     }

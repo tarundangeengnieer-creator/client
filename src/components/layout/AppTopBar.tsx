@@ -26,6 +26,7 @@ import {
   X,
   Radio,
   Sparkles,
+  Globe,
 } from 'lucide-react';
 
 interface NotificationItem {
@@ -158,7 +159,7 @@ export const AppTopBar: React.FC = () => {
 
   const isCaseDetail = ui.currentPath.startsWith('/case');
   const isInbox = ui.currentPath === '/inbox' || ui.currentPath === '/cases';
-  const isOverview = ui.currentPath === '/' || ui.currentPath === '/overview';
+  const isOverview = ui.currentPath === '/overview';
   const isInvestigation = ui.currentPath.startsWith('/investigation') || ui.currentPath === '/ingest';
 
   const activeCaseId = ui.activeCaseId || 'A2291';
@@ -209,7 +210,7 @@ export const AppTopBar: React.FC = () => {
     setShowUserMenu(false);
     authStore.logout();
     uiStore.addToast('info', 'Signed out of ASHIELDER SOC Workstation');
-    uiStore.navigate('/login');
+    uiStore.navigate('/');
   };
 
   return (
@@ -655,6 +656,18 @@ export const AppTopBar: React.FC = () => {
                 >
                   <Shield className="w-3.5 h-3.5 text-slate-400" />
                   <span>SOC Security Overview</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    uiStore.navigate('/');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-colors cursor-pointer text-left font-medium"
+                >
+                  <Globe className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Landing Page (Home)</span>
                 </button>
 
                 <button

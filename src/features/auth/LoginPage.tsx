@@ -119,7 +119,11 @@ export const LoginPage: React.FC = () => {
       <div className="w-full max-w-[390px] sm:max-w-[420px] bg-white dark:bg-[#0c1322] border border-slate-200/90 dark:border-slate-800/90 rounded-2xl shadow-xl p-6 sm:p-8 relative z-10 animate-fadeIn">
         {/* Top Header with Exact Dashboard AshielderLogo Component */}
         <div className="flex flex-col items-center justify-center text-center">
-          <div className="flex items-center justify-center mb-2">
+          <div
+            onClick={() => uiStore.navigate('/')}
+            className="flex items-center justify-center mb-2 cursor-pointer transition-opacity hover:opacity-90"
+            title="Return to ASHIELDER Landing Page"
+          >
             <AshielderLogo
               size="md"
               variant="full"

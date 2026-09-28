@@ -56,6 +56,14 @@ export const Sidebar: React.FC = () => {
       title: 'Operations',
       items: [
         {
+          id: 'landing',
+          path: '/',
+          label: 'Landing Page',
+          icon: <Globe className="w-4 h-4" />,
+          roles: [],
+          show: true,
+        },
+        {
           id: 'dashboard',
           path: '/overview',
           label: 'Security Overview',
@@ -175,8 +183,11 @@ export const Sidebar: React.FC = () => {
   }
 
   const isCurrentActive = (itemPath: string) => {
-    if (itemPath === '/overview' && (ui.currentPath === '/' || ui.currentPath === '/overview')) {
-      return true;
+    if (itemPath === '/') {
+      return ui.currentPath === '/';
+    }
+    if (itemPath === '/overview') {
+      return ui.currentPath === '/overview';
     }
     if (
       itemPath === '/inbox' &&
@@ -203,9 +214,9 @@ export const Sidebar: React.FC = () => {
       <div>
         <div className={`pt-5 pb-4 flex items-center ${ui.isSidebarCollapsed ? 'px-0 justify-center' : 'px-4.5 justify-between'}`}>
           <div
-            onClick={() => uiStore.navigate('/overview')}
+            onClick={() => uiStore.navigate('/')}
             className="cursor-pointer group min-w-0 transition-opacity hover:opacity-95"
-            title="ASHIELDER - Feasible & Viable"
+            title="ASHIELDER - Return to Landing Page"
           >
             <AshielderLogo
               size={ui.isSidebarCollapsed ? 'sm' : 'md'}

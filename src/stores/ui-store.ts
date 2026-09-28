@@ -72,8 +72,15 @@ function applyTheme(theme: 'light' | 'dark') {
 const initialTheme = getInitialTheme();
 applyTheme(initialTheme);
 
+function getInitialPath(): string {
+  if (typeof window === 'undefined') return '/';
+  const path = window.location.pathname;
+  if (!path || path === '/' || path === '/index.html') return '/';
+  return path;
+}
+
 const initialUIState: UIState = {
-  currentPath: typeof window !== 'undefined' ? (window.location.pathname || '/') : '/',
+  currentPath: getInitialPath(),
   activeCaseId: 'A2291',
   activeCaseVerdict: null,
   activeCaseRisk: null,
@@ -114,10 +121,11 @@ export const uiStore = {
   },
 
   navigate(path: string): void {
-    if (currentUIState.currentPath === path && !currentUIState.isMobileSidebarOpen) return;
+    const normalized = (!path || path === '/index.html') ? '/' : path;
+    if (currentUIState.currentPath === normalized && !currentUIState.isMobileSidebarOpen) return;
     currentUIState = {
       ...currentUIState,
-      currentPath: path,
+      currentPath: normalized,
       isMobileSidebarOpen: false,
     };
     notifyUI();
