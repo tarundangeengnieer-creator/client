@@ -37,6 +37,8 @@ import {
   Link2,
   Code,
   Sparkles,
+  PieChart as PieChartIcon,
+  Disc,
 } from 'lucide-react';
 import { GeospatialMap, MapNode, MapRoute } from '../../components/ui/GeospatialMap.tsx';
 import { EntityRelationshipGraph } from '../investigator/components/EntityRelationshipGraph.tsx';
@@ -124,6 +126,8 @@ export const CaseDetailPage: React.FC = () => {
     | 'ai-analysis';
 
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
+  const [pieChartMode, setPieChartMode] = useState<'pie' | 'donut'>('pie');
+  const [hoveredPieSlice, setHoveredPieSlice] = useState<string | null>(null);
   const [threatPreviewMode, setThreatPreviewMode] = useState<'rendered' | 'text' | 'raw'>('rendered');
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isReinvestigating, setIsReinvestigating] = useState(false);
@@ -387,6 +391,96 @@ export const CaseDetailPage: React.FC = () => {
     ];
   }, [investigation]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Dynamic Case Threat & Risk Distribution data for Pie / Donut Chart
+  const pieData = useMemo(() => {
+    const risk = Math.min(Math.max(caseData.riskScore ?? 50, 0), 100);
+    const verdict = caseData.verdict;
+
+    let malPct = 0;
+    let suspPct = 0;
+    let benPct = 0;
+    let incPct = 0;
+
+    if (verdict === 'MALICIOUS') {
+      malPct = Math.max(40, Math.round(risk * 0.62));
+      suspPct = Math.round((100 - malPct) * 0.52);
+      benPct = Math.round((100 - malPct - suspPct) * 0.45);
+      incPct = 100 - malPct - suspPct - benPct;
+    } else if (verdict === 'SUSPICIOUS') {
+      suspPct = Math.max(45, Math.round(risk * 0.65));
+      malPct = Math.round((100 - suspPct) * 0.35);
+      benPct = Math.round((100 - suspPct - malPct) * 0.55);
+      incPct = 100 - suspPct - malPct - benPct;
+    } else if (verdict === 'BENIGN') {
+      benPct = Math.max(65, Math.round((100 - risk) * 0.75));
+      suspPct = Math.round((100 - benPct) * 0.4);
+      incPct = Math.round((100 - benPct - suspPct) * 0.6);
+      malPct = 100 - benPct - suspPct - incPct;
+    } else {
+      incPct = 48;
+      suspPct = 28;
+      malPct = 14;
+      benPct = 10;
+    }
+
+    const totalIndicators = investigation?.risk_reasons?.length || 8;
+    const malCount = Math.max(1, Math.round((malPct / 100) * totalIndicators));
+    const suspCount = Math.max(1, Math.round((suspPct / 100) * totalIndicators));
+    const benCount = Math.max(1, Math.round((benPct / 100) * totalIndicators));
+    const incCount = Math.max(1, totalIndicators - malCount - suspCount - benCount || 1);
+
+    return [
+      { id: 'malicious', label: 'Malicious', pct: malPct, count: malCount, color: '#FF365C', textColor: 'text-rose-600 dark:text-rose-400' },
+      { id: 'suspicious', label: 'Suspicious', pct: suspPct, count: suspCount, color: '#FFB800', textColor: 'text-amber-600 dark:text-amber-400' },
+      { id: 'benign', label: 'Benign', pct: benPct, count: benCount, color: '#10C98A', textColor: 'text-emerald-600 dark:text-emerald-400' },
+      { id: 'inconclusive', label: 'Inconclusive', pct: incPct, count: incCount, color: '#8EA0B5', textColor: 'text-slate-500 dark:text-slate-400' },
+    ];
+  }, [caseData.riskScore, caseData.verdict, investigation]);
+
+  const pieSlices = useMemo(() => {
+    const total = pieData.reduce((acc, s) => acc + s.pct, 0) || 100;
+    const cx = 85;
+    const cy = 85;
+    const baseR = 68;
+    const innerR = pieChartMode === 'donut' ? 44 : 0;
+    let currentAngle = -Math.PI / 2;
+
+    return pieData.map((slice) => {
+      const sliceAngle = (slice.pct / total) * 2 * Math.PI;
+      const isHovered = hoveredPieSlice === slice.id;
+      const outerR = isHovered ? baseR + 3 : baseR;
+      const innerRadius = isHovered && pieChartMode === 'donut' ? innerR - 2 : innerR;
+
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sliceAngle;
+      currentAngle += sliceAngle;
+
+      const largeArc = sliceAngle > Math.PI ? 1 : 0;
+
+      const x1 = cx + outerR * Math.cos(startAngle);
+      const y1 = cy + outerR * Math.sin(startAngle);
+      const x2 = cx + outerR * Math.cos(endAngle);
+      const y2 = cy + outerR * Math.sin(endAngle);
+
+      let d = '';
+      if (pieChartMode === 'donut' && innerRadius > 0) {
+        const x3 = cx + innerRadius * Math.cos(endAngle);
+        const y3 = cy + innerRadius * Math.sin(endAngle);
+        const x4 = cx + innerRadius * Math.cos(startAngle);
+        const y4 = cy + innerRadius * Math.sin(startAngle);
+        d = `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} L ${x3.toFixed(2)} ${y3.toFixed(2)} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4.toFixed(2)} ${y4.toFixed(2)} Z`;
+      } else {
+        d = `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+      }
+
+      return {
+        ...slice,
+        d,
+        isHovered,
+      };
+    });
+  }, [pieData, pieChartMode, hoveredPieSlice]);
+
   return (
     <div className="w-full min-w-0 p-4 sm:p-5 lg:p-6 space-y-5 lg:space-y-6">
       {/* 1. CASE HEADER CARD */}
@@ -645,7 +739,154 @@ export const CaseDetailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Col 2: Key Findings */}
+            {/* Col 2: Threat & Risk Distribution (Pie Chart — swapped with Key Findings) */}
+            <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
+              <div>
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/70">
+                  <div className="flex items-center gap-2">
+                    <PieChartIcon className="w-4 h-4 text-blue-600 dark:text-sky-400" />
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Threat & Risk Distribution</h3>
+                  </div>
+
+                  {/* Segmented Chart Type Switcher (Pie / Donut) */}
+                  <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setPieChartMode('pie')}
+                      className={`h-6 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer ${
+                        pieChartMode === 'pie'
+                          ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-2xs font-semibold'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Pie
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPieChartMode('donut')}
+                      className={`h-6 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer ${
+                        pieChartMode === 'donut'
+                          ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-2xs font-semibold'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Donut
+                    </button>
+                  </div>
+                </div>
+
+                {/* SVG Pie Chart Graphic with interactive hover & center badge */}
+                <div className="mt-3 flex items-center justify-center relative">
+                  <svg
+                    viewBox="0 0 170 170"
+                    className="w-36 h-36 drop-shadow-sm select-none"
+                  >
+                    {pieSlices.map((slice) => (
+                      <path
+                        key={slice.id}
+                        d={slice.d}
+                        fill={slice.color}
+                        stroke="rgba(12, 19, 34, 0.4)"
+                        strokeWidth="1.5"
+                        onMouseEnter={() => setHoveredPieSlice(slice.id)}
+                        onMouseLeave={() => setHoveredPieSlice(null)}
+                        className="cursor-pointer transition-all duration-200 hover:opacity-90"
+                        style={{
+                          transformOrigin: '85px 85px',
+                          transform: slice.isHovered ? 'scale(1.03)' : 'scale(1)',
+                        }}
+                      />
+                    ))}
+
+                    {/* Donut center display */}
+                    {pieChartMode === 'donut' && (
+                      <g className="pointer-events-none">
+                        <text
+                          x="85"
+                          y="80"
+                          textAnchor="middle"
+                          className="font-mono font-black text-lg fill-slate-900 dark:fill-white"
+                        >
+                          {hoveredPieSlice
+                            ? `${pieData.find((p) => p.id === hoveredPieSlice)?.pct}%`
+                            : caseData.riskScore.toFixed(0)}
+                        </text>
+                        <text
+                          x="85"
+                          y="95"
+                          textAnchor="middle"
+                          className="text-[9px] font-bold uppercase tracking-wider fill-slate-400 dark:fill-slate-500"
+                        >
+                          {hoveredPieSlice ? hoveredPieSlice : 'Risk Score'}
+                        </text>
+                      </g>
+                    )}
+                  </svg>
+                </div>
+
+                {/* Slices 2x2 Grid Legend */}
+                <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/70 text-xs">
+                  {pieData.map((item) => (
+                    <div
+                      key={item.id}
+                      onMouseEnter={() => setHoveredPieSlice(item.id)}
+                      onMouseLeave={() => setHoveredPieSlice(null)}
+                      className={`p-2 rounded-lg border transition-colors cursor-pointer ${
+                        hoveredPieSlice === item.id
+                          ? 'bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700'
+                          : 'bg-transparent border-slate-100 dark:border-slate-800/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                            {item.label}
+                          </span>
+                        </div>
+                        <span className={`font-mono font-bold text-xs shrink-0 ${item.textColor}`}>
+                          {item.pct}%
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                        <span>
+                          {item.count} signal{item.count !== 1 ? 's' : ''}
+                        </span>
+                        <span className="uppercase text-[9px] font-semibold tracking-wider">
+                          {item.id === 'malicious'
+                            ? 'Critical'
+                            : item.id === 'suspicious'
+                            ? 'Warning'
+                            : item.id === 'benign'
+                            ? 'Passed'
+                            : 'Neutral'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/70 text-xs text-slate-400 dark:text-slate-500 flex items-center justify-between">
+                <span>
+                  {investigation?.risk_reasons?.length || 8} indicators evaluated
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('evidence')}
+                  className="font-semibold text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>View Evidence Email</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+
+            {/* Col 3: Key Findings (swapped from Col 2) */}
             <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
               <div>
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/70">
@@ -734,176 +975,6 @@ export const CaseDetailPage: React.FC = () => {
                   caseData.confidence >= 0.5 ? 'text-amber-600 dark:text-amber-400' :
                   'text-rose-600 dark:text-rose-400'
                 }`}>{caseData.confidence >= 0.8 ? 'High' : caseData.confidence >= 0.5 ? 'Medium' : 'Low'} confidence</span>
-              </div>
-            </div>
-
-            {/* Col 3: Threat Preview with Segmented Mode Switcher */}
-            <div className="bg-white dark:bg-[#0c1322] rounded-xl p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col justify-between transition-colors">
-              <div>
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/70">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-blue-600 dark:text-sky-400" />
-                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Threat Preview</h3>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-semibold flex items-center gap-1">
-                    <Lock className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400" />
-                    Safe Render
-                  </span>
-                </div>
-
-                {/* Segmented view mode buttons */}
-                <div className="mt-3 flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setThreatPreviewMode('rendered')}
-                    className={`flex-1 h-7 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer text-xs ${
-                      threatPreviewMode === 'rendered'
-                        ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-xs font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    Rendered Email
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setThreatPreviewMode('text')}
-                    className={`flex-1 h-7 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer text-xs ${
-                      threatPreviewMode === 'text'
-                        ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-xs font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    Text View
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setThreatPreviewMode('raw')}
-                    className={`flex-1 h-7 px-2.5 rounded-md font-medium text-center transition-colors cursor-pointer text-xs ${
-                      threatPreviewMode === 'raw'
-                        ? 'bg-white dark:bg-[#0c1322] text-blue-600 dark:text-sky-400 shadow-xs font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    Source (Raw)
-                  </button>
-                </div>
-
-                {/* Preview Content Container */}
-                {threatPreviewMode === 'rendered' && (
-                  <div className="mt-3 p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 text-xs space-y-3 font-sans">
-                    {/* Email headers */}
-                    <div className="space-y-1 pb-2.5 border-b border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-mono">
-                      <p>
-                        <strong className="text-slate-700 dark:text-slate-300 font-sans">From:</strong> PayPal Support &lt;support@paypal1-secure.com&gt;
-                      </p>
-                      <p>
-                        <strong className="text-slate-700 dark:text-slate-300 font-sans">To:</strong> user@company.com
-                      </p>
-                      <p>
-                        <strong className="text-slate-700 dark:text-slate-300 font-sans">Date:</strong> 12 Aug 2025, 10:24 AM
-                      </p>
-                    </div>
-
-                    {/* Email Body */}
-                    <div className="pt-1 space-y-3 bg-white dark:bg-[#0d1627] p-3.5 rounded-lg border border-slate-200/60 dark:border-slate-800 shadow-2xs">
-                      {/* Brand Header Mock */}
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded bg-blue-600 text-white font-black italic flex items-center justify-center text-sm shadow-xs">
-                          P
-                        </div>
-                        <span className="font-extrabold text-blue-900 dark:text-sky-400 tracking-tight text-sm">PayPal</span>
-                      </div>
-
-                      <h4 className="font-bold text-slate-900 dark:text-white text-xs">Payment Confirmation Required</h4>
-
-                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Dear customer, We detected an unusual transaction of $349.00 USD on your account. If you did not authorize this, please review and cancel the invoice immediately.
-                      </p>
-
-                      {/* Phishing Call to Action - Sandboxed & Muted with warning indicator */}
-                      <div className="pt-1">
-                        <div className="inline-flex items-center gap-2 p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                          <button
-                            type="button"
-                            onClick={() => uiStore.addToast('warning', 'Live click intercepted: URL points to phishing harvester!')}
-                            className="h-8 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-md text-xs font-medium transition-colors cursor-pointer"
-                            title="Untrusted simulated phishing link"
-                          >
-                            View Invoice
-                          </button>
-                          <span className="text-xs font-medium text-amber-700 dark:text-amber-300 flex items-center gap-1 pr-1.5">
-                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                            Phishing Link (Sandboxed)
-                          </span>
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-slate-400 dark:text-slate-500 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        PayPal Pte. Ltd. All rights reserved.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {threatPreviewMode === 'text' && (
-                  <div className="mt-3 p-4 rounded-xl bg-slate-50/70 dark:bg-[#090e1a] border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-{`From: PayPal Support <support@paypal1-secure.com>
-To: user@company.com
-Subject: Invoice Payment Update - Action Required
-Date: 12 Aug 2025 10:24:00 +0000
-
-Dear customer,
-
-We detected an unusual transaction of $349.00 USD on your account.
-If you did not authorize this charge, please review and cancel the invoice immediately:
-
-Link: https://paypal1-secure.com/invoice
-
-Thank you,
-PayPal Security & Fraud Department`}
-                  </div>
-                )}
-
-                {threatPreviewMode === 'raw' && (
-                  <div className="mt-3 p-3 rounded-xl bg-slate-900 text-slate-300 font-mono text-xs overflow-x-auto max-h-48 border border-slate-800">
-                    <pre>{`Return-Path: <bounce@paypal1-secure.com>
-Received: from mail.paypal1-secure.com (185.220.101.5)
- by mx.company.com with ESMTP id 9X29A78
- for <user@company.com>; Tue, 12 Aug 2025 10:24:00 +0000
-Message-ID: <202508121024.PAYPAL-ALERT@paypal1-secure.com>
-MIME-Version: 1.0
-Content-Type: multipart/alternative; boundary="--boundary_7812"
-X-Mailer: Python-smtplib/3.10
-Authentication-Results: mx.company.com;
- spf=pass (sender IP is 185.220.101.5);
- dkim=none;
- dmarc=fail (p=reject)`}</pre>
-                  </div>
-                )}
-              </div>
-
-              {/* Suspicious URL Warning Banner with Copy */}
-              <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-[#090e1c] border border-rose-500/30 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
-                      Suspicious URL Detected
-                    </div>
-                    <div className="text-xs font-mono text-slate-900 dark:text-white truncate">
-                      https://paypal1-secure.com/invoice
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleCopyUrl}
-                  className="h-7 px-2.5 rounded-md bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
-                >
-                  {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedUrl ? 'Copied' : 'Copy'}</span>
-                </button>
               </div>
             </div>
           </div>

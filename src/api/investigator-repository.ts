@@ -1248,8 +1248,9 @@ class MockInvestigatorRepository implements InvestigatorRepository {
 }
 
 import { RestInvestigatorRepository } from './rest-investigator-repository.ts';
+import { ENV } from '../config/env.ts';
 
-const _isLiveMode = Boolean(import.meta.env.VITE_API_BASE_URL?.trim());
+const _isLiveMode = Boolean(ENV.API_BASE_URL?.trim());
 
 
 /**

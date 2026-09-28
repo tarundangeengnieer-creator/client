@@ -29,6 +29,7 @@ import type {
 } from '../domain/investigator.ts';
 import { apiClient } from './client.ts';
 import { ENDPOINTS } from './endpoints.ts';
+import { ENV } from '../config/env.ts';
 import {
   mapCaseList,
   mapCase,
@@ -256,7 +257,7 @@ export class RestInvestigatorRepository implements InvestigatorRepository {
         generatedAt: new Date().toISOString(),
       };
     } catch {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+      const baseUrl = ENV.API_BASE_URL || window.location.origin;
       const reportUrl = `${baseUrl.replace(/\/$/, '')}${ENDPOINTS.INVESTIGATION_REPORT(caseId)}`;
       return {
         reportId: `report-${caseId}`,

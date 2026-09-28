@@ -1,6 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+import { ENV } from '../../config/env.ts';
+
+// Set worker URL to ensure vector tile decoding works in production Vite bundles
+if (typeof window !== 'undefined' && workerUrl) {
+  maplibregl.config.WORKER_URL = workerUrl;
+}
 
 export interface MapNode {
   id: string;
@@ -44,22 +51,36 @@ export const GeospatialMap: React.FC<GeospatialMapProps> = ({
     if (!mapContainer.current) return;
     if (mapInstance.current) return; // initialize map only once
 
-    const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
-    const baseUrl = import.meta.env.VITE_MAP_STYLE_URL || 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+    const apiKey = ENV.MAPTILER_API_KEY;
+    const baseUrl = ENV.MAP_STYLE_URL || 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
     
     // Safely append key without duplicating, only if we have a key and it's not the demo tiles or carto
-    const styleUrl = new URL(baseUrl);
-    if (apiKey && !styleUrl.searchParams.has('key') && !baseUrl.includes('demotiles') && !baseUrl.includes('cartocdn')) {
-      styleUrl.searchParams.append('key', apiKey);
+    let styleString = baseUrl;
+    try {
+      const styleUrl = new URL(baseUrl, window.location.origin);
+      if (apiKey && !styleUrl.searchParams.has('key') && !baseUrl.includes('demotiles') && !baseUrl.includes('cartocdn')) {
+        styleUrl.searchParams.append('key', apiKey);
+      }
+      styleString = styleUrl.toString();
+    } catch {
+      styleString = baseUrl;
     }
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: styleUrl.toString(),
+      style: styleString,
       center: initialCenter,
       zoom: initialZoom,
       interactive: interactive,
       attributionControl: false,
+      transformRequest: (url: string) => {
+        // Automatically inject API key for MapTiler tile, glyph, or sprite requests if missing
+        if (apiKey && url.includes('maptiler.com') && !url.includes('key=')) {
+          const sep = url.includes('?') ? '&' : '?';
+          return { url: `${url}${sep}key=${apiKey}` };
+        }
+        return { url };
+      },
     });
 
     mapInstance.current = map;

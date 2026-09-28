@@ -13,6 +13,7 @@ import {
   RateLimitError,
   ValidationError,
 } from './errors.ts';
+import { ENV } from '../config/env.ts';
 
 export interface RequestOptions extends RequestInit {
   timeoutMs?: number;
@@ -23,7 +24,7 @@ export class ApiClient {
   private baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl ?? (import.meta.env.VITE_API_BASE_URL || '');
+    this.baseUrl = baseUrl ?? ENV.API_BASE_URL;
   }
 
   public getApiKey(): string | null {
