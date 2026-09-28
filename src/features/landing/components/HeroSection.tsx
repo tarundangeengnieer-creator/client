@@ -3,32 +3,19 @@ import { uiStore } from '../../../stores/ui-store.ts';
 import { useAuth, authStore } from '../../../stores/auth-store.ts';
 import { Button } from '../../../components/ui/Button.tsx';
 import { ArrowRight, CheckCircle2, Search } from 'lucide-react';
+import { ThreatInvestigatorIllustration } from '../../../components/common/ThreatInvestigatorIllustration.tsx';
 
-// ─── Product UI Mockup Panel (Landing Page Light Enterprise Preview) ────────
+// ─── Product UI Mockup Panel (Landing Page Dark Enterprise Preview) ────────
 
 const ProductMockup: React.FC = () => {
-  const [currentSrc, setCurrentSrc] = React.useState<string>(
-    "/ChatGPT Image Sep 18, 2026, 03_19_53 PM.png"
-  );
-
   return (
     <div className="relative w-full max-w-[860px] select-none" aria-hidden="true">
       {/* Atmospheric backdrop glow */}
       <div className="absolute inset-0 rounded-3xl bg-sky-400/15 blur-2xl pointer-events-none" />
 
-      {/* Application Window Frame (Using exact shared reference mockup image) */}
-      <div className="light-preview relative rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-[#f4f7fb] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),0_0_30px_rgba(24,191,255,0.12)] overflow-hidden flex flex-col font-sans">
-        <img
-          src={currentSrc}
-          alt="AShieldER Threat Forensic Investigator case-A2291"
-          className="w-full h-auto block select-none object-contain"
-          referrerPolicy="no-referrer"
-          onError={() => {
-            if (currentSrc !== "/threat-investigator-mockup.svg") {
-              setCurrentSrc("/threat-investigator-mockup.svg");
-            }
-          }}
-        />
+      {/* Application Window Frame (Using exact uploaded reference mockup image) */}
+      <div className="dark-preview relative rounded-2xl sm:rounded-3xl border border-sky-500/25 bg-[#030913] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(24,191,255,0.18)] overflow-hidden flex flex-col font-sans">
+        <ThreatInvestigatorIllustration className="w-full h-auto block select-none object-contain" />
       </div>
     </div>
   );
