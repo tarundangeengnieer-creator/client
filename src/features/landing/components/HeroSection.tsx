@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { uiStore } from '../../../stores/ui-store.ts';
 import { useAuth, authStore } from '../../../stores/auth-store.ts';
 import { Button } from '../../../components/ui/Button.tsx';
-import { ArrowRight, CheckCircle2, Search, Cpu } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Search } from 'lucide-react';
 import { ThreatInvestigatorIllustration } from '../../../components/common/ThreatInvestigatorIllustration.tsx';
 import { ThreatUniverse3D, ThreatNodeData } from './ThreatUniverse3D.tsx';
 
@@ -98,15 +98,11 @@ export const HeroSection: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10 xl:gap-14 min-w-0">
           {/* Left: Copy & Actions */}
           <div className="flex flex-col gap-6 w-full lg:w-[46%] xl:w-[45%] shrink-0 min-w-0 max-w-xl">
-            {/* Eyebrow & Argon Noble-Gas Engine Indicator */}
-            <div className="flex flex-wrap items-center gap-2.5 self-start">
+            {/* Eyebrow */}
+            <div className="flex items-center self-start">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0a1526]/90 border border-sky-500/30 text-xs font-mono text-sky-400 font-semibold tracking-wider uppercase shadow-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400" aria-hidden="true" />
                 AI-POWERED EMAIL THREAT INTELLIGENCE
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-400/25 text-[11px] font-mono text-cyan-300">
-                <Cpu className="w-3 h-3 text-cyan-400" aria-hidden="true" />
-                Argon · Gemini 4
               </span>
             </div>
 
