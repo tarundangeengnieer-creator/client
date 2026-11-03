@@ -369,8 +369,8 @@ export const ThreatUniverse3D: React.FC<ThreatUniverse3DProps> = ({
 
     // Root orbital group for parallax and cinematic tilt
     const orbitalUniverse = new THREE.Group();
-    // Offset slightly to center the composition naturally behind hero typography & product
-    orbitalUniverse.position.set(1.5, 0.2, 0);
+    // Centered composition naturally framing hero typography and visible behind the SaaS product
+    orbitalUniverse.position.set(0, -0.6, 0);
     scene.add(orbitalUniverse);
 
     // ─── 1. Central Intelligent Threat-Analysis Nucleus ───────────────────────

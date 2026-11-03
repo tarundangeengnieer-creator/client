@@ -23,9 +23,9 @@ export const ThreatInvestigatorIllustration: React.FC<{ className?: string }> = 
       <defs>
         {/* Background Gradients */}
         <radialGradient id="ashBgGlow" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#0b1e36" stopOpacity="1" />
-          <stop offset="50%" stopColor="#071526" stopOpacity="1" />
-          <stop offset="100%" stopColor="#030913" stopOpacity="1" />
+          <stop offset="0%" stopColor="#0b1e36" stopOpacity="0.72" />
+          <stop offset="50%" stopColor="#071526" stopOpacity="0.62" />
+          <stop offset="100%" stopColor="#030913" stopOpacity="0.76" />
         </radialGradient>
 
         <radialGradient id="ashNodeGlow" cx="50%" cy="50%" r="50%">
@@ -114,8 +114,8 @@ export const ThreatInvestigatorIllustration: React.FC<{ className?: string }> = 
         .ash-mono { font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace; }
       `}</style>
 
-      {/* Main Container Frame with High-Contrast Cyber Navy Gradient */}
-      <rect x="0" y="0" width="1140" height="860" rx="20" fill="url(#ashBgGlow)" stroke="#1a3b5c" strokeWidth="1.5" />
+      {/* Main Container Frame with High-Contrast Cyber Navy Gradient and Translucency */}
+      <rect x="0" y="0" width="1140" height="860" rx="20" fill="url(#ashBgGlow)" fillOpacity="0.75" stroke="#1e4773" strokeWidth="1.5" />
 
       {/* Bottom Ambience Reflection */}
       <ellipse cx="570" cy="855" rx="360" ry="95" fill="url(#ashBottomReflection)" />

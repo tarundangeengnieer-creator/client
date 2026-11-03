@@ -18,11 +18,11 @@ const ProductMockup: React.FC = () => {
       <div className="absolute -top-px inset-x-12 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent z-20 pointer-events-none" />
 
       {/* Application Window Frame */}
-      <div className="dark-preview relative rounded-2xl sm:rounded-3xl border border-sky-500/30 bg-[#030913]/95 shadow-[0_25px_80px_-15px_rgba(0,0,0,0.9),0_0_50px_rgba(24,191,255,0.18)] overflow-hidden flex flex-col font-sans backdrop-blur-xs">
+      <div className="dark-preview relative rounded-2xl sm:rounded-3xl border border-sky-500/35 bg-[#030913]/55 shadow-[0_25px_80px_-15px_rgba(0,0,0,0.85),0_0_50px_rgba(24,191,255,0.22)] overflow-hidden flex flex-col font-sans backdrop-blur-md">
         <ThreatInvestigatorIllustration className="w-full h-auto block select-none object-contain" />
 
         {/* Production blend: soft bottom scrim to seamlessly integrate into landing page flow */}
-        <div className="absolute inset-x-0 bottom-0 h-28 sm:h-40 bg-gradient-to-t from-[#060a14] via-[#060a14]/65 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-[#060a14]/90 to-transparent pointer-events-none" />
       </div>
     </div>
   );
@@ -76,9 +76,8 @@ export const HeroSection: React.FC = () => {
         className="absolute inset-0 pointer-events-none z-1"
         style={{
           background: `
-            radial-gradient(ellipse 75% 45% at 50% 25%, rgba(6,10,20,0.88) 0%, rgba(6,10,20,0.5) 60%, transparent 100%),
-            radial-gradient(circle at 50% 85%, rgba(6,10,20,0.7) 0%, transparent 80%),
-            linear-gradient(to bottom, rgba(6,10,20,0.3) 0%, transparent 30%, transparent 70%, rgba(6,10,20,0.95) 100%)
+            radial-gradient(ellipse 70% 35% at 50% 20%, rgba(6,10,20,0.85) 0%, rgba(6,10,20,0.3) 60%, transparent 100%),
+            linear-gradient(to bottom, rgba(6,10,20,0.2) 0%, transparent 22%, transparent 80%, rgba(6,10,20,0.95) 100%)
           `,
         }}
         aria-hidden="true"
