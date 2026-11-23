@@ -1,6 +1,0 @@
-{
-  "summary": "Implemented AShieldER's Interactive 3D Threat Intelligence Universe using Three.js, featuring an orbital structure with independently switching 0 and 1 binary particles, semantic threat intelligence nodes (confirmed malicious, suspicious, analysis, neutral), traveling data packet lines, a central intelligent analysis nucleus with an Argon halo, cursor parallax and raycasting hover inspection, and updated Hero typography and CTAs.",
-  "updatedAt": "2026-11-03T16:55:59.960476164Z",
-  "requestFeedback": true,
-  "userFacing": true
-}

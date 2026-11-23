@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { uiStore } from '../../../stores/ui-store.ts';
 import { useAuth, authStore } from '../../../stores/auth-store.ts';
 import { Button } from '../../../components/ui/Button.tsx';
-import { ArrowRight, CheckCircle2, Search } from 'lucide-react';
+import { ArrowRight, CheckCircle2, LayoutDashboard, Search } from 'lucide-react';
 import { ThreatInvestigatorIllustration } from '../../../components/common/ThreatInvestigatorIllustration.tsx';
 import { ThreatUniverse3D, ThreatNodeData } from './ThreatUniverse3D.tsx';
 
@@ -42,23 +42,18 @@ export const HeroSection: React.FC = () => {
   const auth = useAuth();
   const [, setHoveredNode] = useState<ThreatNodeData | null>(null);
 
-  const handleAnalyzeEmail = () => {
+  const handleGoToDashboard = async () => {
     if (!auth.isAuthenticated) {
-      authStore.login('investigator@ashielder.io', 'demo');
+      await authStore.login('investigator@ashielder.io', 'demo');
     }
-    uiStore.openWorkflowModal('eml');
+    uiStore.navigate('/overview');
   };
 
-  const handleDiscoverHowItWorks = () => {
-    const el = document.getElementById('how-it-works') || document.getElementById('product');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      if (!auth.isAuthenticated) {
-        authStore.login('investigator@ashielder.io', 'demo');
-      }
-      uiStore.navigate('/overview');
+  const handleAnalyzeEmail = async () => {
+    if (!auth.isAuthenticated) {
+      await authStore.login('investigator@ashielder.io', 'demo');
     }
+    uiStore.openWorkflowModal('eml');
   };
 
   return (
@@ -127,22 +122,23 @@ export const HeroSection: React.FC = () => {
               <Button
                 variant="primary"
                 size="lg"
-                onClick={handleAnalyzeEmail}
+                onClick={handleGoToDashboard}
                 className="font-semibold w-full sm:w-auto justify-center bg-sky-600 hover:bg-sky-500 text-white shadow-md hover:shadow-sky-500/25 active:scale-[0.99] transition-all cursor-pointer px-6"
-                leftIcon={<Search className="w-4 h-4 text-sky-200" aria-hidden="true" />}
+                leftIcon={<LayoutDashboard className="w-4 h-4 text-sky-200" aria-hidden="true" />}
                 rightIcon={<ArrowRight className="w-4 h-4" aria-hidden="true" />}
-                aria-label="Explore AShieldER — Launch Forensic Investigation"
+                aria-label="Explore AShieldER — Go to Dashboard"
               >
                 Explore AShieldER
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={handleDiscoverHowItWorks}
+                onClick={handleAnalyzeEmail}
                 className="w-full sm:w-auto justify-center border-slate-700 text-slate-200 hover:text-white hover:border-sky-500/50 bg-[#070c18]/80 cursor-pointer px-6"
-                aria-label="Discover How It Works"
+                leftIcon={<Search className="w-4 h-4 text-sky-400" aria-hidden="true" />}
+                aria-label="Analyze Email — Launch Email Threat Analysis"
               >
-                Discover How It Works
+                Analyze Email
               </Button>
             </div>
 
