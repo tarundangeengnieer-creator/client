@@ -279,7 +279,15 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setActiveStage('INGEST');
-      setActiveTab('upload');
+      const mappedTab =
+        initialSource === 'gmail'
+          ? 'gmail'
+          : initialSource === 'microsoft'
+          ? 'microsoft'
+          : initialSource === 'paste'
+          ? 'paste'
+          : 'upload';
+      setActiveTab(mappedTab);
       setPipelineStages(DEFAULT_PIPELINE_STAGES.map((s) => ({ ...s, status: 'pending' })));
       setExecutionState('idle');
       setExecutionError(null);
@@ -287,12 +295,25 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
       setCompletedResult(null);
       setAssignedCaseId('');
       setPasteContent('');
+      setCopiedToken(false);
       cancelExecutionRef.current = false;
 
       // Select first specimen as clean default
       setSelectedSpecimen(PREBUILT_SPECIMENS[0]);
     }
-  }, [isOpen]);
+  }, [isOpen, initialSource]);
+
+  // Escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // Clean up timers on unmount
   useEffect(() => {
@@ -303,6 +324,16 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
   }, []);
 
   if (!isOpen) return null;
+
+  const handleCopySha256 = async (hash: string) => {
+    try {
+      await navigator.clipboard.writeText(hash);
+      setCopiedToken(true);
+      setTimeout(() => setCopiedToken(false), 1800);
+    } catch {
+      uiStore.addToast('info', 'Copy unavailable in this browser context.');
+    }
+  };
 
   // Process uploaded .eml file
   const processUploadedFile = async (file: File) => {
@@ -521,28 +552,37 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
     runInvestigationExecution(detachedSpecimen);
   };
 
+  const completedStagesCount = pipelineStages.filter((s) => s.status === 'completed').length;
+  const progressPct = Math.round((completedStagesCount / pipelineStages.length) * 100);
+
   return (
     <div
       id="forensic-workflow-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && executionState !== 'analyzing' && executionState !== 'preparing') {
+          onClose();
+        }
+      }}
     >
       <div
-        className="w-full max-w-3xl bg-[#071A2B] text-slate-100 border border-[#1b3552] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] transition-all"
+        className="w-full max-w-[740px] bg-[#0B1220] text-slate-100 border border-slate-800 rounded-xl shadow-[0_24px_64px_-12px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col max-h-[90vh]"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="forensic-modal-title"
       >
-        {/* Header: Professional Enterprise SOC Heading */}
-        <div className="px-5 sm:px-6 py-4 border-b border-[#1b3552] flex items-center justify-between bg-[#0D2238]/80">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#071A2B] border border-[#18BFFF]/30 flex items-center justify-center text-[#18BFFF] shrink-0">
-              <ShieldCheck className="w-4 h-4" />
+        {/* 1. Header: Clean Enterprise SaaS Dialog Header */}
+        <div className="px-6 py-4 border-b border-slate-800/90 flex items-center justify-between bg-[#0D1526]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-lg border border-slate-800 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4 text-slate-200" />
             </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-semibold text-white tracking-tight">
-                New Investigation
+            <div className="min-w-0">
+              <h2 id="forensic-modal-title" className="text-sm sm:text-[15px] font-semibold text-white tracking-tight">
+                New Email Investigation
               </h2>
-              <p className="text-xs text-slate-400">
-                Submit an email specimen for forensic analysis
+              <p className="text-xs text-slate-400 truncate mt-0.5">
+                Ingest an RFC 822 email specimen or connect a mailbox to initiate forensic triage
               </p>
             </div>
           </div>
@@ -550,21 +590,21 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-[#17334f] rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors cursor-pointer shrink-0"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* 4-Step Investigation Pipeline Ribbon */}
-        <div className="px-5 sm:px-6 py-2.5 bg-[#0D2238] border-b border-[#1b3552] flex items-center justify-between">
+        {/* 2. Stepper Bar: Structured SaaS Pipeline Wireframe */}
+        <div className="px-6 py-3 bg-[#090F1C] border-b border-slate-800/90 flex items-center">
           {(
             [
-              { stage: 'INGEST', num: 1, label: 'INGEST' },
-              { stage: 'PLAN', num: 2, label: 'PLAN' },
-              { stage: 'INVESTIGATE', num: 3, label: 'INVESTIGATE' },
-              { stage: 'RESULTS', num: 4, label: 'RESULTS' },
+              { stage: 'INGEST', num: 1, label: 'Ingest' },
+              { stage: 'PLAN', num: 2, label: 'Plan' },
+              { stage: 'INVESTIGATE', num: 3, label: 'Investigate' },
+              { stage: 'RESULTS', num: 4, label: 'Results' },
             ] as const
           ).map(({ stage, num, label }, idx) => {
             const stageOrder: WorkflowStage[] = ['INGEST', 'PLAN', 'INVESTIGATE', 'RESULTS'];
@@ -573,47 +613,53 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
             const isCurrent = stage === activeStage;
 
             return (
-              <div key={stage} className="flex items-center gap-2 flex-1 last:flex-none">
-                <div
-                  className={`flex items-center gap-2 text-xs font-medium ${
-                    isCurrent
-                      ? 'text-[#18BFFF]'
-                      : isDone
-                      ? 'text-[#10C98A]'
-                      : 'text-slate-500'
-                  }`}
-                >
+              <div key={stage} className="flex items-center flex-1 last:flex-none">
+                <div className="flex items-center gap-2 shrink-0">
                   <span
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-semibold transition-colors ${
                       isCurrent
-                        ? 'bg-[#18BFFF] text-[#071A2B]'
+                        ? 'bg-sky-600 text-white ring-2 ring-sky-500/25'
                         : isDone
-                        ? 'bg-[#10C98A]/20 text-[#10C98A] border border-[#10C98A]/40'
-                        : 'bg-slate-800 text-slate-500 border border-slate-700'
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
+                        : 'bg-slate-800/80 text-slate-400 border border-slate-700'
                     }`}
                   >
                     {isDone ? <Check className="w-3 h-3" /> : num}
                   </span>
-                  <span className="hidden sm:inline tracking-wider text-[11px] font-mono uppercase">
+                  <span
+                    className={`text-xs font-medium tracking-tight ${
+                      isCurrent
+                        ? 'text-white'
+                        : isDone
+                        ? 'text-slate-300'
+                        : 'text-slate-500'
+                    }`}
+                  >
                     {label}
                   </span>
                 </div>
-                {idx < 3 && <div className="flex-1 h-[1px] bg-[#1b3552] mx-2" />}
+                {idx < 3 && (
+                  <div
+                    className={`flex-1 h-px mx-3 transition-colors ${
+                      isDone ? 'bg-emerald-500/40' : 'bg-slate-800'
+                    }`}
+                  />
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* Modal Scrollable Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-[#071A2B] text-slate-200">
+        {/* 3. Scrollable Body: Clean SaaS Wireframe Content */}
+        <div className="p-6 overflow-y-auto flex-1 space-y-5 bg-[#0B1220] text-slate-200">
           {/* ================= STAGE 1: INGEST ================= */}
           {activeStage === 'INGEST' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              {/* Secondary Method Selector Tabs */}
-              <div className="flex items-center gap-1.5 p-1 bg-[#0D2238] border border-[#1b3552] rounded-lg">
+            <div className="space-y-5 animate-in fade-in duration-150">
+              {/* Source Method Segmented Control */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-[#080D18] border border-slate-800 rounded-lg">
                 {[
-                  { id: 'upload' as const, label: 'Upload Email (.eml)', icon: <UploadCloud className="w-3.5 h-3.5" /> },
-                  { id: 'paste' as const, label: 'Paste Raw Email', icon: <FileCode className="w-3.5 h-3.5" /> },
+                  { id: 'upload' as const, label: 'Upload .EML', icon: <UploadCloud className="w-3.5 h-3.5" /> },
+                  { id: 'paste' as const, label: 'Paste Raw', icon: <FileCode className="w-3.5 h-3.5" /> },
                   { id: 'gmail' as const, label: 'Gmail', icon: <OfficialGmailLogo className="w-3.5 h-3.5" /> },
                   { id: 'microsoft' as const, label: 'Microsoft 365', icon: <OfficialMicrosoftLogo className="w-3.5 h-3.5" /> },
                 ].map((tab) => (
@@ -621,95 +667,93 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 py-1.5 px-2.5 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`py-2 px-3 rounded-md text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       activeTab === tab.id
-                        ? 'bg-[#071A2B] text-[#18BFFF] shadow-xs border border-[#18BFFF]/40'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-slate-800 text-white shadow-xs border border-slate-700/80'
+                        : 'text-slate-400 hover:text-slate-200 border border-transparent'
                     }`}
                   >
                     {tab.icon}
-                    <span>{tab.label}</span>
+                    <span className="truncate">{tab.label}</span>
                   </button>
                 ))}
               </div>
 
-              {/* Primary Drop Zone: Upload Email */}
+              {/* Upload Email Dropzone */}
               {activeTab === 'upload' && (
-                <div className="space-y-3">
-                  <div
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setDragOver(true);
-                    }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setDragOver(false);
-                      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                        processUploadedFile(e.dataTransfer.files[0]);
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                      processUploadedFile(e.dataTransfer.files[0]);
+                    }
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`py-8 px-6 rounded-xl border border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
+                    dragOver
+                      ? 'border-sky-500 bg-sky-500/5'
+                      : selectedSpecimen?.rawFile
+                      ? 'border-emerald-500/50 bg-emerald-500/5'
+                      : 'border-slate-700 bg-[#080D18]/70 hover:border-slate-500 hover:bg-[#0D1526]'
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".eml,message/rfc822,text/plain"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        processUploadedFile(e.target.files[0]);
                       }
                     }}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`p-6 sm:p-7 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                      dragOver
-                        ? 'border-[#18BFFF] bg-[#0D2238]'
-                        : selectedSpecimen?.rawFile
-                        ? 'border-[#10C98A]/50 bg-[#0D2238]/60'
-                        : 'border-[#1b3552] bg-[#0D2238]/40 hover:border-[#18BFFF]/50 hover:bg-[#0D2238]/80'
-                    }`}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".eml,message/rfc822,text/plain"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          processUploadedFile(e.target.files[0]);
-                        }
-                      }}
-                    />
-                    <div className="w-10 h-10 rounded-full bg-[#071A2B] border border-[#1b3552] flex items-center justify-center text-[#18BFFF] mb-2.5">
-                      <UploadCloud className="w-5 h-5" />
-                    </div>
-                    <p className="text-xs sm:text-sm font-semibold text-white">
-                      Drag and drop your raw email (.eml) here
-                    </p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      or <span className="text-[#18BFFF] underline font-medium">browse from your computer</span>
-                    </p>
-                    <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-2 font-mono">
-                      <span>RFC 822 / MIME format</span>
-                      <span>·</span>
-                      <span>Max file size: 25 MB</span>
-                    </div>
+                  />
+                  <div className="w-10 h-10 rounded-lg border border-slate-800 flex items-center justify-center mb-3">
+                    <UploadCloud className="w-5 h-5 text-slate-300" />
                   </div>
+                  <p className="text-sm font-medium text-white">
+                    {selectedSpecimen?.rawFile
+                      ? `Loaded: ${selectedSpecimen.sourceLabel}`
+                      : 'Drop an .eml file here, or click to browse'}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Supports RFC 822 and MIME email packages up to 25 MB
+                  </p>
                 </div>
               )}
 
-              {/* Secondary Ingest: Paste Raw Email */}
+              {/* Paste Raw RFC 822 Source */}
               {activeTab === 'paste' && (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-[#0D2238] border border-[#1b3552] text-xs flex items-start gap-2 text-slate-300">
-                    <FileCode className="w-4 h-4 text-[#18BFFF] shrink-0 mt-0.5" />
-                    <span>
-                      Paste full RFC 822 email text including headers (<code className="font-mono text-slate-200">From:</code>,{' '}
-                      <code className="font-mono text-slate-200">Received:</code>, <code className="font-mono text-slate-200">Subject:</code>)
-                      and body boundaries.
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="raw-eml-input" className="text-xs font-medium text-slate-300">
+                      Raw RFC 822 Message Source
+                    </label>
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      Include full headers &amp; MIME boundaries
                     </span>
                   </div>
 
                   <textarea
+                    id="raw-eml-input"
                     value={pasteContent}
                     onChange={(e) => setPasteContent(e.target.value)}
-                    placeholder={"Delivered-To: victim@targetcorp.in\nReceived: from mail.vendor-billing-desk.com ([103.14.26.89])\nFrom: Accounts Department <accounts@vendor-billing-desk.com>\nSubject: Invoice #78291\nDate: Sat, 05 Sep 2026 11:02:00 +0000\n\nPlease process revised invoice."}
-                    className="w-full h-40 px-3 py-2.5 rounded-lg border border-[#1b3552] bg-[#071A2B] text-xs font-mono text-slate-200 placeholder:text-slate-600 resize-none outline-none focus:border-[#18BFFF] transition-colors"
+                    placeholder={
+                      'Delivered-To: finance@targetcorp.in\nReceived: from mail.vendor-billing-desk.com ([103.14.26.89])\nFrom: "Accounts Department" <accounts@vendor-billing-desk.com>\nSubject: Invoice #78291\nDate: Sat, 05 Sep 2026 11:02:00 +0000\n\nPlease process revised invoice.'
+                    }
+                    className="w-full h-36 px-3.5 py-2.5 rounded-lg border border-slate-800 bg-[#080D18] text-xs font-mono text-slate-200 placeholder:text-slate-600 resize-none outline-none focus:border-sky-500 transition-colors"
                     spellCheck={false}
                   />
 
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] text-slate-500 font-mono">
-                      {pasteContent.length > 0 ? `${pasteContent.length} bytes input` : 'Awaiting pasted content'}
+                      {pasteContent.length > 0 ? `${formatBytes(pasteContent.length)} entered` : 'Awaiting message source'}
                     </span>
                     <button
                       type="button"
@@ -722,124 +766,136 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                         });
                         processUploadedFile(file);
                       }}
-                      className="px-3.5 py-1.5 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 disabled:opacity-40 text-[#071A2B] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      className="px-3.5 py-1.5 rounded-md bg-sky-600 hover:bg-sky-500 disabled:opacity-40 text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       <Zap className="w-3.5 h-3.5" />
-                      <span>Process Pasted Specimen</span>
+                      <span>Parse Email Source</span>
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Secondary Ingest: Gmail */}
+              {/* Gmail Connector */}
               {activeTab === 'gmail' && (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-[#0D2238] border border-[#1b3552] text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-200">
-                      <span className="w-2 h-2 rounded-full bg-[#10C98A]" />
-                      <span>Connected Google Workspace:</span>
-                      <span className="font-mono text-white">tarundangeengnieer@gmail.com</span>
+                <div className="p-3.5 rounded-lg bg-[#0D1526] border border-slate-800 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <OfficialGmailLogo className="w-4 h-4 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-slate-200 font-medium truncate">tarundangeengnieer@gmail.com</p>
+                      <p className="text-[11px] text-slate-400">Google Workspace mailbox synchronized</p>
                     </div>
-                    <span className="text-[10px] text-[#18BFFF] bg-[#18BFFF]/10 px-2 py-0.5 rounded border border-[#18BFFF]/30">
-                      OAuth2 Active
-                    </span>
                   </div>
-                  <p className="text-xs text-slate-400">Select an email specimen from the synchronized inbox:</p>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[11px] font-medium border border-emerald-500/25 shrink-0">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Connected
+                  </span>
                 </div>
               )}
 
-              {/* Secondary Ingest: Microsoft 365 */}
+              {/* Microsoft 365 Connector */}
               {activeTab === 'microsoft' && (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-[#0D2238] border border-[#1b3552] text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-200">
-                      <span className="w-2 h-2 rounded-full bg-[#10C98A]" />
-                      <span>Connected Tenant:</span>
-                      <span className="font-mono text-white">CDGI Enterprise / Exchange Online</span>
+                <div className="p-3.5 rounded-lg bg-[#0D1526] border border-slate-800 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <OfficialMicrosoftLogo className="w-4 h-4 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-slate-200 font-medium truncate">Acme Enterprise / Exchange Online</p>
+                      <p className="text-[11px] text-slate-400">Microsoft Graph API connector active</p>
                     </div>
-                    <span className="text-[10px] text-[#18BFFF] bg-[#18BFFF]/10 px-2 py-0.5 rounded border border-[#18BFFF]/30">
-                      Graph API
-                    </span>
                   </div>
-                  <p className="text-xs text-slate-400">Select an email specimen from the mailbox:</p>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[11px] font-medium border border-emerald-500/25 shrink-0">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Connected
+                  </span>
                 </div>
               )}
 
-              {/* Demo & Test Specimens */}
-              <div className="space-y-2.5 pt-1">
+              {/* Sample Threat Specimens */}
+              <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-slate-300">Demo & Test Specimens</p>
-                  <span className="text-[11px] text-slate-500">Curated RFC 822 test vectors</span>
+                  <h3 className="text-xs font-medium text-slate-300">Sample Threat Specimens</h3>
+                  <span className="text-[11px] text-slate-500">Select a baseline vector or upload above</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {PREBUILT_SPECIMENS.map((specimen) => {
                     const isSelected = selectedSpecimen?.id === specimen.id;
                     const isMalicious = specimen.verdict === Verdict.MALICIOUS;
                     const isSuspicious = specimen.verdict === Verdict.SUSPICIOUS;
 
                     return (
-                      <div
+                      <button
                         key={specimen.id}
+                        type="button"
                         onClick={() => setSelectedSpecimen(specimen)}
-                        className={`p-3 rounded-lg border text-xs transition-all cursor-pointer flex flex-col justify-between ${
+                        className={`text-left p-3.5 rounded-lg border transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
                           isSelected
-                            ? 'border-[#18BFFF] bg-[#0D2238] shadow-xs'
-                            : 'border-[#1b3552] bg-[#0D2238] hover:border-[#18BFFF]/50'
+                            ? 'border-sky-500/80 bg-[#0F192D] ring-1 ring-sky-500/25'
+                            : 'border-slate-800 bg-[#0D1526]/70 hover:border-slate-700 hover:bg-[#0D1526]'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="font-semibold text-white truncate">{specimen.subject}</p>
-                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{specimen.sender}</p>
+                        <div className="flex items-start justify-between gap-2 w-full">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <span
+                              className={`mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                                isSelected
+                                  ? 'border-sky-500 bg-sky-500 text-white'
+                                  : 'border-slate-600 bg-transparent'
+                              }`}
+                            >
+                              {isSelected && <Check className="w-2.5 h-2.5" />}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-xs font-medium text-white truncate">{specimen.subject}</p>
+                              <p className="text-[11px] text-slate-400 font-mono truncate mt-0.5">
+                                {specimen.sender}
+                              </p>
+                            </div>
                           </div>
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold font-mono uppercase shrink-0 border ${
-                              isMalicious
-                                ? 'bg-[#FF365C]/10 text-[#FF365C] border-[#FF365C]/30'
-                                : isSuspicious
-                                ? 'bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/30'
-                                : 'bg-[#10C98A]/10 text-[#10C98A] border-[#10C98A]/30'
-                            }`}
-                          >
-                            {specimen.verdict}
-                          </span>
                         </div>
 
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mt-2 pt-2 border-t border-[#1b3552]">
-                          <span>
-                            {formatBytes(specimen.fileSize)} · RFC 822 · {specimen.date.split(',')[0]}
+                        <div className="flex items-center justify-between w-full pt-2 border-t border-slate-800/80">
+                          <span className="text-[11px] text-slate-500 font-mono">
+                            {formatBytes(specimen.fileSize)} · {specimen.date.split(',')[0]}
                           </span>
-                          {isSelected && <span className="text-[#18BFFF] font-bold">SELECTED</span>}
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border ${
+                              isMalicious
+                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/25'
+                                : isSuspicious
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/25'
+                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
+                            }`}
+                          >
+                            {isMalicious ? (
+                              <ShieldAlert className="w-2.5 h-2.5" />
+                            ) : isSuspicious ? (
+                              <AlertTriangle className="w-2.5 h-2.5" />
+                            ) : (
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                            )}
+                            <span>{specimen.verdict}</span>
+                          </span>
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Selected Specimen Status Card */}
+              {/* Active Specimen Queue Strip */}
               {selectedSpecimen && (
-                <div className="p-3.5 rounded-lg bg-[#0D2238] border border-[#18BFFF]/40 flex items-center justify-between text-xs animate-in fade-in duration-150">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-7 h-7 rounded-md bg-[#071A2B] border border-[#1b3552] flex items-center justify-center text-[#18BFFF] shrink-0">
-                      <FileCheck className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-white truncate">{selectedSpecimen.subject}</p>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5 font-mono">
-                        <span>{formatBytes(selectedSpecimen.fileSize)}</span>
-                        <span>·</span>
-                        <span>{selectedSpecimen.rawFile ? 'Local Upload' : 'Test Specimen'}</span>
-                        <span>·</span>
-                        <span>RFC 822 format</span>
-                      </div>
-                    </div>
+                <div className="px-3.5 py-2.5 rounded-lg bg-[#080D18] border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <FileCheck className="w-4 h-4 text-slate-300 shrink-0" />
+                    <span className="text-slate-400 shrink-0">Queued:</span>
+                    <span className="font-medium text-white truncate">{selectedSpecimen.subject}</span>
+                    <span className="hidden sm:inline text-slate-500 font-mono shrink-0">
+                      ({formatBytes(selectedSpecimen.fileSize)})
+                    </span>
                   </div>
-
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#10C98A]/10 text-[#10C98A] text-[11px] font-semibold border border-[#10C98A]/30 shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10C98A]" />
-                    Ready for Plan
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Ready
                   </span>
                 </div>
               )}
@@ -848,60 +904,74 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
 
           {/* ================= STAGE 2: PLAN ================= */}
           {activeStage === 'PLAN' && selectedSpecimen && (
-            <div className="space-y-4 animate-in fade-in duration-150 text-xs">
-              <div className="p-4 rounded-xl border border-[#1b3552] bg-[#0D2238] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">{selectedSpecimen.subject}</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono text-[#18BFFF] bg-[#18BFFF]/10 border border-[#18BFFF]/30">
+            <div className="space-y-5 animate-in fade-in duration-150 text-xs">
+              {/* Specimen Metadata Specification Table */}
+              <div className="rounded-lg border border-slate-800 bg-[#080D18] divide-y divide-slate-800/80 overflow-hidden">
+                <div className="px-4 py-3 bg-[#0D1526] flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-[11px] text-slate-400 block">Target Subject</span>
+                    <span className="font-semibold text-white text-sm truncate block mt-0.5">
+                      {selectedSpecimen.subject}
+                    </span>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-md text-[11px] font-mono text-slate-300 bg-slate-800/90 border border-slate-700 shrink-0">
                     {selectedSpecimen.sourceLabel}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] text-slate-300 pt-2 border-t border-[#1b3552]">
-                  <div>
-                    <span className="text-slate-500 block">Sender:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80">
+                  <div className="px-4 py-2.5">
+                    <span className="text-[11px] text-slate-500 block">From</span>
                     <span className="font-mono text-slate-200 truncate block mt-0.5">{selectedSpecimen.sender}</span>
                   </div>
-                  <div>
-                    <span className="text-slate-500 block">Recipient:</span>
+                  <div className="px-4 py-2.5">
+                    <span className="text-[11px] text-slate-500 block">To</span>
                     <span className="font-mono text-slate-200 truncate block mt-0.5">{selectedSpecimen.recipient}</span>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-[#1b3552] flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">SHA-256 Hash Integrity:</span>
-                  <span className="font-mono text-[#18BFFF] select-all truncate max-w-[280px]">
-                    {selectedSpecimen.sha256}
-                  </span>
+                <div className="px-4 py-2.5 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="text-[11px] text-slate-500 shrink-0">SHA-256:</span>
+                    <span className="font-mono text-slate-300 truncate">{selectedSpecimen.sha256}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopySha256(selectedSpecimen.sha256)}
+                    className="px-2 py-1 rounded border border-slate-700/80 hover:bg-slate-800 text-[11px] text-slate-300 flex items-center gap-1 shrink-0 cursor-pointer transition-colors"
+                  >
+                    {copiedToken ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedToken ? 'Copied' : 'Copy'}</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Pre-flight Checks Status */}
-              <div className="p-3 rounded-lg bg-[#0D2238] border border-emerald-500/30 flex items-center gap-2.5 text-[#10C98A]">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#10C98A]" />
-                <span>Pre-flight checks passed: RFC 822 structure verified, integrity recorded.</span>
+              {/* Pre-flight Status */}
+              <div className="px-3.5 py-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/25 flex items-center gap-2.5 text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>Pre-flight checks passed: RFC 822 structure verified and digest locked.</span>
               </div>
 
-              {/* Scheduled Analysis Execution Layers */}
+              {/* Analysis Execution Plan */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold text-white">Scheduled Analysis Execution Layers:</p>
-                  <span className="text-[11px] text-slate-500 font-mono">SLA Target: &lt;4,000ms</span>
+                  <h3 className="font-medium text-slate-200">Scheduled Analysis Modules ({pipelineStages.length})</h3>
+                  <span className="text-[11px] text-slate-500 font-mono">Target SLA &lt; 4,000ms</span>
                 </div>
 
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                <div className="rounded-lg border border-slate-800 bg-[#080D18] divide-y divide-slate-800/70 max-h-56 overflow-y-auto">
                   {pipelineStages.map((stage, idx) => (
                     <div
                       key={stage.id}
-                      className="p-2.5 rounded-lg border border-[#1b3552] bg-[#0D2238] flex items-center justify-between text-xs"
+                      className="px-3.5 py-2.5 flex items-center justify-between gap-3"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center text-[9px] text-slate-400 font-mono">
-                          {idx + 1}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-[11px] text-slate-500 font-mono w-4 shrink-0">
+                          {String(idx + 1).padStart(2, '0')}
                         </span>
-                        <span className="text-slate-200 font-medium">{stage.name}</span>
+                        <span className="text-slate-200 font-medium truncate">{stage.name}</span>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#071A2B] text-slate-400 font-mono border border-slate-800">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400 font-mono border border-slate-800 shrink-0">
                         {stage.level}
                       </span>
                     </div>
@@ -914,31 +984,46 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
           {/* ================= STAGE 3: INVESTIGATE ================= */}
           {activeStage === 'INVESTIGATE' && selectedSpecimen && (
             <div className="space-y-4 animate-in fade-in duration-150">
-              {/* Telemetry Header */}
-              <div className="p-4 rounded-xl bg-[#0D2238] border border-[#1b3552] flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                    Pipeline Execution Telemetry
-                  </p>
-                  <p className="text-xs font-bold text-white truncate max-w-sm mt-0.5">
-                    Analyzing: {selectedSpecimen.subject}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold font-mono text-[#18BFFF]">{formatLatency(elapsedMs)}</div>
-                  <div className="text-[10px] font-mono text-slate-400">
-                    {executionState === 'preparing' ? 'FINALIZING RESULT' : 'SLA &lt;4,000ms (ACTIVE)'}
+              {/* Execution Summary & Progress Bar */}
+              <div className="p-4 rounded-lg bg-[#080D18] border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-[11px] text-slate-400 block">Executing Forensic Pipeline</span>
+                    <p className="text-sm font-medium text-white truncate mt-0.5">
+                      {selectedSpecimen.subject}
+                    </p>
                   </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-semibold font-mono text-white tabular-nums">
+                      {formatLatency(elapsedMs)}
+                    </div>
+                    <div className="text-[11px] font-mono text-slate-400">
+                      {executionState === 'preparing' ? 'Finalizing' : `${completedStagesCount}/${pipelineStages.length} modules`}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      executionState === 'error'
+                        ? 'bg-rose-500'
+                        : executionState === 'preparing'
+                        ? 'bg-emerald-500'
+                        : 'bg-sky-500'
+                    }`}
+                    style={{ width: `${executionState === 'preparing' ? 100 : progressPct}%` }}
+                  />
                 </div>
               </div>
 
               {/* Error Banner if execution failed */}
               {executionState === 'error' && (
-                <div className="p-4 rounded-xl bg-[#FF365C]/10 border border-[#FF365C]/30 text-xs space-y-3">
-                  <div className="flex items-start gap-2.5 text-[#FF365C]">
+                <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs space-y-3">
+                  <div className="flex items-start gap-2.5 text-rose-400">
                     <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-bold">Investigation Request Halted</p>
+                      <p className="font-semibold">Investigation Pipeline Halted</p>
                       <p className="text-slate-300 mt-1 leading-relaxed">
                         {executionError || 'The forensic pipeline service encountered a connection or processing failure.'}
                       </p>
@@ -949,15 +1034,15 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                     <button
                       type="button"
                       onClick={() => runInvestigationExecution(selectedSpecimen)}
-                      className="px-3 py-1.5 rounded-lg bg-[#FF365C] hover:bg-[#FF365C]/90 text-white font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-md bg-rose-600 hover:bg-rose-500 text-white font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
-                      <RotateCcw className="w-3 h-3" />
+                      <RotateCcw className="w-3.5 h-3.5" />
                       <span>Retry Analysis</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleFallbackToDemo}
-                      className="px-3 py-1.5 rounded-lg bg-[#071A2B] border border-[#1b3552] text-slate-200 hover:text-white font-medium transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-md bg-slate-800 border border-slate-700 text-slate-200 hover:text-white font-medium transition-colors cursor-pointer"
                     >
                       Run Offline Specimen Analysis
                     </button>
@@ -965,8 +1050,8 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                 </div>
               )}
 
-              {/* Stepper Progress: 8 Layers with PENDING -> ACTIVE -> COMPLETED -> ERROR */}
-              <div className="space-y-2">
+              {/* Compact 8-Layer Execution Checklist */}
+              <div className="rounded-lg border border-slate-800 bg-[#080D18] divide-y divide-slate-800/70">
                 {pipelineStages.map((stage, idx) => {
                   const isDone = stage.status === 'completed';
                   const isRunning = stage.status === 'running';
@@ -975,33 +1060,33 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   return (
                     <div
                       key={stage.id}
-                      className={`p-3 rounded-xl border transition-all text-xs ${
+                      className={`px-4 py-2.5 transition-colors text-xs ${
                         isFailed
-                          ? 'border-[#FF365C]/50 bg-[#FF365C]/5'
+                          ? 'bg-rose-500/5'
                           : isRunning
-                          ? 'border-[#18BFFF]/50 bg-[#0D2238] shadow-xs'
+                          ? 'bg-slate-800/50'
                           : isDone
-                          ? 'border-[#10C98A]/30 bg-[#0D2238]'
-                          : 'border-[#1b3552]/40 opacity-40 bg-[#071A2B]'
+                          ? 'bg-transparent'
+                          : 'opacity-45'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
                           {isFailed ? (
-                            <AlertCircle className="w-4 h-4 text-[#FF365C] shrink-0" />
+                            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
                           ) : isDone ? (
-                            <CheckCircle2 className="w-4 h-4 text-[#10C98A] shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                           ) : isRunning ? (
-                            <Loader2 className="w-4 h-4 text-[#18BFFF] animate-spin shrink-0" />
+                            <Loader2 className="w-4 h-4 text-sky-400 animate-spin shrink-0" />
                           ) : (
-                            <div className="w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center text-[9px] text-slate-500 font-mono">
+                            <span className="w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center text-[10px] text-slate-500 font-mono shrink-0">
                               {idx + 1}
-                            </div>
+                            </span>
                           )}
                           <span
-                            className={`font-semibold ${
+                            className={`font-medium truncate ${
                               isFailed
-                                ? 'text-[#FF365C]'
+                                ? 'text-rose-400'
                                 : isRunning
                                 ? 'text-white'
                                 : isDone
@@ -1012,24 +1097,25 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                             {stage.name}
                           </span>
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#071A2B] text-slate-400 font-mono border border-slate-800">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400 font-mono border border-slate-800 shrink-0">
                           {stage.level}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-1 pl-6 leading-tight">
-                        {stage.description}
-                      </p>
+                      {isRunning && (
+                        <p className="text-[11px] text-slate-400 mt-1 pl-6.5 leading-snug">
+                          {stage.description}
+                        </p>
+                      )}
                     </div>
                   );
                 })}
               </div>
 
-              {/* State Notice separating "Investigation complete" from "Preparing results" */}
               {executionState === 'preparing' && (
-                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-[#10C98A] flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#10C98A]" />
+                <div className="px-3.5 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-400 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span className="font-medium">
-                    Investigation complete — Preparing forensic artifacts and evidence ledger...
+                    Investigation complete — compiling forensic artifacts and verdict ledger...
                   </span>
                 </div>
               )}
@@ -1038,75 +1124,72 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
 
           {/* ================= STAGE 4: RESULTS ================= */}
           {activeStage === 'RESULTS' && selectedSpecimen && completedResult && (
-            <div className="space-y-4 animate-in fade-in duration-200 text-xs">
-              {/* Verdict Summary Card */}
-              <div className="p-4 rounded-xl border border-[#1b3552] bg-[#0D2238] space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      FORENSIC VERDICT
-                    </span>
+            <div className="space-y-4 animate-in fade-in duration-150 text-xs">
+              {/* Verdict Header Strip */}
+              <div className="p-4 rounded-lg border border-slate-800 bg-[#080D18] flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <span className="text-[11px] text-slate-400 block">Forensic Verdict</span>
+                  <div className="flex items-center gap-2.5 mt-1">
                     <span
-                      className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-bold mt-1 border ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold border ${
                         completedResult.verdict === Verdict.MALICIOUS
-                          ? 'bg-[#FF365C]/10 text-[#FF365C] border-[#FF365C]/30'
+                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
                           : completedResult.verdict === Verdict.SUSPICIOUS
-                          ? 'bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/30'
-                          : 'bg-[#10C98A]/10 text-[#10C98A] border-[#10C98A]/30'
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                       }`}
                     >
-                      {completedResult.verdict}
+                      {completedResult.verdict === Verdict.MALICIOUS ? (
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                      ) : completedResult.verdict === Verdict.SUSPICIOUS ? (
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      )}
+                      <span>{completedResult.verdict}</span>
                     </span>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      ASSIGNED CASE ID
-                    </span>
-                    <span className="text-base font-black text-[#18BFFF] font-mono">
-                      #{assignedCaseId}
-                    </span>
+                    <span className="text-slate-300 font-medium truncate">{selectedSpecimen.subject}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#1b3552]">
-                  <div className="p-3 rounded-lg bg-[#071A2B] border border-[#1b3552]">
-                    <span className="text-[10px] text-slate-400 block font-bold">THREAT RISK SCORE</span>
-                    <span
-                      className={`text-xl font-black ${
-                        completedResult.risk_score >= 80
-                          ? 'text-[#FF365C]'
-                          : completedResult.risk_score >= 50
-                          ? 'text-[#FFB800]'
-                          : 'text-[#10C98A]'
-                      }`}
-                    >
-                      {formatScore(completedResult.risk_score)}/100
-                    </span>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-[#071A2B] border border-[#1b3552]">
-                    <span className="text-[10px] text-slate-400 block font-bold">CONFIDENCE METRIC</span>
-                    <span className="text-xl font-black text-[#18BFFF]">
-                      {((completedResult.confidence ?? 0.85) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-[#1b3552]">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    PRIMARY FORENSIC SIGNALS
+                <div className="text-right shrink-0">
+                  <span className="text-[11px] text-slate-400 block">Case ID</span>
+                  <span className="text-sm font-semibold text-white font-mono">
+                    #{assignedCaseId}
                   </span>
-                  <ul className="space-y-1.5 pl-4 list-disc marker:text-[#18BFFF] text-slate-300 text-xs">
-                    {(completedResult.risk_reasons && completedResult.risk_reasons.length > 0
-                      ? completedResult.risk_reasons
-                      : selectedSpecimen.findings
-                    ).map((f, i) => (
-                      <li key={i} className="leading-snug">
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
+                </div>
+              </div>
+
+              {/* 3-Column KPI Strip */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-lg bg-[#080D18] border border-slate-800">
+                  <span className="text-[11px] text-slate-400 block">Threat Risk Score</span>
+                  <span
+                    className={`text-xl font-bold font-mono tabular-nums mt-1 block ${
+                      completedResult.risk_score >= 80
+                        ? 'text-rose-400'
+                        : completedResult.risk_score >= 50
+                        ? 'text-amber-400'
+                        : 'text-emerald-400'
+                    }`}
+                  >
+                    {formatScore(completedResult.risk_score)}
+                    <span className="text-xs font-normal text-slate-500">/100</span>
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-lg bg-[#080D18] border border-slate-800">
+                  <span className="text-[11px] text-slate-400 block">Model Confidence</span>
+                  <span className="text-xl font-bold font-mono tabular-nums text-white mt-1 block">
+                    {((completedResult.confidence ?? 0.85) * 100).toFixed(1)}%
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-lg bg-[#080D18] border border-slate-800">
+                  <span className="text-[11px] text-slate-400 block">Analysis Latency</span>
+                  <span className="text-xl font-bold font-mono tabular-nums text-slate-200 mt-1 block">
+                    {formatLatency(elapsedMs)}
+                  </span>
                 </div>
               </div>
 
@@ -1125,25 +1208,32 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                 const auth = parseHeaderAuth();
                 const col = (v: AV) =>
                   v === 'PASS'
-                    ? 'border-[#10C98A]/30 bg-[#10C98A]/5 text-[#10C98A]'
+                    ? 'border-emerald-500/25 bg-emerald-500/5 text-emerald-400'
                     : v === 'FAIL'
-                    ? 'border-[#FF365C]/30 bg-[#FF365C]/5 text-[#FF365C]'
-                    : v === 'NONE'
-                    ? 'border-slate-700 bg-slate-800/30 text-slate-400'
-                    : 'border-slate-800 bg-slate-900/40 text-slate-500';
+                    ? 'border-rose-500/25 bg-rose-500/5 text-rose-400'
+                    : 'border-slate-800 bg-[#0D1526] text-slate-400';
 
                 return (
-                  <div className="p-4 rounded-xl border border-[#1b3552] bg-[#0D2238] space-y-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      AUTHENTICATION MATRIX
+                  <div className="p-4 rounded-lg border border-slate-800 bg-[#080D18] space-y-2.5">
+                    <span className="text-[11px] font-medium text-slate-400 block">
+                      Authentication Posture
                     </span>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-2.5">
                       {(['SPF', 'DKIM', 'DMARC'] as const).map((k) => {
                         const v = auth[k.toLowerCase() as keyof typeof auth];
                         return (
-                          <div key={k} className={`p-2.5 rounded-lg border flex flex-col gap-0.5 ${col(v)}`}>
-                            <span className="font-black text-xs">{k}</span>
-                            <span className="text-[11px] font-bold uppercase">{v}</span>
+                          <div key={k} className={`px-3 py-2 rounded-md border flex items-center justify-between ${col(v)}`}>
+                            <span className="font-semibold text-xs">{k}</span>
+                            <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold">
+                              {v === 'PASS' ? (
+                                <CheckCircle2 className="w-3 h-3" />
+                              ) : v === 'FAIL' ? (
+                                <AlertCircle className="w-3 h-3" />
+                              ) : (
+                                <AlertTriangle className="w-3 h-3" />
+                              )}
+                              {v}
+                            </span>
                           </div>
                         );
                       })}
@@ -1151,18 +1241,36 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   </div>
                 );
               })()}
+
+              {/* Primary Forensic Signals */}
+              <div className="p-4 rounded-lg border border-slate-800 bg-[#080D18] space-y-2.5">
+                <span className="text-[11px] font-medium text-slate-400 block">
+                  Primary Forensic Findings
+                </span>
+                <ul className="space-y-2 text-slate-300 text-xs">
+                  {(completedResult.risk_reasons && completedResult.risk_reasons.length > 0
+                    ? completedResult.risk_reasons
+                    : selectedSpecimen.findings
+                  ).map((f, i) => (
+                    <li key={i} className="flex items-start gap-2 leading-snug">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mt-1.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Modal Footer Controls */}
-        <div className="px-5 sm:px-6 py-4 border-t border-[#1b3552] bg-[#0D2238]/80 flex items-center justify-between gap-3">
+        {/* 4. Modal Footer Controls */}
+        <div className="px-6 py-4 border-t border-slate-800/90 bg-[#0D1526] flex items-center justify-between gap-3">
           {activeStage === 'INGEST' && (
             <>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-lg border border-[#1b3552] text-xs font-semibold text-slate-300 hover:bg-[#17334f] transition-colors cursor-pointer"
+                className="px-3.5 py-2 rounded-lg border border-slate-700/80 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -1170,9 +1278,9 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                 type="button"
                 disabled={!selectedSpecimen}
                 onClick={() => setActiveStage('PLAN')}
-                className="pl-4 pr-3 py-2 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 disabled:opacity-40 text-[#071A2B] text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-40 text-white text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer disabled:cursor-not-allowed shadow-xs"
               >
-                <span>Continue to Investigation Plan</span>
+                <span>Continue to Plan</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </>
@@ -1183,17 +1291,17 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveStage('INGEST')}
-                className="px-4 py-2 rounded-lg border border-[#1b3552] text-xs font-semibold text-slate-300 hover:bg-[#17334f] transition-colors cursor-pointer"
+                className="px-3.5 py-2 rounded-lg border border-slate-700/80 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                Back to Ingestion
+                Back
               </button>
               <button
                 type="button"
                 onClick={() => runInvestigationExecution(selectedSpecimen)}
-                className="px-5 py-2 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 text-[#071A2B] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
               >
                 <Zap className="w-3.5 h-3.5" />
-                <span>Execute Investigation Pipeline</span>
+                <span>Run Investigation</span>
               </button>
             </>
           )}
@@ -1203,22 +1311,22 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
               <div className="flex items-center gap-2">
                 {executionState === 'analyzing' ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-[#18BFFF]" />
-                    <span>Executing real-time forensic pipeline...</span>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-400" />
+                    <span>Running 8-layer forensic pipeline...</span>
                   </>
                 ) : executionState === 'preparing' ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-[#10C98A]" />
-                    <span className="text-[#10C98A]">Finalizing investigation results...</span>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                    <span className="text-emerald-400">Finalizing verdict and evidence ledger...</span>
                   </>
                 ) : executionState === 'error' ? (
-                  <span className="text-[#FF365C]">Pipeline interrupted.</span>
+                  <span className="text-rose-400">Pipeline halted. Select retry or offline mode above.</span>
                 ) : (
                   <span>Ready.</span>
                 )}
               </div>
               <span className="font-mono text-[11px] text-slate-500">
-                {executionState === 'preparing' ? 'COMPLETED' : '8 FORENSIC LAYERS'}
+                {executionState === 'preparing' ? '100%' : `${progressPct}%`}
               </span>
             </div>
           )}
@@ -1239,9 +1347,9 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   if (onCompletedCase) onCompletedCase(assignedCaseId);
                   uiStore.navigate('/inbox');
                 }}
-                className="px-4 py-2 rounded-lg border border-[#1b3552] text-xs font-semibold text-slate-300 hover:bg-[#17334f] transition-colors cursor-pointer"
+                className="px-3.5 py-2 rounded-lg border border-slate-700/80 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                Done (View in Table)
+                View in Case Inbox
               </button>
               <button
                 type="button"
@@ -1256,9 +1364,9 @@ export const ForensicWorkflowModal: React.FC<ForensicWorkflowModalProps> = ({
                   onClose();
                   uiStore.navigate(`/case/${assignedCaseId}`);
                 }}
-                className="pl-4 pr-3 py-2 rounded-lg bg-[#18BFFF] hover:bg-[#18BFFF]/90 text-[#071A2B] text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
               >
-                <span>Enter Full Forensic Workspace</span>
+                <span>Open Full Investigation</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </button>
             </>
